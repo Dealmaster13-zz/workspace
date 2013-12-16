@@ -1,0 +1,30 @@
+package uk.ac.cam.oda22.graphics;
+
+import java.awt.Color;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+
+/**
+ * @author Oliver
+ *
+ */
+public class Circle {
+
+	public final Ellipse2D c;
+
+	public final Color colour;
+
+	public final float thickness;
+
+	/**
+	 * @param l
+	 * @param colour
+	 * @param thickness
+	 */
+	public Circle(Ellipse2D c, Color colour, float thickness) {
+		this.c = c;
+		this.colour = colour;
+		this.thickness = thickness;
+	}
+
+}

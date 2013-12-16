@@ -1,0 +1,157 @@
+package uk.ac.cam.oda22.pathplanning;
+
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import uk.ac.cam.oda22.core.MathExtended;
+import uk.ac.cam.oda22.core.environment.Room;
+import uk.ac.cam.oda22.core.environment.VisibilityGraphNode;
+import uk.ac.cam.oda22.core.logging.Log;
+import uk.ac.cam.oda22.core.robots.Robot;
+import uk.ac.cam.oda22.core.robots.actions.IRobotAction;
+import uk.ac.cam.oda22.core.tethers.Tether;
+
+/**
+ * @author Oliver
+ *
+ */
+public final class PathPlanner {
+
+	public static List<IRobotAction> performPathPlanning(Room room, Robot robot, Point2D goal, int tetherSegments) {
+		if (!room.isPointInEmptySpace(goal)) {
+			Log.error("Goal (" + goal.getX() + ", " + goal.getY() + ") is not reachable.");
+
+			return null;
+		}
+
+		List<IRobotAction> actions = new ArrayList<IRobotAction>();
+
+		VisibilityGraphNode startNode = new VisibilityGraphNode(robot.getPosition());
+
+		List<VisibilityGraphNode> l = room.getVisibleNodes(startNode);
+		sortNodesByAngle(startNode, l);
+
+		List<TetherPointVisibility> visibility = getTetherPointVisibilitySets(robot.getTether(), tetherSegments, room);
+
+		return actions;
+	}
+
+	private static void sortNodesByAngle(VisibilityGraphNode startNode, List<VisibilityGraphNode> neighbours) {
+		List<Double> angles = new ArrayList<Double>();
+
+		for (int i = 0; i < neighbours.size(); i++) {
+			Point2D p = neighbours.get(i).vertex;
+
+			double angle = Math.atan2(startNode.vertex.getY() - p.getY(), startNode.vertex.getX() - p.getX());
+
+			angles.add(angle);
+		}
+
+		List<VisibilityGraphNode> sortedNeighbours = new ArrayList<VisibilityGraphNode>();
+
+		for (int i = angles.size() - 1; i >= 0; i--) {
+			double min = Double.MAX_VALUE;
+			int minIndex = -1;
+
+			for (int j = 0; j < angles.size(); j++) {
+				if (angles.get(j) < min) {
+					min = angles.get(j);
+					minIndex = j;
+				}
+			}
+
+			sortedNeighbours.add(neighbours.get(minIndex));
+			angles.set(minIndex, Double.MAX_VALUE);
+		}
+
+		neighbours = sortedNeighbours;
+	}
+
+	/**
+	 * Compute which vertices are visible from different points on the tether, from the robot to the anchor point.
+	 * 
+	 * @param t
+	 * @param tetherSegments
+	 * @param room
+	 * @return tether point visibility sets
+	 */
+	// TODO: Replace algorithm with continuous solution.
+	private static List<TetherPointVisibility> getTetherPointVisibilitySets(Tether t, int tetherSegments, Room room) {
+		List<TetherPointVisibility> tetherPointVisibilitySets = new ArrayList<TetherPointVisibility>();
+
+		double l = t.getUsedLength();
+
+		double interval = l / tetherSegments;
+
+		double w = l;
+
+		boolean complete = false;
+
+		// Compute the visible vertices from equally spaced points on the tether.
+		while (!complete) {
+			Point2D p = t.getPositionByDistance(w);
+
+			// Compute the visible nodes.
+			List<VisibilityGraphNode> visibleNodes = room.getVisibleNodes(new VisibilityGraphNode(p));
+
+			List<Point2D> visibleVertices = new ArrayList<Point2D>();
+
+			// Store the vertices from the nodes.
+			for (VisibilityGraphNode node : visibleNodes) {
+				visibleVertices.add(node.vertex);
+			}
+
+			double nextW = w - interval;
+
+			// Ensure that the last sample point is always at the anchor point.
+			if (w <= interval / 2) {
+				nextW = 0;
+			}
+
+			List<Double> wList = new ArrayList<Double>();
+			wList.add(w);
+			
+			List<Point2D> pList = new ArrayList<Point2D>();
+			pList.add(p);
+			
+			tetherPointVisibilitySets.add(new TetherPointVisibility(wList, pList, visibleVertices));
+
+			// Finish once the whole tether has been analysed.
+			if (w <= 0) {
+				complete = true;
+				
+				if (w < 0) {
+					Log.error("Tether position is out of range.");
+				}
+			}
+			else {
+				w = nextW;
+			}
+		}
+
+		// Merge any duplicate sets.
+		margeDuplicateVisibilitySets(tetherPointVisibilitySets);
+		
+		return tetherPointVisibilitySets;
+	}
+	
+	private static void margeDuplicateVisibilitySets(List<TetherPointVisibility> sets) {
+		// Iterate over the list of sets, merging any duplicates containing the same visibility set as the previous element.
+		for (int i = sets.size() - 2; i >= 0; i--) {
+			TetherPointVisibility previous = sets.get(i + 1);
+			TetherPointVisibility current = sets.get(i);
+			
+			// Merge the sets if they contain the same vertices.
+			if (current.isVisibilitySetEqual(previous.visibleVertices)) {
+				previous.wList.addAll(current.wList);
+				previous.pList.addAll(current.pList);
+				
+				sets.remove(current);
+			}
+		}
+	}
+
+}

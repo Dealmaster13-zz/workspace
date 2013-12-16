@@ -1,0 +1,26 @@
+package uk.ac.cam.oda22.graphics.shapes;
+
+import java.awt.Color;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
+
+/**
+ * @author Oliver
+ *
+ */
+public class Circle extends Shape {
+
+	public final Ellipse2D c;
+
+	/**
+	 * @param l
+	 * @param colour
+	 * @param thickness
+	 */
+	public Circle(Point2D position, double radius, Color colour, float thickness) {
+		this.c = new Ellipse2D.Double(position.getX(), position.getY(), radius * 2, radius * 2);
+		this.colour = colour;
+		this.thickness = thickness;
+	}
+
+}

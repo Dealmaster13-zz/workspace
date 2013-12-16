@@ -1,0 +1,13 @@
+package uk.ac.cam.oda22.graphics;
+
+import java.awt.geom.Line2D;
+
+/**
+ * @author Oliver
+ *
+ */
+public class GraphicsFunctions {
+
+	public static Line[] colourLines(Line2D[] lines, Color colour, float thickness)
+	
+}

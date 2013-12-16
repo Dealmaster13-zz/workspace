@@ -1,0 +1,19 @@
+package uk.ac.cam.oda22.graphics;
+
+import javax.swing.JFrame;
+
+/**
+ * @author Oliver Allbless
+ *
+ */
+public class VisualiserUsingJFrame extends JFrame {
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

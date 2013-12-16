@@ -1,0 +1,61 @@
+package uk.ac.cam.oda22.pathplanning;
+
+import java.awt.geom.Point2D;
+import java.util.List;
+
+/**
+ * @author Oliver
+ *
+ */
+public class TetherPointVisibility {
+
+	/**
+	 * The tether points by their distance from the anchor point.
+	 */
+	public final List<Double> w;
+	
+	public final List<Point2D> visibleVertices;
+
+	/**
+	 * @param w
+	 * @param visibleVertices
+	 */
+	public TetherPointVisibility(List<Double> w, List<Point2D> visibleVertices) {
+		this.w1 = w1;
+		this.w2 = w2;
+		this.visibleVertices = visibleVertices;
+	}
+	
+	/**
+	 * Check if two visibility sets are equal in the points that they contain.
+	 * 
+	 * @param l
+	 * @return true if the sets are equal, false otherwise
+	 */
+	public boolean isVisibilitySetEqual(List<Point2D> l) {
+		if (this.visibleVertices.size() != l.size()) {
+			return false;
+		}
+		
+		for (Point2D p : l) {
+			int index = 0;
+			
+			boolean found = false;
+			
+			while (!found && index < this.visibleVertices.size()) {
+				if (p.equals(this.visibleVertices.get(index))) {
+					found = true;
+				}
+				
+				index ++;
+			}
+			
+			if (!found) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+}

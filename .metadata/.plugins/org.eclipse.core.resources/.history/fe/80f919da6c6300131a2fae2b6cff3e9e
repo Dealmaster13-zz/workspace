@@ -1,0 +1,20 @@
+package uk.ac.cam.oda22.core.robots;
+
+import java.awt.Shape;
+import java.awt.geom.Point2D;
+
+import uk.ac.cam.oda22.core.tethers.Tether;
+
+/**
+ * @author Oliver
+ *
+ */
+public class PointRobot extends Robot {
+
+	public PointRobot(Point2D position, double rotation, Tether tether) {
+		Shape outline = new GeneralPath();
+		
+		super(position, rotation, tether);
+	}
+
+}

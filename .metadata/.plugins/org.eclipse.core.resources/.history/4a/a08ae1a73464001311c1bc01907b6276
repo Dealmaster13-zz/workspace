@@ -1,0 +1,27 @@
+package uk.ac.cam.oda22.core.robots;
+
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+
+import uk.ac.cam.oda22.core.tethers.Tether;
+
+/**
+ * @author Oliver
+ *
+ */
+public class PointRobot extends Robot {
+
+	public PointRobot(Point2D position, double rotation, Tether tether) {
+		super(position, rotation, tether);
+		
+		Line2D[] lines = new Line2D.Double[2];
+		lines[0] = new Line2D.Double(-5, -5, 5, 5);
+		lines[1] = new Line2D.Double(-5, 5, 5, -5);
+		Line2D[] cross = GraphicsFunctions
+		
+		RobotOutline outline = new RobotOutline(lines);
+		
+		this.setOutline(outline);
+	}
+
+}

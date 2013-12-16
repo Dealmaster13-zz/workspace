@@ -1,0 +1,39 @@
+package uk.ac.cam.oda22.graphics;
+
+import java.awt.Color;
+import java.awt.geom.Line2D;
+
+import uk.ac.cam.oda22.core.ShapeFunctions;
+
+/**
+ * @author Oliver
+ *
+ */
+public class Line {
+
+	public final Line2D l;
+	
+	public final Color colour;
+	
+	public final float thickness;
+
+	/**
+	 * @param l
+	 * @param colour
+	 * @param thickness
+	 */
+	public Line(Line2D l, Color colour, float thickness) {
+		this.l = l;
+		this.colour = colour;
+		this.thickness = thickness;
+	}
+	
+	public Line translate(double x, double y) {
+		return new Line(ShapeFunctions.translateShape(this.l, x, y), this.colour, this.thickness);
+	}
+	
+	public Line stretch(double xScale, double yScale) {
+		return new Line(ShapeFunctions.stretchShape(this.l, xScale, yScale), this.colour, this.thickness);
+	}
+	
+}
