@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.actions.IRobotAction"/>
 <fullyQualifiedTypeName name="java.security.InvalidParameterException"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.Edge2D"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.Room"/>
@@ -11,7 +10,6 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.VisibilityGraphEdge"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.Obstacle"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.VisibilityGraph"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.actions.IRobotAction"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.Tether"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.TetherPointVisibilitySet"/>
 <fullyQualifiedTypeName name="java.util.Set"/>
@@ -60,4 +58,6 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.shapes.DisplayShape"/>
 <fullyQualifiedTypeName name="java.util.LinkedList"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.shapes.Circle"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.actions.IRobotAction"/>
+<fullyQualifiedTypeName name="org.testng.Assert"/>
 </qualifiedTypeNameHistroy>

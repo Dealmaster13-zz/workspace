@@ -1,0 +1,16 @@
+package uk.ac.cam.oda22.tests;
+
+import org.testng.annotations.*;
+
+/**
+ * @author Oliver
+ *
+ */
+public class TestPathPlanning {
+
+	@BeforeClass
+	public void oneTimeSetUp() {
+		
+	}
+	
+}
