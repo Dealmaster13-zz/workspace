@@ -27,7 +27,7 @@ public class TetherPointVisibility {
 	/**
 	 * The tether points.
 	 */
-	public final List<Point2D> pList;
+	public final List<Point2D> xList;
 	
 	public final List<Point2D> visibleVertices;
 
@@ -35,11 +35,11 @@ public class TetherPointVisibility {
 	 * @param w
 	 * @param visibleVertices
 	 */
-	public TetherPointVisibility(double startW, double endW, List<Double> wList, List<Point2D> pList, List<Point2D> visibleVertices) {
+	public TetherPointVisibility(double startW, double endW, List<Double> wList, List<Point2D> xList, List<Point2D> visibleVertices) {
 		this.startW = startW;
 		this.endW = endW;
 		this.wList = wList;
-		this.pList = pList;
+		this.xList = xList;
 		this.visibleVertices = visibleVertices;
 	}
 	

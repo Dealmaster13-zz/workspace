@@ -10,15 +10,15 @@ import uk.ac.cam.oda22.core.tethers.Tether;
  * 
  * This LEGO Mindstorms robot uses the NXT brick in a square formation using tracks with two motors.
  */
-public class NXT1 extends SquareRobot implements ITracksDriven {
+public class NXT1 extends RectangularRobot implements ITracksDriven {
 
 	/**
 	 * The robot's wheel diameter in metres, noting that the tracks are attached to wheels.
 	 */
 	private double tracksHeight;
 	
-	public NXT1(Point2D position, double rotation, Tether tether) {
-		super(position, rotation, tether);
+	public NXT1(Point2D position, double rotation, Tether tether, double width, double height) {
+		super(position, rotation, tether, width, height);
 		
 		this.tracksHeight = 0.045;
 

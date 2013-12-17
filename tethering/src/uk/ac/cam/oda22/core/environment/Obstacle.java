@@ -10,6 +10,8 @@ import uk.ac.cam.oda22.core.MathExtended;
 /**
  * @author Oliver
  *
+ * TODO: Implement expansion of an obstacle for non-point robots.
+ *
  */
 public class Obstacle {
 	

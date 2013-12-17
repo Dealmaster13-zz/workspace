@@ -40,4 +40,8 @@ public final class MathExtended {
 		return false;
 	}
 	
+	public static double getRadius(double w, double h) {
+		return Math.sqrt((w * w) + (h * h));
+	}
+	
 }

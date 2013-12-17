@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="java.security.InvalidParameterException"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.Edge2D"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.Room"/>
 <fullyQualifiedTypeName name="java.awt.Polygon"/>
@@ -21,13 +20,11 @@
 <fullyQualifiedTypeName name="lejos.util.Delay"/>
 <fullyQualifiedTypeName name="lejos.nxt.Button"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.IWheelDriven"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.MathExtended"/>
 <fullyQualifiedTypeName name="wiiusej.wiiusejevents.utils.WiimoteListener"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.TetherPointVisibility"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.PathPlanner"/>
 <fullyQualifiedTypeName name="java.awt.Point"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ListFunctions"/>
-<fullyQualifiedTypeName name="java.awt.geom.Point2D"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="javax.swing.JApplet"/>
 <fullyQualifiedTypeName name="javax.swing.SwingUtilities"/>
@@ -35,7 +32,6 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.VisualiserUsingJFrame"/>
 <fullyQualifiedTypeName name="javax.swing.JFrame"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.IVisualiser"/>
-<fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.VisualiserJPanel"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.EnvironmentTriangle"/>
 <fullyQualifiedTypeName name="java.awt.Color"/>
@@ -54,10 +50,14 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ShapeFunctions"/>
 <fullyQualifiedTypeName name="java.awt.geom.Line2D"/>
 <fullyQualifiedTypeName name="java.awt.geom.Ellipse2D"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.logging.Log"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.shapes.DisplayShape"/>
-<fullyQualifiedTypeName name="java.util.LinkedList"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.shapes.Circle"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.actions.IRobotAction"/>
 <fullyQualifiedTypeName name="org.testng.Assert"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.MathExtended"/>
+<fullyQualifiedTypeName name="java.util.LinkedList"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.logging.Log"/>
+<fullyQualifiedTypeName name="java.awt.geom.Point2D"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.VisibilityChangeList"/>
 </qualifiedTypeNameHistroy>

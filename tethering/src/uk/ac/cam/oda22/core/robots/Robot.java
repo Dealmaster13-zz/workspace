@@ -11,6 +11,8 @@ import uk.ac.cam.oda22.core.tethers.Tether;
 public abstract class Robot {
 
 	public final Tether tether;
+	
+	public final double radius;
 
 	private Point2D position;
 
@@ -21,8 +23,9 @@ public abstract class Robot {
 	
 	private RobotOutline outline;
 	
-	public Robot(Point2D position, double rotation, Tether tether) {
+	public Robot(Point2D position, double radius, double rotation, Tether tether) {
 		this.position = position;
+		this.radius = radius;
 		this.rotation = rotation;
 		this.tether = tether;
 	}
