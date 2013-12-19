@@ -3,6 +3,8 @@ package uk.ac.cam.oda22.pathplanning;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import uk.ac.cam.oda22.core.tethers.TetherPoint;
+
 /**
  * @author Oliver
  *
@@ -20,14 +22,9 @@ public class TetherPointVisibility {
 	public final double endW;
 	
 	/**
-	 * The tether points by their distance from the anchor point.
-	 */
-	public final List<Double> wList;
-
-	/**
 	 * The tether points.
 	 */
-	public final List<Point2D> xList;
+	public final List<TetherPoint> tetherPoints;
 	
 	public final List<Point2D> visibleVertices;
 
@@ -35,11 +32,10 @@ public class TetherPointVisibility {
 	 * @param w
 	 * @param visibleVertices
 	 */
-	public TetherPointVisibility(double startW, double endW, List<Double> wList, List<Point2D> xList, List<Point2D> visibleVertices) {
+	public TetherPointVisibility(double startW, double endW, List<TetherPoint> points, List<Point2D> visibleVertices) {
 		this.startW = startW;
 		this.endW = endW;
-		this.wList = wList;
-		this.xList = xList;
+		this.tetherPoints = points;
 		this.visibleVertices = visibleVertices;
 	}
 	

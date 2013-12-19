@@ -12,6 +12,7 @@ import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.core.robots.Robot;
 import uk.ac.cam.oda22.core.robots.actions.IRobotAction;
 import uk.ac.cam.oda22.core.tethers.Tether;
+import uk.ac.cam.oda22.core.tethers.TetherPoint;
 
 /**
  * @author Oliver
@@ -142,13 +143,10 @@ public final class PathPlanner {
 				nextW = l;
 			}
 
-			List<Double> wList = new ArrayList<Double>();
-			wList.add(w);
+			List<TetherPoint> pList = new ArrayList<TetherPoint>();
+			pList.add(new TetherPoint(p, w));
 
-			List<Point2D> pList = new ArrayList<Point2D>();
-			pList.add(p);
-
-			tetherPointVisibilitySets.add(new TetherPointVisibility(w, nextW, wList, pList, visibleVertices));
+			tetherPointVisibilitySets.add(new TetherPointVisibility(w, nextW, pList, visibleVertices));
 
 			// Finish once the whole tether has been analysed.
 			if (w >= l) {
@@ -183,8 +181,7 @@ public final class PathPlanner {
 
 			// Merge the sets if they contain the same vertices.
 			if (current.isVisibilitySetEqual(previous.visibleVertices)) {
-				previous.wList.addAll(current.wList);
-				previous.xList.addAll(current.xList);
+				previous.tetherPoints.addAll(current.tetherPoints);
 
 				sets.remove(current);
 			}
@@ -208,7 +205,7 @@ public final class PathPlanner {
 			visibleVertices.add(vs.get(i));
 		}
 
-		VisibilityChangeList v_0 = new VisibilityChangeList(visibleVertices, s.get(0).wList, s.get(0).xList);
+		VisibilityChangeList v_0 = new VisibilityChangeList(visibleVertices, s.get(0).tetherPoints);
 		
 		v.add(v_0);
 
@@ -230,7 +227,7 @@ public final class PathPlanner {
 				}
 			}
 
-			VisibilityChangeList v_i = new VisibilityChangeList(changes, s.get(i).wList, s.get(i).xList);
+			VisibilityChangeList v_i = new VisibilityChangeList(changes, s.get(i).tetherPoints);
 			
 			v.add(v_i);
 		}
@@ -246,17 +243,26 @@ public final class PathPlanner {
 	 * @return
 	 */
 	private static Path computePath(List<VisibilityChangeList> v) {
+		Path optimalPath = null;
+		Path currentPath;
+		
 		// For each vertex list in the visibility change list.
 		for (int i = 0; i < v.size(); i++) {
 			VisibilityChangeList v_i = v.get(i);
 			
 			// For each visible vertex.
 			for (int j = 0; j < v_i.vertices.size(); j++) {
+				currentPath = new Path();
+				
 				Point2D vertex = v_i.vertices.get(j);
+				
+				TetherPoint x = v_i.getFarthestPoint();
+				
+				
 			}
 		}
 		
-		return null;
+		return optimalPath;
 	}
 
 }

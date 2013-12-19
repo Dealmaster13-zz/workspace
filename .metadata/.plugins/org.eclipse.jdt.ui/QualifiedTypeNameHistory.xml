@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.Edge2D"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.Room"/>
-<fullyQualifiedTypeName name="java.awt.Polygon"/>
-<fullyQualifiedTypeName name="java.awt.Robot"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.Robot"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.logging.InfoMessage"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.VisibilityGraphEdge"/>
@@ -22,7 +18,6 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.IWheelDriven"/>
 <fullyQualifiedTypeName name="wiiusej.wiiusejevents.utils.WiimoteListener"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.TetherPointVisibility"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.PathPlanner"/>
 <fullyQualifiedTypeName name="java.awt.Point"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ListFunctions"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
@@ -55,9 +50,14 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.actions.IRobotAction"/>
 <fullyQualifiedTypeName name="org.testng.Assert"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.MathExtended"/>
-<fullyQualifiedTypeName name="java.util.LinkedList"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.logging.Log"/>
 <fullyQualifiedTypeName name="java.awt.geom.Point2D"/>
-<fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.VisibilityChangeList"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.PathPlanner"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.TetherPoint"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.Path"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.astar.AStarEdge"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.astar.AStarNode"/>
+<fullyQualifiedTypeName name="java.util.LinkedList"/>
 </qualifiedTypeNameHistroy>
