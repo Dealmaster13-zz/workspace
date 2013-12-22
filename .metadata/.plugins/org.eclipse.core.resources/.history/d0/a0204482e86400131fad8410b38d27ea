@@ -1,9 +1,0 @@
-package uk.ac.cam.oda22.graphics.shapes;
-
-/**
- * @author Oliver
- *
- */
-public interface IShape {
-
-}

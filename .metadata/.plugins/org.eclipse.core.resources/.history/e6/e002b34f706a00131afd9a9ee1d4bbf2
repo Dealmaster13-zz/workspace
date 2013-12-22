@@ -1,0 +1,17 @@
+package uk.ac.cam.oda22.core.astar;
+
+import java.util.List;
+
+/**
+ * @author Oliver
+ *
+ */
+public class AStarPath {
+
+	public final List<AStarNode> path;
+	
+	public AStarPath(List<AStarNode> path) {
+		this.path = path;
+	}
+	
+}

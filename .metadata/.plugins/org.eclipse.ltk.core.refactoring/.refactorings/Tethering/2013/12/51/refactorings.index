@@ -8,3 +8,7 @@
 1387473341847	Rename field 'points'
 1387473532072	Rename field 'points'
 1387475016631	Move compilation unit
+1387651635748	Delete element
+1387653204733	Rename local variable 'node'
+1387653351863	Rename field 'edges'
+1387738273228	Rename field 'neighbours'

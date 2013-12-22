@@ -1,0 +1,30 @@
+package uk.ac.cam.oda22.core.astar;
+
+import java.util.List;
+
+/**
+ * @author Oliver
+ *
+ */
+public class AStarNode {
+
+	public final Object data;
+	
+	public final List<AStarEdge> edges;
+	
+	/**
+	 * To cost from the source node to this node.
+	 */
+	public double f;
+	
+	/**
+	 * The heuristic cost from this node to the destination node.
+	 */
+	public double g;
+	
+	public AStarNode(Object data, List<AStarEdge> edges) {
+		this.data = data;
+		this.edges = edges;
+	}
+	
+}

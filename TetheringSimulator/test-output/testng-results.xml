@@ -1,63 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testng-results skipped="0" failed="1" total="2" passed="1">
+<testng-results skipped="0" failed="0" total="3" passed="3">
   <reporter-output>
   </reporter-output>
-  <suite name="Default suite" duration-ms="201" started-at="2013-12-16T18:59:47Z" finished-at="2013-12-16T18:59:47Z">
+  <suite name="Default suite" duration-ms="49" started-at="2013-12-22T19:40:35Z" finished-at="2013-12-22T19:40:36Z">
     <groups>
     </groups>
-    <test name="Default test" duration-ms="201" started-at="2013-12-16T18:59:47Z" finished-at="2013-12-16T18:59:47Z">
-      <class name="uk.ac.cam.oda22.tests.TestPathPlanning">
-        <test-method status="PASS" signature="oneTimeSetUp()[pri:0, instance:uk.ac.cam.oda22.tests.TestPathPlanning@29abbe6c]" name="oneTimeSetUp" is-config="true" duration-ms="156" started-at="2013-12-16T22:59:47Z" finished-at="2013-12-16T22:59:47Z">
+    <test name="Default test" duration-ms="49" started-at="2013-12-22T19:40:35Z" finished-at="2013-12-22T19:40:36Z">
+      <class name="uk.ac.cam.oda22.tests.TestAStar">
+        <test-method status="PASS" signature="oneTimeSetUp()[pri:0, instance:uk.ac.cam.oda22.tests.TestAStar@58d39353]" name="oneTimeSetUp" is-config="true" duration-ms="18" started-at="2013-12-22T23:40:35Z" finished-at="2013-12-22T23:40:35Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- oneTimeSetUp -->
-        <test-method status="FAIL" signature="testActionsNonEmpty()[pri:0, instance:uk.ac.cam.oda22.tests.TestPathPlanning@29abbe6c]" name="testActionsNonEmpty" duration-ms="16" started-at="2013-12-16T22:59:47Z" finished-at="2013-12-16T22:59:47Z">
-          <exception class="java.lang.AssertionError">
-            <message>
-              <![CDATA[expected [true] but found [false]]]>
-            </message>
-            <full-stacktrace>
-              <![CDATA[java.lang.AssertionError: expected [true] but found [false]
-	at org.testng.Assert.fail(Assert.java:94)
-	at org.testng.Assert.failNotEquals(Assert.java:494)
-	at org.testng.Assert.assertTrue(Assert.java:42)
-	at org.testng.Assert.assertTrue(Assert.java:52)
-	at uk.ac.cam.oda22.tests.TestPathPlanning.testActionsNonEmpty(TestPathPlanning.java:76)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
-	at java.lang.reflect.Method.invoke(Unknown Source)
-	at org.testng.internal.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:84)
-	at org.testng.internal.Invoker.invokeMethod(Invoker.java:714)
-	at org.testng.internal.Invoker.invokeTestMethod(Invoker.java:901)
-	at org.testng.internal.Invoker.invokeTestMethods(Invoker.java:1231)
-	at org.testng.internal.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:127)
-	at org.testng.internal.TestMethodWorker.run(TestMethodWorker.java:111)
-	at org.testng.TestRunner.privateRun(TestRunner.java:767)
-	at org.testng.TestRunner.run(TestRunner.java:617)
-	at org.testng.SuiteRunner.runTest(SuiteRunner.java:334)
-	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:329)
-	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:291)
-	at org.testng.SuiteRunner.run(SuiteRunner.java:240)
-	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
-	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:86)
-	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1224)
-	at org.testng.TestNG.runSuitesLocally(TestNG.java:1149)
-	at org.testng.TestNG.run(TestNG.java:1057)
-	at org.testng.remote.RemoteTestNG.run(RemoteTestNG.java:111)
-	at org.testng.remote.RemoteTestNG.initAndRun(RemoteTestNG.java:204)
-	at org.testng.remote.RemoteTestNG.main(RemoteTestNG.java:175)
-]]>
-            </full-stacktrace>
-          </exception> <!-- java.lang.AssertionError -->
+        <test-method status="PASS" signature="testPathShouldBeCorrect()[pri:0, instance:uk.ac.cam.oda22.tests.TestAStar@58d39353]" name="testPathShouldBeCorrect" duration-ms="10" started-at="2013-12-22T23:40:35Z" finished-at="2013-12-22T23:40:36Z">
           <reporter-output>
           </reporter-output>
-        </test-method> <!-- testActionsNonEmpty -->
-        <test-method status="PASS" signature="testActionsNotNull()[pri:0, instance:uk.ac.cam.oda22.tests.TestPathPlanning@29abbe6c]" name="testActionsNotNull" duration-ms="2" started-at="2013-12-16T22:59:47Z" finished-at="2013-12-16T22:59:47Z">
+        </test-method> <!-- testPathShouldBeCorrect -->
+        <test-method status="PASS" signature="testPathShouldBeFound()[pri:0, instance:uk.ac.cam.oda22.tests.TestAStar@58d39353]" name="testPathShouldBeFound" duration-ms="1" started-at="2013-12-22T23:40:36Z" finished-at="2013-12-22T23:40:36Z">
           <reporter-output>
           </reporter-output>
-        </test-method> <!-- testActionsNotNull -->
-      </class> <!-- uk.ac.cam.oda22.tests.TestPathPlanning -->
+        </test-method> <!-- testPathShouldBeFound -->
+        <test-method status="PASS" signature="testPathShouldHaveCorrectLength()[pri:0, instance:uk.ac.cam.oda22.tests.TestAStar@58d39353]" name="testPathShouldHaveCorrectLength" duration-ms="1" started-at="2013-12-22T23:40:36Z" finished-at="2013-12-22T23:40:36Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testPathShouldHaveCorrectLength -->
+      </class> <!-- uk.ac.cam.oda22.tests.TestAStar -->
     </test> <!-- Default test -->
   </suite> <!-- Default suite -->
 </testng-results>
