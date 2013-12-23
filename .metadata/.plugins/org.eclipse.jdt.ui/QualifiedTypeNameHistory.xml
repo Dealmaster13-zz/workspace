@@ -14,7 +14,6 @@
 <fullyQualifiedTypeName name="wiiusej.wiiusejevents.utils.WiimoteListener"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.TetherPointVisibility"/>
 <fullyQualifiedTypeName name="java.awt.Point"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ListFunctions"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="javax.swing.JApplet"/>
 <fullyQualifiedTypeName name="javax.swing.SwingUtilities"/>
@@ -34,7 +33,6 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.GraphicsFunctions"/>
 <fullyQualifiedTypeName name="java.awt.geom.Point2D.Double"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.GraphicsFunctions"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.SimpleTether"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.Circle"/>
 <fullyQualifiedTypeName name="java.awt.BasicStroke"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ShapeFunctions"/>
@@ -43,12 +41,10 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.shapes.DisplayShape"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.shapes.Circle"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.actions.IRobotAction"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.MathExtended"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.logging.Log"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.VisibilityChangeList"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.PathPlanner"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.TetherPoint"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.Path"/>
 <fullyQualifiedTypeName name="java.util.Queue"/>
 <fullyQualifiedTypeName name="java.lang.Exception"/>
 <fullyQualifiedTypeName name="org.testng.annotations.BeforeClass"/>
@@ -60,4 +56,8 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.astar.AStarPathfinding"/>
 <fullyQualifiedTypeName name="org.testng.Assert"/>
 <fullyQualifiedTypeName name="java.util.HashSet"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.Path"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.MathExtended"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.SimpleTether"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ListFunctions"/>
 </qualifiedTypeNameHistroy>

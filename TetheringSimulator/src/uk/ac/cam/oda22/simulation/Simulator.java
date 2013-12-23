@@ -22,6 +22,7 @@ import uk.ac.cam.oda22.graphics.IVisualiser;
 import uk.ac.cam.oda22.graphics.VisualiserUsingJFrame;
 import uk.ac.cam.oda22.graphics.shapes.Circle;
 import uk.ac.cam.oda22.graphics.shapes.Line;
+import uk.ac.cam.oda22.pathplanning.Path;
 import uk.ac.cam.oda22.pathplanning.PathPlanner;
 
 /**
@@ -66,9 +67,9 @@ public class Simulator {
 
 		Point2D anchor = new Point2D.Double(0, 0);
 
-		List<Point2D> X = new ArrayList<Point2D>();
-		X.add(new Point2D.Double(50, 15));
-		X.add(new Point2D.Double(80, 60));
+		Path X = new Path();
+		X.addPoint(new Point2D.Double(50, 15));
+		X.addPoint(new Point2D.Double(80, 60));
 
 		Tether t = new SimpleTether(anchor, 150, X);
 

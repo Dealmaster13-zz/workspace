@@ -27,16 +27,18 @@ public class VisibilityChangeList {
 	}
 	
 	/**
-	 * Gets the point farthest from the anchor point.
+	 * Gets the point closest to the robot.
+	 * If reverse is true then treat w as the distance from the robot.
 	 * 
+	 * @param reverse
 	 * @return
 	 */
-	public TetherPoint getFarthestPoint() {
-		double w = Double.NEGATIVE_INFINITY;
+	public TetherPoint getClosestPoint(boolean reverse) {
+		double w = reverse ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY;
 		TetherPoint tetherPoint = null;
 		
 		for (TetherPoint p : this.tetherPoints) {
-			if (p.w > w) {
+			if (reverse ? p.w < w : p.w > w) {
 				w = p.w;
 				tetherPoint = p;
 			}

@@ -8,9 +8,15 @@ import java.awt.geom.Point2D;
  */
 public abstract class Tether {
 	
+	/**
+	 * The position of the anchor point.
+	 */
 	protected Point2D anchor;
 	
-	protected double length;
+	/**
+	 * The maximum length of the tether.
+	 */
+	public final double length;
 	
 	public Tether(Point2D anchor, double length) {
 		this.anchor = anchor;
@@ -23,6 +29,8 @@ public abstract class Tether {
 	
 	public abstract double getUsedLength();
 	
-	public abstract Point2D getPositionByDistance(double distance);
+	public abstract Point2D getPositionByDistance(double w);
+	
+	public abstract TetherSegment getTetherSegment(double startW, double endW);
 
 }

@@ -10,7 +10,6 @@ import java.util.List;
 public final class ListFunctions {
 
 	public static boolean isPointInList(Point2D point, List<Point2D> list) {
-		
 		for (Point2D p : list) {
 			if (point.equals(p)) {
 				return true;
@@ -18,6 +17,10 @@ public final class ListFunctions {
 		}
 		
 		return false;
+	}
+	
+	public static <T> T getLast(List<T> list) {
+		return list.get(list.size() - 1);
 	}
 	
 }

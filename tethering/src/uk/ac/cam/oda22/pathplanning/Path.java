@@ -1,6 +1,7 @@
 package uk.ac.cam.oda22.pathplanning;
 
 import java.awt.geom.Point2D;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,28 +13,32 @@ import uk.ac.cam.oda22.core.logging.Log;
  */
 public class Path {
 
-	public final List<Point2D> path;
+	public final List<Point2D> points;
 	
 	public Path() {
-		this.path = new LinkedList<Point2D>();
+		this.points = new LinkedList<Point2D>();
 	}
 	
 	public Path(List<Point2D> path) {
-		this.path = path;
+		this.points = path;
 	}
 	
 	public void addPoint(Point2D p) {
-		this.path.add(p);
+		this.points.add(p);
+	}
+	
+	public void addPoints(Collection<Point2D> ps) {
+		this.points.addAll(ps);
 	}
 	
 	public void removePoint() {
-		if (this.path.size() == 0) {
+		if (this.points.size() == 0) {
 			Log.error("Cannot remove point from empty path.");
 			
 			return;
 		}
 		
-		this.path.remove(this.path.size() - 1);
+		this.points.remove(this.points.size() - 1);
 	}
 	
 }

@@ -1,0 +1,7 @@
+1387821902795	Rename field 'path'
+1387822462898	Rename local variable 'distance'
+1387822776572	Rename local variable 'distance'
+1387822798105	Rename local variable 'currentDistance'
+1387823113693	Rename local variable 'segmentDistance'
+1387824873815	Rename method 'getFarthestPoint'
+1387824940343	Rename local variable 'p'

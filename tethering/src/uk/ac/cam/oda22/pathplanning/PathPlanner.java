@@ -6,11 +6,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import uk.ac.cam.oda22.core.ListFunctions;
+import uk.ac.cam.oda22.core.MathExtended;
 import uk.ac.cam.oda22.core.environment.Room;
 import uk.ac.cam.oda22.core.environment.VisibilityGraphNode;
 import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.core.robots.Robot;
 import uk.ac.cam.oda22.core.robots.actions.IRobotAction;
+import uk.ac.cam.oda22.core.tethers.SimpleTether;
+import uk.ac.cam.oda22.core.tethers.SimpleTetherSegment;
 import uk.ac.cam.oda22.core.tethers.Tether;
 import uk.ac.cam.oda22.core.tethers.TetherPoint;
 
@@ -242,7 +245,7 @@ public final class PathPlanner {
 	 * @param v
 	 * @return
 	 */
-	private static Path computePath(List<VisibilityChangeList> v) {
+	private static Path computePath(List<VisibilityChangeList> v, Tether t, Point2D goal) {
 		Path optimalPath = null;
 		Path currentPath;
 		
@@ -256,8 +259,35 @@ public final class PathPlanner {
 				
 				Point2D vertex = v_i.vertices.get(j);
 				
-				TetherPoint x = v_i.getFarthestPoint();
+				TetherPoint x = v_i.getClosestPoint(true);
 				
+				if (t instanceof SimpleTether) {
+					SimpleTether tether = (SimpleTether) t;
+					
+					SimpleTetherSegment tetherSegment = (SimpleTetherSegment) tether.getTetherSegment(0, t.length - x.w);
+					
+					// Ensure that the tether segment ends at the correct position.
+					if (!MathExtended.ApproxEqual(x.x, ListFunctions.getLast(tetherSegment.path.points), 0.0001, 0.0001)) {
+						Log.error("Malformed tether segment.");
+						
+						return null;
+					}
+					
+					// TODO: Set up pathfinding.
+					
+					// The path is the tether up to x, concatenated 
+					// with the direct path from x to vertex, 
+					// concatenated with the shortest path from vertex 
+					// to the goal.
+					Path q = new Path();
+					q.addPoints(tetherSegment.path.points);
+					q.addPoint(vertex);
+				}
+				else {
+					Log.error("Unsupported tether type.");
+					
+					return null;
+				}
 				
 			}
 		}
