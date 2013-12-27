@@ -14,13 +14,17 @@ public class VisibilityGraphNode {
 		this.vertex = node;
 	}
 	
+	public VisibilityGraphNode(VisibilityGraphNode node) {
+		this.vertex = new Point2D.Double(node.vertex.getX(), node.vertex.getY());
+	}
+	
 	@Override
 	public boolean equals(Object o) {
 		if (o == null) {
 			return false;
 		}
 		
-		VisibilityGraphNode n = (VisibilityGraphNode)o;
+		VisibilityGraphNode n = (VisibilityGraphNode) o;
 		
 		return this.vertex.equals(n.vertex);
 	}

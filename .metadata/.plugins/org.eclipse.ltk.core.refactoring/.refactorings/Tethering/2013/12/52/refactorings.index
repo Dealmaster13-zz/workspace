@@ -5,3 +5,12 @@
 1387823113693	Rename local variable 'segmentDistance'
 1387824873815	Rename method 'getFarthestPoint'
 1387824940343	Rename local variable 'p'
+1388165737428	Move compilation unit
+1388167094300	Rename local variable 'cross'
+1388168613935	Rename local variable 'visibility'
+1388168677274	Rename method 'partlyVisible'
+1388168694967	Rename method 'isVisible'
+1388169324623	Rename local variable 'node'
+1388169328161	Rename local variable 'goalNode'
+1388169364072	Rename local variable 'g'
+1388170375004	Rename method 'calculateHeuristic'

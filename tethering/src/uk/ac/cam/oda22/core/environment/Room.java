@@ -5,21 +5,23 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import uk.ac.cam.oda22.core.LineIntersectionResult;
+
 /**
  * @author Oliver
  *
  */
 public class Room {
 
-	public final double width;
-
-	public final double height;
-
 	public final List<Obstacle> obstacles;
 
-	public final List<EnvironmentTriangle> triangles;
-	
 	public final VisibilityGraph visibilityGraph;
+
+	private final double width;
+
+	private final double height;
+
+	private final List<EnvironmentTriangle> triangles;
 
 	public Room(double width, double height, List<Obstacle> l) {
 		this.width = width;
@@ -34,50 +36,68 @@ public class Room {
 		this.addRoomEdges();
 
 		this.triangles = this.triangulateRoom();
-		
+
 		this.visibilityGraph = this.generateVisibilityGraph();
 	}
-	
+
 	public boolean isPointInEmptySpace(Point2D p) {
 		boolean inSpace = false;
-		
+
 		int index = 0;
-		
+
 		while (!inSpace && index < this.triangles.size()) {
 			EnvironmentTriangle t = this.triangles.get(index);
-			
+
 			if (!t.isObstacle && t.containsPoint(p)) {
 				inSpace = true;
 			}
-			
+
 			index ++;
 		}
-		
+
 		return inSpace;
 	}
-	
-	public void addGoal(Point2D goal) {
-		VisibilityGraphNode goalNode = new VisibilityGraphNode(goal);
+
+	/**
+	 * Adds a node, returning a new visibility graph.
+	 * 
+	 * @param goal
+	 * @return a visibility graph with the new node added
+	 */
+	public VisibilityGraph addNode(VisibilityGraph g1, Point2D goal) {
+		VisibilityGraphNode node = new VisibilityGraphNode(goal);
 		
-		this.visibilityGraph.addNode(goalNode);
-		
-		for (VisibilityGraphNode node : this.visibilityGraph.nodes) {
-			this.tryAddEdge(goalNode, node, this.visibilityGraph);
+		VisibilityGraph g2 = new VisibilityGraph(g1);
+
+		boolean addedNode = g2.addNode(node);
+
+		if (!addedNode) {
+			return g2;
 		}
+		
+		for (VisibilityGraphNode n : g2.nodes) {
+			this.tryAddEdge(node, n, g2);
+		}
+		
+		return g2;
 	}
-	
+
 	public List<VisibilityGraphNode> getVisibleNodes(VisibilityGraphNode node) {
 		List<VisibilityGraphNode> l = new ArrayList<VisibilityGraphNode>();
-		
+
 		for (VisibilityGraphNode q : this.visibilityGraph.nodes) {
-			if (isVisible(node, q, this.visibilityGraph)) {
+			// Add node q if it is visible from 'node'.
+			if (getVisibility(node, q, this.visibilityGraph).isPartlyVisible()) {
 				l.add(q);
 			}
 		}
-		
+
 		return l;
 	}
 
+	/**
+	 * Adds the four room edges as four obstacles with no width.
+	 */
 	private void addRoomEdges() {
 		Point2D p1 = new Point2D.Double(0, 0);
 		Point2D p2 = new Point2D.Double(width, 0);
@@ -148,7 +168,7 @@ public class Room {
 
 								Line2D l1 = new Line2D.Double();
 								l1.setLine(point1, q.points.get(j));
-								
+
 								Line2D l2 = new Line2D.Double();
 								l2.setLine(point2, q.points.get(j));
 
@@ -162,19 +182,19 @@ public class Room {
 								}
 
 								EnvironmentTriangle s = new EnvironmentTriangle(false, point1, point2, point3);
-								
+
 								boolean unique = true;
-								
+
 								int index2 = 0;
-								
+
 								while (unique && index2 < t.size()) {
 									if (s.equals(t.get(index2))) {
 										unique = false;
 									}
-									
+
 									index2 ++;
 								}
-								
+
 								if (!cross && unique) {
 									t.add(s);
 								}
@@ -187,60 +207,88 @@ public class Room {
 
 		return t;
 	}
-	
+
 	private VisibilityGraph generateVisibilityGraph() {
 		VisibilityGraph g = new VisibilityGraph();
-		
+
 		for (Obstacle obstacle : this.obstacles) {
 			for (Point2D p : obstacle.points) {
 				g.addNode(new VisibilityGraphNode(p));
 			}
 		}
-		
+
 		for (VisibilityGraphNode p : g.nodes) {
 			for (VisibilityGraphNode q : g.nodes) {
 				this.tryAddEdge(p, q, g);
 			}
 		}
-		
+
 		return g;
 	}
-	
+
 	private boolean tryAddEdge(VisibilityGraphNode p, VisibilityGraphNode q, VisibilityGraph g) {
-		if (isVisible(p, q, g)) {
+		NodeVisibility visibility = this.getVisibility(p, q, g);
+		
+		// Add the edge if q is at least partly visible from p.
+		if (visibility.isPartlyVisible()) {
 			double weight = p.vertex.distance(q.vertex);
+
+			boolean isObstacleEdge = visibility == NodeVisibility.ALONG_OBSTACLE_EDGE;
 			
-			g.addEdge(new VisibilityGraphEdge(p, q, weight));
-			
+			g.addEdge(new VisibilityGraphEdge(p, q, weight, isObstacleEdge));
+
 			return true;
 		}
-		
+
 		return false;
 	}
-	
-	private boolean isVisible(VisibilityGraphNode p, VisibilityGraphNode q, VisibilityGraph g) {
+
+	/**
+	 * Calculates the visibility between two points.
+	 * 
+	 * @param p
+	 * @param q
+	 * @param g
+	 * @return point-to-point visibility
+	 */
+	private NodeVisibility getVisibility(VisibilityGraphNode p, VisibilityGraphNode q, VisibilityGraph g) {
+		// If the points are not equal then check for visibility.
 		if (!p.equals(q)) {
 			Line2D l = new Line2D.Double();
 			l.setLine(p.vertex, q.vertex);
-			
-			boolean cross = false;
-			
+
+			// Initialise visibility to 'fully visible.
+			NodeVisibility visibility = NodeVisibility.FULLY_VISIBLE;
+
 			int index = 0;
-			
-			while (!cross && index < this.obstacles.size()) {
+
+			// For each obstacle, check if it blocks visibility.
+			while (visibility != NodeVisibility.NOT_VISIBLE && index < this.obstacles.size()) {
 				Obstacle o = this.obstacles.get(index);
-				
-				if (o.intersectsLine(l)) {
-					cross = true;
+
+				// Calculate if the line formed between the two points intersects with the obstacle.
+				LineIntersectionResult intersection = o.intersectsLine(l);
+
+				switch (intersection) {
+				case CROSSED:
+					visibility = NodeVisibility.NOT_VISIBLE;
+					break;
+
+				case EQUAL_LINES:
+					visibility = NodeVisibility.ALONG_OBSTACLE_EDGE;
+					break;
+
+				default:
+					break;
 				}
-				
+
 				index ++;
 			}
-			
-			return !cross;
+
+			return visibility;
 		}
-		
-		return false;
+
+		return NodeVisibility.SAME_POINT;
 	}
 
 }

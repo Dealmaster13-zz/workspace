@@ -3,6 +3,8 @@ package uk.ac.cam.oda22.core.astar;
 import java.util.LinkedList;
 import java.util.List;
 
+import uk.ac.cam.oda22.pathplanning.Path;
+
 /**
  * @author Oliver
  *
@@ -24,7 +26,7 @@ public class AStarPathfinding {
 			node.predecessor = null;
 			node.discovered = false;
 			node.f = Double.POSITIVE_INFINITY;
-			node.g = node.calculateHeuristic(destination.p);
+			node.g = node.distance(destination.p);
 		}
 
 		// Set the source's f cost to 0.
@@ -83,6 +85,28 @@ public class AStarPathfinding {
 		}
 
 		return lowestCostNode;
+	}
+	
+	public static Path retrievePath(AStarNode destination) {
+		Path path = new Path();
+		
+		List<AStarNode> reversePath = new LinkedList<AStarNode>();
+		
+		AStarNode currentNode = destination;
+		
+		// Retrieve the reverse path.
+		while (currentNode != null) {
+			reversePath.add(currentNode);
+			
+			currentNode = currentNode.predecessor;
+		}
+		
+		// Reassemble the forward path.
+		for (int i = reversePath.size() - 1; i >= 0; i--) {
+			path.addPoint(reversePath.get(i).p);
+		}
+		
+		return path;
 	}
 
 }

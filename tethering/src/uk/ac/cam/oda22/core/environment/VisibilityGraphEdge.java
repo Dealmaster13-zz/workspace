@@ -11,11 +11,21 @@ public class VisibilityGraphEdge {
 	public final VisibilityGraphNode endNode;
 	
 	public final double weight;
+	
+	public final boolean isObstacleEdge;
 
-	public VisibilityGraphEdge(VisibilityGraphNode startNode, VisibilityGraphNode endNode, double weight) {
+	public VisibilityGraphEdge(VisibilityGraphNode startNode, VisibilityGraphNode endNode, double weight, boolean isObstacleEdge) {
 		this.startNode = startNode;
 		this.endNode = endNode;
 		this.weight = weight;
+		this.isObstacleEdge = isObstacleEdge;
+	}
+
+	public VisibilityGraphEdge(VisibilityGraphEdge edge) {
+		this.startNode = new VisibilityGraphNode(edge.startNode);
+		this.endNode = new VisibilityGraphNode(edge.endNode);
+		this.weight = edge.weight;
+		this.isObstacleEdge = edge.isObstacleEdge;
 	}
 	
 	@Override
@@ -24,7 +34,7 @@ public class VisibilityGraphEdge {
 			return false;
 		}
 		
-		VisibilityGraphEdge e = (VisibilityGraphEdge)o;
+		VisibilityGraphEdge e = (VisibilityGraphEdge) o;
 		
 		if (this.startNode.equals(e.startNode) && this.endNode.equals(e.endNode)) {
 			return true;

@@ -2,12 +2,18 @@ package uk.ac.cam.oda22.pathplanning;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 
 import uk.ac.cam.oda22.core.ListFunctions;
 import uk.ac.cam.oda22.core.MathExtended;
+import uk.ac.cam.oda22.core.astar.AStarEdge;
+import uk.ac.cam.oda22.core.astar.AStarNode;
+import uk.ac.cam.oda22.core.astar.AStarPathfinding;
 import uk.ac.cam.oda22.core.environment.Room;
+import uk.ac.cam.oda22.core.environment.VisibilityGraph;
+import uk.ac.cam.oda22.core.environment.VisibilityGraphEdge;
 import uk.ac.cam.oda22.core.environment.VisibilityGraphNode;
 import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.core.robots.Robot;
@@ -245,7 +251,7 @@ public final class PathPlanner {
 	 * @param v
 	 * @return
 	 */
-	private static Path computePath(List<VisibilityChangeList> v, Tether t, Point2D goal) {
+	private static Path computePath(List<VisibilityChangeList> v, Tether t, Room room, Point2D goal) {
 		Path optimalPath = null;
 		Path currentPath;
 		
@@ -273,15 +279,29 @@ public final class PathPlanner {
 						return null;
 					}
 					
-					// TODO: Set up pathfinding.
+					// Compute the shortest path from vertex to the goal.
+					Path vToG = getShortestPath(vertex, goal, room);
 					
-					// The path is the tether up to x, concatenated 
-					// with the direct path from x to vertex, 
-					// concatenated with the shortest path from vertex 
-					// to the goal.
+					// If the path is null or empty then fail.
+					if (vToG == null || vToG.isEmpty()) {
+						Log.error("The shortest path from v to g was not found.");
+						
+						return null;
+					}
+
+					// If the path does not contain vertex then fail.
+					if (!vToG.contains(vertex)) {
+						Log.error("The shortest path from v to g does not contain v.");
+						
+						return null;
+					}
+					
+					// The path is the tether up to x, concatenated with the direct path from x to vertex, 
+					// concatenated with the shortest path from vertex to the goal.
+					// Note that vertex is contained in vToG.
 					Path q = new Path();
 					q.addPoints(tetherSegment.path.points);
-					q.addPoint(vertex);
+					q.addPoints(vToG.points);
 				}
 				else {
 					Log.error("Unsupported tether type.");
@@ -293,6 +313,77 @@ public final class PathPlanner {
 		}
 		
 		return optimalPath;
+	}
+	
+	private static Path getShortestPath(Point2D source, Point2D destination, Room room) {
+		// If the points are equal then return the empty path.
+		if (source.equals(destination)) {
+			return new Path();
+		}
+		
+		// Create a visibility graph including the source and destination nodes.
+		// Note that if either vertex already exists then a new node will not be added.
+		VisibilityGraph g = room.addNode(room.visibilityGraph, source);
+		g = room.addNode(g, destination);
+		
+		VisibilityGraphNode sourceNode = null;
+		VisibilityGraphNode destinationNode = null;
+		
+		int index = 0;
+		
+		// Find the source and destination nodes.
+		while ((sourceNode == null || destinationNode == null) && index < g.nodes.size()) {
+			VisibilityGraphNode node = g.nodes.get(index);
+			
+			if (node.vertex.equals(source)) {
+				sourceNode = node;
+			}
+			
+			if (node.vertex.equals(destination)) {
+				destinationNode = node;
+			}
+		}
+		
+		// If either the source or destination nodes were not found then fail.
+		if (sourceNode == null || destinationNode == null) {
+			Log.warning("Source or destination node not found.");
+			
+			return null;
+		}
+		
+		List<AStarNode> aStarNodes = new LinkedList<AStarNode>();
+		
+		Hashtable<VisibilityGraphNode, AStarNode> nodeMapping = new Hashtable<VisibilityGraphNode, AStarNode>();
+		
+		// Create all of the A* nodes.
+		for (VisibilityGraphNode node : g.nodes) {
+			AStarNode aStarNode = new AStarNode(node.vertex);
+			
+			aStarNodes.add(aStarNode);
+			
+			nodeMapping.put(node, aStarNode);
+		}
+		
+		// Create all of the A* edges.
+		for (VisibilityGraphEdge edge : g.edges) {
+			AStarNode aStarNode1 = nodeMapping.get(edge.startNode);
+			AStarNode aStarNode2 = nodeMapping.get(edge.endNode);
+			
+			AStarEdge aStarEdge = new AStarEdge(aStarNode1, aStarNode2, aStarNode1.distance(aStarNode2.p));
+			AStarNode.addEdge(aStarEdge);
+		}
+
+		AStarNode aStarSource = nodeMapping.get(sourceNode);
+		AStarNode aStarDestination = nodeMapping.get(destinationNode);
+		
+		boolean pathFound = AStarPathfinding.getShortestPath(aStarSource, aStarDestination, aStarNodes);
+		
+		// Fail if no path was found.
+		if (!pathFound) {
+			return null;
+		}
+		
+		return AStarPathfinding.retrievePath(aStarDestination);
 	}
 
 }

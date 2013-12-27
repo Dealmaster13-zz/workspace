@@ -44,6 +44,10 @@ public class AStarNode {
 		this.p = p;
 		
 		this.edges = new LinkedList<AStarEdge>();
+		this.predecessor = null;
+		this.discovered = false;
+		this.f = Double.POSITIVE_INFINITY;
+		this.g = Double.POSITIVE_INFINITY;
 	}
 	
 	public static void addEdge(AStarEdge e) {
@@ -51,7 +55,7 @@ public class AStarNode {
 		e.q.edges.add(e);
 	}
 	
-	public double calculateHeuristic(Point2D q) {
+	public double distance(Point2D q) {
 		return p.distance(q);
 	}
 	

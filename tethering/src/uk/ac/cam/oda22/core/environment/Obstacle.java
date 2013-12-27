@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import uk.ac.cam.oda22.core.LineIntersectionResult;
 import uk.ac.cam.oda22.core.MathExtended;
 
 /**
@@ -34,25 +35,19 @@ public class Obstacle {
 		}
 	}
 
-	public boolean looseIntersectsLine(Line2D l) {
+	/**
+	 * Note that this does not deal with intersections within the polygon.
+	 * This primitive implementation should be fine for visibility checking.
+	 * 
+	 * TODO: Calculate intersections within the polygon.
+	 * 
+	 * @param l
+	 * @return
+	 */
+	public LineIntersectionResult intersectsLine(Line2D l) {
 		double fractionalError = 0.001, absoluteError = 0.001;
 
-		for (Line2D edge : this.edges) {
-			if (l.intersectsLine(edge)
-					&& !MathExtended.ApproxEqual(edge.getP1(), l.getP1(), fractionalError, absoluteError)
-					&& !MathExtended.ApproxEqual(edge.getP1(), l.getP2(), fractionalError, absoluteError)
-					&& !MathExtended.ApproxEqual(edge.getP2(), l.getP1(), fractionalError, absoluteError)
-					&& !MathExtended.ApproxEqual(edge.getP2(), l.getP2(), fractionalError, absoluteError)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public boolean intersectsLine(Line2D l) {
-		double fractionalError = 0.001, absoluteError = 0.001;
-
+		// Check if the line is the same as any of the obstacle edges.
 		for (Line2D edge : this.edges) {
 			boolean b1 = MathExtended.ApproxEqual(edge.getP1(), l.getP1(), fractionalError, absoluteError)
 					^ MathExtended.ApproxEqual(edge.getP2(), l.getP2(), fractionalError, absoluteError);
@@ -60,22 +55,30 @@ public class Obstacle {
 			boolean b2 = MathExtended.ApproxEqual(edge.getP1(), l.getP2(), fractionalError, absoluteError)
 					^ MathExtended.ApproxEqual(edge.getP2(), l.getP1(), fractionalError, absoluteError);
 			
-			if (l.intersectsLine(edge) && !b1 && !b2) {
-				return true;
+			if (b1 || b2) {
+				return LineIntersectionResult.EQUAL_LINES;
+			}
+		}
+
+		// Check if any obstacle edges intersect with the line.
+		for (Line2D edge : this.edges) {
+			if (l.intersectsLine(edge)) {
+				return LineIntersectionResult.CROSSED;
 			}
 		}
 		
+		// Check if the edge formed spans between any two obstacle vertices.
 		for (Point2D p1 : this.points) {
 			if (p1.equals(l.getP1())) {
 				for (Point2D p2 : this.points) {
 					if (p2.equals(l.getP2())) {
-						return true;
+						return LineIntersectionResult.CROSSED;
 					}
 				}
 			}
 		}
 
-		return false;
+		return LineIntersectionResult.NONE;
 	}
 	
 }

@@ -41,4 +41,18 @@ public class Path {
 		this.points.remove(this.points.size() - 1);
 	}
 	
+	public boolean contains(Point2D point) {
+		for (Point2D p : this.points) {
+			if (p.equals(point)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean isEmpty() {
+		return this.points.size() == 0;
+	}
+	
 }
