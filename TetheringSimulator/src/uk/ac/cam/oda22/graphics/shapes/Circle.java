@@ -15,14 +15,30 @@ public class Circle extends DisplayShape {
 	public final Ellipse2D c;
 
 	/**
-	 * @param l
+	 * @param position
+	 * @param radius
 	 * @param colour
 	 * @param thickness
 	 */
 	public Circle(Point2D position, double radius, Color colour, float thickness) {
 		super(colour, thickness);
 		
-		this.c = new Ellipse2D.Double(position.getX() - radius, position.getY() - radius, radius * 2, radius * 2);
+		this.c = getEllipse(position, radius);
+	}
+
+	/**
+	 * @param position
+	 * @param radius
+	 * @param thickness
+	 */
+	public Circle(Point2D position, double radius, float thickness) {
+		super(thickness);
+		
+		this.c = getEllipse(position, radius);
+	}
+	
+	public static Ellipse2D getEllipse(Point2D position, double radius) {
+		return new Ellipse2D.Double(position.getX() - radius, position.getY() - radius, radius * 2, radius * 2);
 	}
 
 	@Override

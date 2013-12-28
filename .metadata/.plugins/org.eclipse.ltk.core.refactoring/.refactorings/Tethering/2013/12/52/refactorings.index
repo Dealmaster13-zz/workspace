@@ -14,3 +14,6 @@
 1388169328161	Rename local variable 'goalNode'
 1388169364072	Rename local variable 'g'
 1388170375004	Rename method 'calculateHeuristic'
+1388256023160	Rename local variable 'angle'
+1388256462935	Rename local variable 'rotationFrom'
+1388256467447	Rename local variable 'rotationTo'

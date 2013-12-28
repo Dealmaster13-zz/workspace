@@ -18,7 +18,7 @@ public class NXT1 extends RectangularRobot implements ITracksDriven {
 	private double tracksHeight;
 	
 	public NXT1(Point2D position, double rotation, Tether tether, double width, double height) {
-		super(position, rotation, tether, width, height);
+		super(position, rotation, Math.PI / 180, tether, width, height);
 		
 		this.tracksHeight = 0.045;
 

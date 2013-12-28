@@ -54,7 +54,7 @@ public class SimpleTether extends Tether {
 		for (int i = 0; i < points.size(); i++) {
 			currentPoint = points.get(i);
 
-			totalLength += Point2D.distance(previousPoint.getX(), previousPoint.getY(), currentPoint.getX(), currentPoint.getY());
+			totalLength += previousPoint.distance(currentPoint);
 
 			previousPoint = currentPoint;
 		}
@@ -79,7 +79,7 @@ public class SimpleTether extends Tether {
 
 		List<Point2D> points = this.getFixedPoints();
 
-		for (int i = 1; i < points.size(); i++) {
+		for (int i = 0; i < points.size(); i++) {
 			Point2D nextPoint = points.get(i);
 
 			double segmentLength = currentPoint.distance(nextPoint);

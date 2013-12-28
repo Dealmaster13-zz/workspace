@@ -18,8 +18,8 @@ public class RectangularRobot extends Robot {
 	/**
 	 * @param args
 	 */
-	public RectangularRobot(Point2D position, double rotation, Tether tether, double width, double height) {
-		super(position, MathExtended.getRadius(width, height), rotation, tether);
+	public RectangularRobot(Point2D position, double rotation, double rotationalSensitivity, Tether tether, double width, double height) {
+		super(position, MathExtended.getRadius(width, height), rotation, rotationalSensitivity, tether);
 		
 		this.width = width;
 		this.height = height;

@@ -13,6 +13,11 @@ public abstract class Robot {
 	public final Tether tether;
 	
 	public final double radius;
+	
+	/**
+	 * The smallest fraction of a radian which can be recognised as a change in rotation
+	 */
+	public final double rotationalSensitivity;
 
 	private Point2D position;
 
@@ -23,10 +28,11 @@ public abstract class Robot {
 	
 	private RobotOutline outline;
 	
-	public Robot(Point2D position, double radius, double rotation, Tether tether) {
+	public Robot(Point2D position, double radius, double rotation, double rotationalSensitivity, Tether tether) {
 		this.position = position;
 		this.radius = radius;
 		this.rotation = rotation;
+		this.rotationalSensitivity = rotationalSensitivity;
 		this.tether = tether;
 	}
 

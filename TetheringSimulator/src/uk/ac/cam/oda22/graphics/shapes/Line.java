@@ -24,6 +24,16 @@ public class Line extends DisplayShape {
 		this.l = l;
 	}
 
+	/**
+	 * @param l
+	 * @param thickness
+	 */
+	public Line(Line2D l, float thickness) {
+		super(thickness);
+		
+		this.l = l;
+	}
+
 	@Override
 	public DisplayShape translate(double x, double y) {
 		return new Line(ShapeFunctions.translateShape(this.l, x, y), this.colour, this.thickness);

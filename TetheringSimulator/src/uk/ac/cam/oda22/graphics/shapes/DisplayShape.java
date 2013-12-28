@@ -17,6 +17,11 @@ public abstract class DisplayShape {
 		this.thickness = thickness;
 	}
 	
+	public DisplayShape(float thickness) {
+		this.colour = Color.black;
+		this.thickness = thickness;
+	}
+	
 	public abstract DisplayShape translate(double x, double y);
 	
 	public abstract DisplayShape stretch(double xScale, double yScale);

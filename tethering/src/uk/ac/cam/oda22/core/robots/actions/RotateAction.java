@@ -4,7 +4,7 @@ package uk.ac.cam.oda22.core.robots.actions;
  * @author Oliver
  *
  */
-public class RotateAction {
+public class RotateAction implements IRobotAction {
 
 	public final double rads;
 

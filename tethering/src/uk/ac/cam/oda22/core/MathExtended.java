@@ -44,4 +44,35 @@ public final class MathExtended {
 		return Math.sqrt((w * w) + (h * h));
 	}
 	
+	/**
+	 * Gets the shortest angular change from one angle to another.
+	 * 
+	 * @param radsFrom
+	 * @param radsTo
+	 * @return angular change
+	 */
+	public static double getAngularChange(double radsFrom, double radsTo) {
+		return normaliseAngle(radsTo - radsFrom);
+	}
+	
+	/**
+	 * Normalises an angle to take a value between -pi and +pi.
+	 * 
+	 * @param rads
+	 * @return normalised angle
+	 */
+	public static double normaliseAngle(double rads) {
+		double twoPi = 2 * Math.PI;
+		
+		double normalisedAngle = rads % twoPi;
+		
+		normalisedAngle = (normalisedAngle + twoPi) % twoPi;
+	    
+	    if (normalisedAngle > Math.PI) {
+	    	normalisedAngle -= twoPi;
+	    }
+	    
+	    return normalisedAngle;
+	}
+	
 }

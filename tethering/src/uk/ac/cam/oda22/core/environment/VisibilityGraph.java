@@ -1,6 +1,7 @@
 package uk.ac.cam.oda22.core.environment;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 /**
@@ -22,12 +23,22 @@ public class VisibilityGraph {
 		this.nodes = new ArrayList<VisibilityGraphNode>();
 		this.edges = new ArrayList<VisibilityGraphEdge>();
 		
+		// Ensure that the new edges use the new nodes by storing the appropriate node mapping.
+		Hashtable<VisibilityGraphNode, VisibilityGraphNode> nodeMapping = new Hashtable<VisibilityGraphNode, VisibilityGraphNode>();
+		
 		for (VisibilityGraphNode node : g.nodes) {
-			this.nodes.add(new VisibilityGraphNode(node));
+			VisibilityGraphNode newNode = new VisibilityGraphNode(node);
+			
+			this.nodes.add(newNode);
+			
+			nodeMapping.put(node, newNode);
 		}
 		
 		for (VisibilityGraphEdge edge : g.edges) {
-			this.edges.add(new VisibilityGraphEdge(edge));
+			VisibilityGraphNode startNode = nodeMapping.get(edge.startNode);
+			VisibilityGraphNode endNode = nodeMapping.get(edge.endNode);
+			
+			this.edges.add(new VisibilityGraphEdge(startNode, endNode, edge.weight, edge.isObstacleEdge));
 		}
 	}
 	

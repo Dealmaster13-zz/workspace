@@ -41,6 +41,21 @@ public class Path {
 		this.points.remove(this.points.size() - 1);
 	}
 	
+	/**
+	 * Returns a new path with the list of points reversed.
+	 * 
+	 * @return reversed path
+	 */
+	public Path reverse() {
+		Path reversedPath = new Path();
+		
+		for (int i = this.points.size() - 1; i >= 0; i--) {
+			reversedPath.addPoint(this.points.get(i));
+		}
+		
+		return reversedPath;
+	}
+	
 	public boolean contains(Point2D point) {
 		for (Point2D p : this.points) {
 			if (p.equals(point)) {
@@ -53,6 +68,31 @@ public class Path {
 	
 	public boolean isEmpty() {
 		return this.points.size() == 0;
+	}
+	
+	/**
+	 * Gets the length of the path.
+	 * 
+	 * @return length
+	 */
+	public double length() {
+		if (this.points.size() == 0) {
+			return 0;
+		}
+		
+		double l = 0;
+		
+		Point2D currentPoint = this.points.get(0);
+		
+		for (int i = 1; i < this.points.size(); i++) {
+			Point2D nextPoint = this.points.get(i);
+			
+			l += currentPoint.distance(nextPoint);
+			
+			currentPoint = nextPoint;
+		}
+		
+		return l;
 	}
 	
 }

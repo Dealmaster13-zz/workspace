@@ -73,7 +73,7 @@ public class Simulator {
 
 		Tether t = new SimpleTether(anchor, 150, X);
 
-		Robot robot = new PointRobot(u, 0, t);
+		Robot robot = new PointRobot(u, 0, Math.PI / 180, t);
 
 		tetherSegments = 1000;
 		
