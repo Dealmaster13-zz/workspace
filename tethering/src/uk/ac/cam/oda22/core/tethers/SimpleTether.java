@@ -105,6 +105,7 @@ public class SimpleTether extends Tether {
 
 	@Override
 	public TetherSegment getTetherSegment(double startW, double endW) {
+		// Fail if either of the distance parameters are out of invalid.
 		if (startW > endW || startW < 0 || endW > this.length) {
 			return null;
 		}
@@ -119,7 +120,8 @@ public class SimpleTether extends Tether {
 
 		boolean pointFound = false;
 
-		int index = 1;
+		// Note that the fixed points list does not include the anchor point.
+		int index = 0;
 
 		// Find the start point.
 		while (index < points.size() && !pointFound) {

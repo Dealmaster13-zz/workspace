@@ -1,0 +1,26 @@
+package uk.ac.cam.oda22.core.robots.actions;
+
+import java.util.List;
+
+/**
+ * @author Oliver
+ *
+ */
+public class MoveAction implements IRobotAction {
+
+	public final double dist;
+
+	public MoveAction(double dist) {
+		this.dist = dist;
+	}
+	
+	public void addAction(List<IRobotAction> l, IRobotAction action) {
+		
+	}
+	
+	@Override
+	public String toString() {
+		return "Move action: " + this.dist;
+	}
+	
+}

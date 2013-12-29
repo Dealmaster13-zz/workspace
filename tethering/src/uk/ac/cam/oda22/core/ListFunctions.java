@@ -23,4 +23,8 @@ public final class ListFunctions {
 		return list.get(list.size() - 1);
 	}
 	
+	public static <T> T removeLast(List<T> list) {
+		return list.remove(list.size() - 1);
+	}
+	
 }

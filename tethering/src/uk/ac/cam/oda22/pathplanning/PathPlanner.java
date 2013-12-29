@@ -488,14 +488,14 @@ public final class PathPlanner {
 			double angularChange = MathExtended.getAngularChange(currentRotation, direction);
 			
 			if (Math.abs(angularChange) >= rotationalSensitivity) {
-				actions.add(new RotateAction(angularChange));
+				RotateAction rotateAction = new RotateAction(angularChange);
+				rotateAction.addAction(actions);
 				
 				currentRotation = direction;
 			}
 			
-			double dist = currentPoint.distance(nextPoint);
-			
-			actions.add(new MoveAction(dist));
+			MoveAction moveAction = new MoveAction(currentPoint.distance(nextPoint));
+			moveAction.addAction(actions);
 			
 			currentPoint = nextPoint;
 		}

@@ -1,0 +1,42 @@
+package uk.ac.cam.oda22.core.robots.actions;
+
+import java.util.List;
+
+import uk.ac.cam.oda22.core.ListFunctions;
+import uk.ac.cam.oda22.core.MathExtended;
+
+/**
+ * @author Oliver
+ *
+ */
+public class RotateAction implements IRobotAction {
+
+	public final double rads;
+
+	public RotateAction(double rads) {
+		this.rads = rads;
+	}
+
+	@Override
+	public void addAction(List<IRobotAction> l) {
+		IRobotAction lastAction = actions.size() == 0 ? null : ListFunctions.getLast(actions);
+		
+		if (lastAction != null && lastAction instanceof RotateAction) {
+			double newAngle = MathExtended.normaliseAngle(((RotateAction) lastAction).rads + angularChange);
+			
+			RotateAction newAction = new RotateAction(newAngle);
+			
+			ListFunctions.removeLast(actions);
+			actions.add(newAction);
+		}
+		else {
+			actions.add(new RotateAction(angularChange));
+		}
+	}
+	
+	@Override
+	public String toString() {
+		return "Rotate action: " + this.rads;
+	}
+	
+}
