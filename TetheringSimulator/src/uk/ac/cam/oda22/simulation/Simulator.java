@@ -14,7 +14,6 @@ import uk.ac.cam.oda22.core.environment.Room;
 import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.core.robots.PointRobot;
 import uk.ac.cam.oda22.core.robots.Robot;
-import uk.ac.cam.oda22.core.robots.actions.IRobotAction;
 import uk.ac.cam.oda22.core.tethers.SimpleTether;
 import uk.ac.cam.oda22.core.tethers.Tether;
 import uk.ac.cam.oda22.graphics.GraphicsFunctions;
@@ -24,6 +23,7 @@ import uk.ac.cam.oda22.graphics.shapes.Circle;
 import uk.ac.cam.oda22.graphics.shapes.Line;
 import uk.ac.cam.oda22.pathplanning.Path;
 import uk.ac.cam.oda22.pathplanning.PathPlanner;
+import uk.ac.cam.oda22.pathplanning.PathPlanningResult;
 
 /**
  * @author Oliver
@@ -77,9 +77,9 @@ public class Simulator {
 
 		tetherSegments = 1000;
 		
-		Point2D goal = new Point2D.Double(20, 20);
+		Point2D goal = new Point2D.Double(5, 30);
 
-		testPathPlanning(room, robot, goal);
+		PathPlanningResult result = testPathPlanning(room, robot, goal);
 		
 		// Draw the graphics.
 		drawRoom(room);
@@ -87,6 +87,7 @@ public class Simulator {
 		drawGoal(goal);
 		drawTether(robot.tether);
 		drawAnchor(anchor);
+		drawPath(result.path);
 	}
 
 	private static void createVisualiser() {
@@ -100,7 +101,7 @@ public class Simulator {
 	private static void drawRoom(Room room) {
 		for (Obstacle o : room.obstacles) {
 			for (Line2D edge : o.edges) {
-				visualiser.drawLine(new Line(edge, Color.red, 1));
+				visualiser.drawLine(new Line(edge, Color.black, 1));
 			}
 		}
 	}
@@ -126,12 +127,14 @@ public class Simulator {
 			
 			Point2D previousPoint = t.getAnchor();
 			
-			for (Point2D p : t.getFixedPoints()) {
-				Line2D l = new Line2D.Double(previousPoint, p);
+			List<Point2D> points = t.getFixedPoints();
+			
+			for (int i = 0; i < points.size(); i++) {
+				Line2D l = new Line2D.Double(previousPoint, points.get(i));
 				
 				visualiser.drawLine(new Line(l, Color.gray, 1));
 				
-				previousPoint = p;
+				previousPoint = points.get(i);
 			}
 		}
 		else {
@@ -140,15 +143,33 @@ public class Simulator {
 	}
 	
 	private static void drawAnchor(Point2D anchor) {
-		visualiser.drawCircle(new Circle(anchor, 2, Color.black, 1));
+		visualiser.drawCircle(new Circle(anchor, 2, Color.darkGray, 1));
+	}
+	
+	private static void drawPath(Path path) {
+		if (path.points.size() == 0) {
+			return;
+		}
+		
+		Point2D previousPoint = path.points.get(0);
+		
+		for (int i = 1; i < path.points.size(); i++) {
+			Line2D l = new Line2D.Double(previousPoint, path.points.get(i));
+			
+			visualiser.drawLine(new Line(l, Color.red, 1));
+			
+			previousPoint = path.points.get(i);
+		}
 	}
 
-	private static void testPathPlanning(Room room, Robot robot, Point2D goal) {
-		List<IRobotAction> actions = PathPlanner.performPathPlanning(room, robot, goal, tetherSegments);
+	private static PathPlanningResult testPathPlanning(Room room, Robot robot, Point2D goal) {
+		PathPlanningResult result = PathPlanner.performPathPlanning(room, robot, goal, tetherSegments);
 
-		for (int i = 0; i < actions.size(); i++) {
-			System.out.println(actions.get(i));
+		for (int i = 0; i < result.actions.size(); i++) {
+			System.out.println(result.actions.get(i));
 		}
+		
+		return result;
 	}
 
 }

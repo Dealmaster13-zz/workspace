@@ -136,20 +136,37 @@ public class SimpleTether extends Tether {
 				double y = currentPoint.getY() + (nextPoint.getY() - currentPoint.getY()) * ratio;
 
 				path.addPoint(new Point2D.Double(x, y));
-				
+
 				pointFound = true;
 			}
 			else {
 				currentPoint = nextPoint;
 
 				currentW += segmentLength;
-				
-				index ++;
+
+				// If the end of the tether has been reached then check if the start distance is approximately equal to the tether's used length.
+				// If the start distance is at the end of the tether then simply add that point to the path and return it.
+				if (index == points.size() - 1 && MathExtended.ApproxEqual(startW, currentW, 0.0001, 0.0001)) {
+					double x = currentPoint.getX();
+					double y = currentPoint.getY();
+					
+					path.addPoint(new Point2D.Double(x, y));
+					
+					// If the end distance is not at the end of the tether then produce a warning.
+					if (!MathExtended.ApproxEqual(endW, currentW, 0.0001, 0.0001)) {
+						Log.warning("The given end distance is greater than the tether's used length.");
+					}
+					
+					return new SimpleTetherSegment(path);
+				}
+				else {
+					index ++;
+				}
 			}
 		}
 
 		pointFound = false;
-		
+
 		// Find the end point.
 		while (index < points.size() && !pointFound) {
 			Point2D nextPoint = points.get(index);
@@ -164,16 +181,16 @@ public class SimpleTether extends Tether {
 				double y = currentPoint.getY() + (nextPoint.getY() - currentPoint.getY()) * ratio;
 
 				path.addPoint(new Point2D.Double(x, y));
-				
+
 				pointFound = true;
 			}
 			else {
 				path.addPoint(nextPoint);
-				
+
 				currentPoint = nextPoint;
 
 				currentW += segmentLength;
-				
+
 				index ++;
 			}
 		}

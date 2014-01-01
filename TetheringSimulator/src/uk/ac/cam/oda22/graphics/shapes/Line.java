@@ -43,5 +43,12 @@ public class Line extends DisplayShape {
 	public DisplayShape stretch(double xScale, double yScale) {
 		return new Line(ShapeFunctions.stretchShape(this.l, xScale, yScale), this.colour, this.thickness);
 	}
+
+	@Override
+	public DisplayShape flipY() {
+		Line2D newLine = new Line2D.Double(this.l.getX1(), -this.l.getY1(), this.l.getX2(), -this.l.getY2());
+		
+		return new Line(newLine, this.colour, this.thickness);
+	}
 	
 }

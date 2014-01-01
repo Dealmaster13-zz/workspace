@@ -54,6 +54,13 @@ public class Circle extends DisplayShape {
 		
 		return new Circle(centre, this.c.getWidth() * xScale, this.colour, this.thickness);
 	}
+
+	@Override
+	public DisplayShape flipY() {
+		Point2D centre = new Point2D.Double(this.c.getCenterX(), -this.c.getCenterY());
+		
+		return new Circle(centre, this.c.getWidth(), this.colour, this.thickness);
+	}
 	
 	private static Ellipse2D getEllipse(Point2D position, double radius) {
 		return new Ellipse2D.Double(position.getX() - radius, position.getY() - radius, radius * 2, radius * 2);

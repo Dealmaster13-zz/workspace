@@ -12,11 +12,11 @@ import uk.ac.cam.oda22.core.environment.Obstacle;
 import uk.ac.cam.oda22.core.environment.Room;
 import uk.ac.cam.oda22.core.robots.PointRobot;
 import uk.ac.cam.oda22.core.robots.Robot;
-import uk.ac.cam.oda22.core.robots.actions.IRobotAction;
 import uk.ac.cam.oda22.core.tethers.SimpleTether;
 import uk.ac.cam.oda22.core.tethers.Tether;
 import uk.ac.cam.oda22.pathplanning.Path;
 import uk.ac.cam.oda22.pathplanning.PathPlanner;
+import uk.ac.cam.oda22.pathplanning.PathPlanningResult;
 
 /**
  * @author Oliver
@@ -24,7 +24,7 @@ import uk.ac.cam.oda22.pathplanning.PathPlanner;
  */
 public class TestPathPlanning {
 
-	private List<IRobotAction> actions;
+	private PathPlanningResult result;
 	
 	@BeforeClass
 	public void oneTimeSetUp() {
@@ -64,17 +64,17 @@ public class TestPathPlanning {
 		
 		Point2D goal = new Point2D.Double(20, 20);
 		
-		this.actions = PathPlanner.performPathPlanning(room, robot, goal, 1000);
+		this.result = PathPlanner.performPathPlanning(room, robot, goal, 1000);
 	}
 	
 	@Test
 	public void testActionsNotNull() {
-		Assert.assertNotNull(this.actions);
+		Assert.assertNotNull(this.result.actions);
 	}
 	
 	@Test
 	public void testActionsNonEmpty() {
-		Assert.assertTrue(this.actions.size() > 0);
+		Assert.assertTrue(this.result.actions.size() > 0);
 	}
 	
 }

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;goal&apos; in &apos;uk.ac.cam.oda22.core.environment.Room.addNode(...)&apos; to &apos;p&apos;&#x0D;&#x0A;- Original project: &apos;Tethering&apos;&#x0D;&#x0A;- Original element: &apos;uk.ac.cam.oda22.core.environment.Room.addNode(VisibilityGraph, Point2D).goal&apos;&#x0D;&#x0A;- Renamed element: &apos;goal&apos;&#x0D;&#x0A;- Update references to refactored element" description="Rename local variable &apos;goal&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src&lt;uk.ac.cam.oda22.core.environment{Room.java[Room~addNode~QVisibilityGraph;~QPoint2D;@goal!1373!1384!1381!1384!QPoint2D;!0!true" name="p" references="true" stamp="1388437578016" version="1.0"/>
+</session>

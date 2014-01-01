@@ -15,7 +15,7 @@ public class Room {
 
 	public final List<Obstacle> obstacles;
 
-	public final VisibilityGraph visibilityGraph;
+	private final VisibilityGraph visibilityGraph;
 
 	private final double width;
 
@@ -39,6 +39,15 @@ public class Room {
 
 		this.visibilityGraph = this.generateVisibilityGraph();
 	}
+	
+	/**
+	 * Returns a copy of the room's visibility graph.
+	 * 
+	 * @return the visibility graph
+	 */
+	public VisibilityGraph getVisibilityGraph() {
+		return new VisibilityGraph(this.visibilityGraph);
+	}
 
 	public boolean isPointInEmptySpace(Point2D p) {
 		boolean inSpace = false;
@@ -60,12 +69,13 @@ public class Room {
 
 	/**
 	 * Adds a node, returning a new visibility graph.
+	 * This is typically used to add a start or goal node.
 	 * 
-	 * @param goal
+	 * @param p
 	 * @return a visibility graph with the new node added
 	 */
-	public VisibilityGraph addNode(VisibilityGraph g1, Point2D goal) {
-		VisibilityGraphNode node = new VisibilityGraphNode(goal);
+	public VisibilityGraph addNode(VisibilityGraph g1, Point2D p) {
+		VisibilityGraphNode node = new VisibilityGraphNode(p);
 		
 		VisibilityGraph g2 = new VisibilityGraph(g1);
 
@@ -82,13 +92,23 @@ public class Room {
 		return g2;
 	}
 
-	public List<VisibilityGraphNode> getVisibleNodes(VisibilityGraphNode node) {
+	/**
+	 * Gets the list of nodes visible to a particular point.
+	 * This should not be used if point p exists in the visibility graph as a node.
+	 * 
+	 * @param p
+	 * @return the nodes visible to p
+	 */
+	public List<VisibilityGraphNode> getVisibleNodes(Point2D p, VisibilityGraph g) {
 		List<VisibilityGraphNode> l = new ArrayList<VisibilityGraphNode>();
 
-		for (VisibilityGraphNode q : this.visibilityGraph.nodes) {
-			// Add node q if it is visible from 'node'.
-			if (getVisibility(node, q, this.visibilityGraph).isPartlyVisible()) {
-				l.add(q);
+		for (VisibilityGraphNode node : g.nodes) {
+			// Calculate the visibility between nodes p and 'node'.
+			NodeVisibility nodeVisibility = this.getVisibility(p, node.vertex);
+			
+			// Add the node if it is at least partly visible.
+			if (nodeVisibility.isPartlyVisible()) {
+				l.add(node);
 			}
 		}
 
@@ -126,6 +146,11 @@ public class Room {
 		this.obstacles.add(new Obstacle(el4));
 	}
 
+	/**
+	 * Triangulates the room's obstacles and empty space.
+	 * 
+	 * @return the triangles
+	 */
 	private List<EnvironmentTriangle> triangulateRoom() {
 		List<EnvironmentTriangle> t = new ArrayList<EnvironmentTriangle>();
 
@@ -208,6 +233,11 @@ public class Room {
 		return t;
 	}
 
+	/**
+	 * Generates the visibility graph.
+	 * 
+	 * @return the visibility graph
+	 */
 	private VisibilityGraph generateVisibilityGraph() {
 		VisibilityGraph g = new VisibilityGraph();
 
@@ -226,8 +256,18 @@ public class Room {
 		return g;
 	}
 
+	/**
+	 * Checks if an edge can be added between two nodes, and adds the edge if possible.
+	 * Returns whether or not an edge was added.
+	 * 
+	 * @param p
+	 * @param q
+	 * @param g
+	 * @return whether or not the edge was added
+	 */
 	private boolean tryAddEdge(VisibilityGraphNode p, VisibilityGraphNode q, VisibilityGraph g) {
-		NodeVisibility visibility = this.getVisibility(p, q, g);
+		// Get the visibility between the two vertices by checking if any room obstacles are in the way.
+		NodeVisibility visibility = this.getVisibility(p.vertex, q.vertex);
 		
 		// Add the edge if q is at least partly visible from p.
 		if (visibility.isPartlyVisible()) {
@@ -244,18 +284,17 @@ public class Room {
 	}
 
 	/**
-	 * Calculates the visibility between two points.
+	 * Calculates the visibility between two points by checking if any room obstacles are in the way.
 	 * 
 	 * @param p
 	 * @param q
-	 * @param g
 	 * @return point-to-point visibility
 	 */
-	private NodeVisibility getVisibility(VisibilityGraphNode p, VisibilityGraphNode q, VisibilityGraph g) {
+	private NodeVisibility getVisibility(Point2D p, Point2D q) {
 		// If the points are not equal then check for visibility.
 		if (!p.equals(q)) {
 			Line2D l = new Line2D.Double();
-			l.setLine(p.vertex, q.vertex);
+			l.setLine(p, q);
 
 			// Initialise visibility to 'fully visible.
 			NodeVisibility visibility = NodeVisibility.FULLY_VISIBLE;

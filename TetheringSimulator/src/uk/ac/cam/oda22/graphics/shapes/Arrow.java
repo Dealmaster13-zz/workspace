@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
+import uk.ac.cam.oda22.core.ShapeFunctions;
 import uk.ac.cam.oda22.core.logging.Log;
 
 /**
@@ -30,7 +31,7 @@ public class Arrow extends DisplayShape {
 		this.length = length;
 		this.headLength = headLength;
 		
-		this.ls = getLines(position, rotation, length, headLength);
+		this.ls = ShapeFunctions.getArrow(position, rotation, length, headLength);
 	}
 
 	/**
@@ -45,7 +46,7 @@ public class Arrow extends DisplayShape {
 		this.length = length;
 		this.headLength = headLength;
 
-		this.ls = getLines(position, rotation, length, headLength);
+		this.ls = ShapeFunctions.getArrow(position, rotation, length, headLength);
 	}
 	
 	@Override
@@ -63,24 +64,12 @@ public class Arrow extends DisplayShape {
 		
 		return new Arrow(this.position, this.rotation, this.length * xScale, this.headLength * xScale, this.colour, this.thickness);
 	}
-	
-	private static Line2D[] getLines(Point2D position, double rotation, double length, double headLength) {
-		Line2D[] lines = new Line2D[3];
+
+	@Override
+	public DisplayShape flipY() {
+		Point2D newPosition = new Point2D.Double(this.position.getX(), -this.position.getY());
 		
-		double headX = position.getX() + (length * Math.cos(rotation));
-		double headY = position.getY() + (length * Math.sin(rotation));
-
-		double headTailX1 = headX + (headLength * Math.cos(rotation + (Math.PI * 3 / 4)));
-		double headTailY1 = headX + (headLength * Math.sin(rotation + (Math.PI * 3 / 4)));
-
-		double headTailX2 = headX + (headLength * Math.cos(rotation - (Math.PI * 3 / 4)));
-		double headTailY2 = headX + (headLength * Math.sin(rotation - (Math.PI * 3 / 4)));
-
-		lines[0] = new Line2D.Double(position.getX(), position.getY(), headX, headY);
-		lines[1] = new Line2D.Double(headX, headY, headTailX1, headTailY1);
-		lines[2] = new Line2D.Double(headX, headY, headTailX2, headTailY2);
-		
-		return lines;
+		return new Arrow(newPosition, -this.rotation, this.length, this.headLength, this.colour, this.thickness);
 	}
 	
 }

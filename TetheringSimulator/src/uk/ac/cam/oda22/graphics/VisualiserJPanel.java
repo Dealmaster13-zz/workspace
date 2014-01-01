@@ -38,7 +38,7 @@ public class VisualiserJPanel extends JPanel implements IVisualiser {
 		this.lines = new LinkedList<Line>();
 		this.circles = new LinkedList<Circle>();
 		
-		this.offset = new Point2D.Double(50, 50);
+		this.offset = new Point2D.Double(50, 200);
 		this.xScale = 2;
 		this.yScale = 2;
 	}
@@ -109,7 +109,7 @@ public class VisualiserJPanel extends JPanel implements IVisualiser {
 	}
 	
 	private DisplayShape transformShape(DisplayShape s) {
-		return s.translate(this.offset.getX(), this.offset.getY()).stretch(this.xScale, this.yScale);
+		return s.flipY().translate(this.offset.getX(), this.offset.getY()).stretch(this.xScale, this.yScale);
 	}
 
 }

@@ -75,4 +75,31 @@ public final class MathExtended {
 	    return normalisedAngle;
 	}
 	
+	public static boolean strictIntersectsLine(Line2D l1, Line2D l2) {
+		if (!l1.intersectsLine(l2)) {
+			return false;
+		}
+		
+		// Calculate the gradient of the first line.
+		double g1 = (l1.getY2() - l1.getY1()) / (l1.getX2() - l1.getX1());
+		
+		// Calculate the y value for the first point of the second line given its x value if it were on the first line.
+		double y2_1 = l1.getY1() + (g1 * (l2.getX1() - l1.getX1()));
+		
+		// Return no intersection if the point is on the line.
+		if (MathExtended.ApproxEqual(y2_1, l2.getY1(), 0.0001, 0.0001)) {
+			return false;
+		}
+		
+		// Calculate the y value for the second point of the second line given its x value if it were on the first line.
+		double y2_2 = l1.getY1() + (g1 * (l2.getX2() - l1.getX1()));
+		
+		// Return no intersection if the point is on the line.
+		if (MathExtended.ApproxEqual(y2_2, l2.getY2(), 0.0001, 0.0001)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
 }

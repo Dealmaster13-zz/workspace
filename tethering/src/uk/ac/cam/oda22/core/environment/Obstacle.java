@@ -50,10 +50,10 @@ public class Obstacle {
 		// Check if the line is the same as any of the obstacle edges.
 		for (Line2D edge : this.edges) {
 			boolean b1 = MathExtended.ApproxEqual(edge.getP1(), l.getP1(), fractionalError, absoluteError)
-					^ MathExtended.ApproxEqual(edge.getP2(), l.getP2(), fractionalError, absoluteError);
+					&& MathExtended.ApproxEqual(edge.getP2(), l.getP2(), fractionalError, absoluteError);
 			
 			boolean b2 = MathExtended.ApproxEqual(edge.getP1(), l.getP2(), fractionalError, absoluteError)
-					^ MathExtended.ApproxEqual(edge.getP2(), l.getP1(), fractionalError, absoluteError);
+					&& MathExtended.ApproxEqual(edge.getP2(), l.getP1(), fractionalError, absoluteError);
 			
 			if (b1 || b2) {
 				return LineIntersectionResult.EQUAL_LINES;
@@ -62,7 +62,7 @@ public class Obstacle {
 
 		// Check if any obstacle edges intersect with the line.
 		for (Line2D edge : this.edges) {
-			if (l.intersectsLine(edge)) {
+			if (MathExtended.strictIntersectsLine(l, edge)) {
 				return LineIntersectionResult.CROSSED;
 			}
 		}

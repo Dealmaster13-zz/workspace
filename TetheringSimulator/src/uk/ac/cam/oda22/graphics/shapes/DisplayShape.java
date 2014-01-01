@@ -25,5 +25,7 @@ public abstract class DisplayShape {
 	public abstract DisplayShape translate(double x, double y);
 	
 	public abstract DisplayShape stretch(double xScale, double yScale);
+	
+	public abstract DisplayShape flipY();
 
 }

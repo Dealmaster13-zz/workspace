@@ -19,6 +19,11 @@ public class Path {
 		this.points = new LinkedList<Point2D>();
 	}
 	
+	public Path(Point2D p) {
+		this.points = new LinkedList<Point2D>();
+		this.points.add(p);
+	}
+	
 	public Path(List<Point2D> path) {
 		this.points = path;
 	}

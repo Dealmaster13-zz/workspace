@@ -28,6 +28,25 @@ public class ShapeFunctions {
 
 		return lines;
 	}
+	
+	public static Line2D[] getArrow(Point2D position, double rotation, double length, double headLength) {
+		Line2D[] lines = new Line2D[3];
+		
+		double headX = position.getX() + (length * Math.cos(rotation));
+		double headY = position.getY() + (length * Math.sin(rotation));
+
+		double headTailX1 = headX + (headLength * Math.cos(rotation + (Math.PI * 3 / 4)));
+		double headTailY1 = headY + (headLength * Math.sin(rotation + (Math.PI * 3 / 4)));
+
+		double headTailX2 = headX + (headLength * Math.cos(rotation - (Math.PI * 3 / 4)));
+		double headTailY2 = headY + (headLength * Math.sin(rotation - (Math.PI * 3 / 4)));
+
+		lines[0] = new Line2D.Double(position.getX(), position.getY(), headX, headY);
+		lines[1] = new Line2D.Double(headX, headY, headTailX1, headTailY1);
+		lines[2] = new Line2D.Double(headX, headY, headTailX2, headTailY2);
+		
+		return lines;
+	}
 
 	public static Line2D translateShape(Line2D line, double x, double y) {
 		return new Line2D.Double(

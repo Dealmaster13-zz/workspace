@@ -67,5 +67,20 @@ public class VisibilityGraph {
 		
 		return true;
 	}
+
+	public List<VisibilityGraphNode> getVisibleNodes(VisibilityGraphNode node) {
+		List<VisibilityGraphNode> l = new ArrayList<VisibilityGraphNode>();
+
+		for (VisibilityGraphEdge e : this.edges) {
+			if (e.startNode == node) {
+				l.add(e.endNode);
+			}
+			else if (e.endNode == node) {
+				l.add(e.startNode);
+			}
+		}
+
+		return l;
+	}
 	
 }

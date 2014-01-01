@@ -31,7 +31,7 @@ import uk.ac.cam.oda22.core.tethers.TetherPoint;
  */
 public final class PathPlanner {
 
-	public static List<IRobotAction> performPathPlanning(Room room, Robot robot, Point2D goal, int tetherSegments) {
+	public static PathPlanningResult performPathPlanning(Room room, Robot robot, Point2D goal, int tetherSegments) {
 		/*
 		 * Note that Step 1 (triangulate the environment) is carried 
 		 * out by default in the Room class.
@@ -44,30 +44,37 @@ public final class PathPlanner {
 
 			return null;
 		}
+		
+		VisibilityGraph visibilityGraph = room.getVisibilityGraph();
+		
+		// Add the goal node to the visibility graph.
+		visibilityGraph = room.addNode(visibilityGraph, goal);
 
-		VisibilityGraphNode startNode = new VisibilityGraphNode(robot.getPosition());
+		Point2D startNode = robot.getPosition();
 
 		/*
 		 * Step 3: Find the vertices visible from the start position 
 		 * and order them by their angle relative to s.
 		 */
-		List<VisibilityGraphNode> l = room.getVisibleNodes(startNode);
+		List<VisibilityGraphNode> l = room.getVisibleNodes(startNode, visibilityGraph);
 		sortNodesByAngle(startNode, l);
 
 		/*
 		 * Step 4: Compute the changes that occur in the visible 
 		 * vertices of the reverse path.
 		 */
-		List<TetherPointVisibility> visibility = getTetherPointVisibilitySets(robot.tether, tetherSegments, room);
+		List<TetherPointVisibility> visibility = getTetherPointVisibilitySets(robot.tether, tetherSegments, room, visibilityGraph);
 
 		/*
 		 * Step 5: Compute the optimal distance to backtrack and then proceed to the goal via the shortest path.
 		 */
 		List<VisibilityChangeList> vList = calculateVisibilitySetChanges(visibility);
-		Path optimalPath = computeOptimalPath(vList, robot.tether, room, goal);
+		Path optimalPath = computeOptimalPath(vList, robot.tether, room, visibilityGraph, goal);
 
 		// Generate the robot actions which are required to be executed given the optimal path.
-		return generateActionsFromPath(optimalPath, robot.getRotation(), robot.rotationalSensitivity);
+		List<IRobotAction> actions = generateActionsFromPath(optimalPath, robot.getRotation(), robot.rotationalSensitivity);
+		
+		return new PathPlanningResult(actions, optimalPath);
 	}
 
 	/**
@@ -77,13 +84,13 @@ public final class PathPlanner {
 	 * @param startNode
 	 * @param neighbours
 	 */
-	private static void sortNodesByAngle(VisibilityGraphNode startNode, List<VisibilityGraphNode> neighbours) {
+	private static void sortNodesByAngle(Point2D startNode, List<VisibilityGraphNode> neighbours) {
 		List<Double> angles = new ArrayList<Double>();
 
 		for (int i = 0; i < neighbours.size(); i++) {
 			Point2D p = neighbours.get(i).vertex;
 
-			double angle = Math.atan2(startNode.vertex.getY() - p.getY(), startNode.vertex.getX() - p.getX());
+			double angle = Math.atan2(startNode.getY() - p.getY(), startNode.getX() - p.getX());
 
 			angles.add(angle);
 		}
@@ -114,11 +121,15 @@ public final class PathPlanner {
 	 * 
 	 * @param t
 	 * @param tetherSegments
-	 * @param room
+	 * @param visibilityGraph
 	 * @return tether point visibility sets
 	 */
 	// TODO: Replace algorithm with continuous solution.
-	private static List<TetherPointVisibility> getTetherPointVisibilitySets(Tether t, int tetherSegments, Room room) {
+	private static List<TetherPointVisibility> getTetherPointVisibilitySets(
+			Tether t,
+			int tetherSegments,
+			Room room,
+			VisibilityGraph visibilityGraph) {
 		List<TetherPointVisibility> tetherPointVisibilitySets = new LinkedList<TetherPointVisibility>();
 
 		double l = t.getUsedLength();
@@ -142,7 +153,7 @@ public final class PathPlanner {
 			}
 
 			// Compute the visible nodes.
-			List<VisibilityGraphNode> visibleNodes = room.getVisibleNodes(new VisibilityGraphNode(p));
+			List<VisibilityGraphNode> visibleNodes = room.getVisibleNodes(p, visibilityGraph);
 
 			List<Point2D> visibleVertices = new ArrayList<Point2D>();
 
@@ -257,7 +268,12 @@ public final class PathPlanner {
 	 * @param v
 	 * @return
 	 */
-	private static Path computeOptimalPath(List<VisibilityChangeList> v, Tether t, Room room, Point2D goal) {
+	private static Path computeOptimalPath(
+			List<VisibilityChangeList> v,
+			Tether t,
+			Room room,
+			VisibilityGraph visibilityGraph,
+			Point2D goal) {
 		Path optimalPath = null;
 		Path currentPath;
 
@@ -310,7 +326,7 @@ public final class PathPlanner {
 				}
 
 				// Compute the shortest path from vertex to the goal.
-				Path vToG = getShortestPath(vertex, goal, room);
+				Path vToG = getShortestPath(vertex, goal, room, visibilityGraph);
 
 				// If the path is null or empty then fail.
 				if (vToG == null || vToG.isEmpty()) {
@@ -395,15 +411,15 @@ public final class PathPlanner {
 	 * @param room
 	 * @return
 	 */
-	private static Path getShortestPath(Point2D source, Point2D destination, Room room) {
-		// If the points are equal then return the empty path.
+	private static Path getShortestPath(Point2D source, Point2D destination, Room room, VisibilityGraph visibilityGraph) {
+		// If the points are equal then return the path with a single node.
 		if (source.equals(destination)) {
-			return new Path();
+			return new Path(destination);
 		}
 
 		// Create a visibility graph including the source and destination nodes.
 		// Note that if either vertex already exists then a new node will not be added.
-		VisibilityGraph g = room.addNode(room.visibilityGraph, source);
+		VisibilityGraph g = room.addNode(visibilityGraph, source);
 		g = room.addNode(g, destination);
 
 		VisibilityGraphNode sourceNode = null;
