@@ -6,7 +6,7 @@ import uk.ac.cam.oda22.pathplanning.Path;
  * @author Oliver
  *
  */
-public class SimpleTetherSegment extends TetherSegment {
+public class SimpleTetherSegment implements ITetherSegment {
 
 	public final Path path;
 	

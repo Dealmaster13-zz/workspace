@@ -1,0 +1,17 @@
+package uk.ac.cam.oda22.coverage;
+
+import java.awt.geom.Line2D;
+
+/**
+ * @author Oliver
+ *
+ */
+public class StraightSweepSegment {
+
+	public final Line2D line;
+	
+	public StraightSweepSegment(Line2D line) {
+		this.line = line;
+	}
+	
+}

@@ -36,14 +36,16 @@ public class Path {
 		this.points.addAll(ps);
 	}
 	
-	public void removePoint() {
+	public boolean removePoint() {
 		if (this.points.size() == 0) {
 			Log.error("Cannot remove point from empty path.");
 			
-			return;
+			return false;
 		}
 		
 		this.points.remove(this.points.size() - 1);
+		
+		return true;
 	}
 	
 	/**

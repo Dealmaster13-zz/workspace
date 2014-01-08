@@ -1,0 +1,17 @@
+package uk.ac.cam.oda22.coverage;
+
+import java.util.List;
+
+/**
+ * @author Oliver
+ *
+ */
+public class Sweep {
+
+	List<ISweepSegment> sweepSegments;
+	
+	public Sweep(List<ISweepSegment> sweepSegments) {
+		this.sweepSegments = sweepSegments;
+	}
+	
+}

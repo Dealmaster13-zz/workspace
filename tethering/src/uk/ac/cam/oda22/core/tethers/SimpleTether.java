@@ -104,7 +104,7 @@ public class SimpleTether extends Tether {
 	}
 
 	@Override
-	public TetherSegment getTetherSegment(double startW, double endW) {
+	public ITetherSegment getTetherSegment(double startW, double endW) {
 		// Fail if either of the distance parameters are out of invalid.
 		if (startW > endW || startW < 0 || endW > this.length) {
 			return null;

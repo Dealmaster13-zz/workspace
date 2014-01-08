@@ -102,4 +102,22 @@ public final class MathExtended {
 		return true;
 	}
 	
+	public static Point2D getCartesian(double radius, double rads) {
+		double x = radius * Math.cos(rads);
+		double y = radius * Math.sin(rads);
+		
+		return new Point2D.Double(x, y);
+	}
+	
+	/**
+	 * Translates point p by position vector t, returning a new point.
+	 * 
+	 * @param p
+	 * @param t
+	 * @return translated point
+	 */
+	public static Point2D translate(Point2D p, Point2D t) {
+		return new Point2D.Double(p.getX() + t.getX(), p.getY() + t.getY());
+	}
+	
 }

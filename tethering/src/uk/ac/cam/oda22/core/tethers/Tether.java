@@ -31,6 +31,6 @@ public abstract class Tether {
 	
 	public abstract Point2D getPositionByDistance(double w);
 	
-	public abstract TetherSegment getTetherSegment(double startW, double endW);
+	public abstract ITetherSegment getTetherSegment(double startW, double endW);
 
 }

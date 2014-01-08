@@ -76,6 +76,12 @@ public final class PathPlanner {
 		
 		return new PathPlanningResult(actions, optimalPath);
 	}
+	
+	public static PathPlanningResult returnToBase() {
+		//TODO: Implement this method.
+		
+		return null;
+	}
 
 	/**
 	 * Step 3 (second half).
@@ -118,13 +124,13 @@ public final class PathPlanner {
 	/**
 	 * Step 4.
 	 * Computes which vertices are visible from different points on the tether, from the robot to the anchor point.
+	 * TODO: Replace algorithm with continuous solution.
 	 * 
 	 * @param t
 	 * @param tetherSegments
 	 * @param visibilityGraph
 	 * @return tether point visibility sets
 	 */
-	// TODO: Replace algorithm with continuous solution.
 	private static List<TetherPointVisibility> getTetherPointVisibilitySets(
 			Tether t,
 			int tetherSegments,
@@ -264,6 +270,7 @@ public final class PathPlanner {
 	/**
 	 * Step 5b.
 	 * Computes the optimal path using the visibility change lists.
+	 * TODO: Prevent the ability to cross the robot's tether.
 	 * 
 	 * @param v
 	 * @return

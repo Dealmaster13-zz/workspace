@@ -2,7 +2,6 @@ package uk.ac.cam.oda22.core.robots;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Double;
 
 import uk.ac.cam.oda22.core.ShapeFunctions;
 import uk.ac.cam.oda22.core.tethers.Tether;

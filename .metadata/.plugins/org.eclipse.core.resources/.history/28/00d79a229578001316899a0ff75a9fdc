@@ -1,0 +1,34 @@
+package uk.ac.cam.oda22.coverage;
+
+import java.awt.geom.Point2D;
+
+/**
+ * @author Oliver
+ *
+ */
+public class CurvedSweepSegment {
+
+	public final Point2D centre;
+	
+	public final double radius;
+	
+	public final double startRads;
+	
+	public final double rads;
+
+	/**
+	 * Creates a sweep segment which is a segment of a circle with the appropriate parameters.
+	 * 
+	 * @param centre
+	 * @param radius
+	 * @param startRads
+	 * @param rads
+	 */
+	public CurvedSweepSegment(Point2D centre, double radius, double startRads, double rads) {
+		this.centre = centre;
+		this.radius = radius;
+		this.startRads = startRads;
+		this.rads = rads;
+	}
+	
+}
