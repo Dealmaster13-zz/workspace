@@ -1,0 +1,23 @@
+package uk.ac.cam.oda22.coverage;
+
+/**
+ * @author Oliver
+ *
+ */
+public class CorridorProgress {
+
+	private int currentPotential;
+	
+	private CorridorProgress leftCorridor;
+	
+	private CorridorProgress rightCorridor;
+	
+	public CorridorProgress(int initialPotential) {
+		this.currentPotential = initialPotential;
+	}
+	
+	public int incrementPotential() {
+		return ++currentPotential;
+	}
+	
+}

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.cam.oda22.core.LineIntersectionResult;
+import uk.ac.cam.oda22.core.logging.Log;
 
 /**
  * @author Oliver
@@ -113,6 +114,30 @@ public class Room {
 		}
 
 		return l;
+	}
+	
+	/**
+	 * Returns whether or not an obstacle is internal (not touching the rooms sides).
+	 * Note that we are assuming that all obstacles are normalised (no two obstacles touching sides)
+	 * 
+	 * @param o
+	 * @return true if the obstacle is internal, and false otherwise
+	 */
+	public boolean isObstacleInternal(Obstacle o) {
+		if (!this.obstacles.contains(o)) {
+			Log.error("Obstacle not found in the room");
+			
+			return false;
+		}
+		
+		// For each obstacle check if it touches o.
+		for (Obstacle obstacle : this.obstacles) {
+			if (obstacle != o && obstacle.touchesObstacle(o)) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 	/**

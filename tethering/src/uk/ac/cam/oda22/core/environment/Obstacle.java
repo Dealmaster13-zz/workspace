@@ -7,6 +7,7 @@ import java.util.List;
 
 import uk.ac.cam.oda22.core.LineIntersectionResult;
 import uk.ac.cam.oda22.core.MathExtended;
+import uk.ac.cam.oda22.core.logging.Log;
 
 /**
  * @author Oliver
@@ -30,6 +31,15 @@ public class Obstacle {
 			
 			Line2D line = new Line2D.Double();
 			line.setLine(this.points.get(i), this.points.get(j));
+			
+			// Fail if this line intersects with any of the existing edges.
+			for (Line2D l : this.edges) {
+				if (MathExtended.strictIntersectsLine(line, l)) {
+					Log.error("Obstacle is malformed as two or more of its edges intersect one another.");
+					
+					return;
+				}
+			}
 			
 			this.edges.add(line);
 		}
@@ -79,6 +89,33 @@ public class Obstacle {
 		}
 
 		return LineIntersectionResult.NONE;
+	}
+	
+	public boolean touchesObstacle(Obstacle o) {
+		// For each vertex of this obstacle, check if it touches one of o's edges.
+		for (Point2D p : this.points) {
+			for (Line2D e : o.edges) {
+				if (MathExtended.isPointOnLine(p, e)) {
+					return true;
+				}
+			}
+		}
+
+		// For each vertex of o, check if it touches one of this obstacle's edges.
+		for (Point2D p : o.points) {
+			for (Line2D e : this.edges) {
+				if (MathExtended.isPointOnLine(p, e)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	public Obstacle mergeObstacles(Obstacle o) {
+		// TODO: Implement.
+		return null;
 	}
 	
 }

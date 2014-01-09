@@ -1,0 +1,67 @@
+package uk.ac.cam.oda22.coverage;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import uk.ac.cam.oda22.core.environment.Obstacle;
+import uk.ac.cam.oda22.core.environment.Room;
+import uk.ac.cam.oda22.core.logging.Log;
+import uk.ac.cam.oda22.core.robots.Robot;
+
+/**
+ * @author Oliver
+ *
+ */
+public final class Coverage {
+
+	public static CoverageResult performCoverage(Room room, Robot robot) {
+		/**
+		 * TODO: Perform input sanitisation.
+		 * Note that the robot must have a positive (non-zero) area for coverage to be possible.
+		 */
+		
+		if (robot.radius <= 0) {
+			Log.error("Robot must have a positive area to perform coverage.");
+			
+			return null;
+		}
+		
+		/**
+		 * TODO: Determine which obstacles are internal and compute the saddle lines.
+		 * Treat the saddle lines as obstacles.
+		 * Initialise a split point stack S.
+		 */
+		
+		/**
+		 * TODO: Sweep around the anchor point until an obstacle is hit which splits the potential in two directions along the obstacle.
+		 * Call this the primary split point and add it to S.
+		 */
+		
+		/**
+		 * TODO: Explore the right-hand corridor.
+		 * Move sufficiently far along the obstacle edge such that the robot is at the edge of the covered area.
+		 */
+		
+		return null;
+	}
+	
+	/**
+	 * Gets the internal obstacles in a room.
+	 * 
+	 * @param obstacles
+	 * @param room
+	 * @return
+	 */
+	private static List<Obstacle> getInternalObstacles(Room room) {
+		List<Obstacle> internalObstacles = new LinkedList<Obstacle>();
+		
+		for (Obstacle o : room.obstacles) {
+			if (room.isObstacleInternal(o)) {
+				internalObstacles.add(o);
+			}
+		}
+		
+		return internalObstacles;
+	}
+	
+}
