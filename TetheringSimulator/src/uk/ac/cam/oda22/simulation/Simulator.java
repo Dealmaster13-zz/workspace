@@ -136,7 +136,7 @@ public class Simulator {
 			for (int i = 0; i < points.size(); i++) {
 				Line2D l = new Line2D.Double(previousPoint, points.get(i));
 				
-				Line line = new Line(l, Color.gray, 1);
+				Line line = new Line(l, Color.gray, 3);
 				
 				visualiser.drawLine(line);
 				

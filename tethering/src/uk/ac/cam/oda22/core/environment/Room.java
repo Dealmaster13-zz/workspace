@@ -5,7 +5,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import uk.ac.cam.oda22.core.LineIntersectionResult;
 import uk.ac.cam.oda22.core.logging.Log;
 
 /**
@@ -331,7 +330,7 @@ public class Room {
 				Obstacle o = this.obstacles.get(index);
 
 				// Calculate if the line formed between the two points intersects with the obstacle.
-				LineIntersectionResult intersection = o.intersectsLine(l);
+				ObstacleLineIntersectionResult intersection = o.intersectsLine(l);
 
 				switch (intersection) {
 				case CROSSED:

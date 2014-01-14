@@ -5,7 +5,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import uk.ac.cam.oda22.core.LineIntersectionResult;
 import uk.ac.cam.oda22.core.MathExtended;
 import uk.ac.cam.oda22.core.logging.Log;
 
@@ -54,7 +53,7 @@ public class Obstacle {
 	 * @param l
 	 * @return
 	 */
-	public LineIntersectionResult intersectsLine(Line2D l) {
+	public ObstacleLineIntersectionResult intersectsLine(Line2D l) {
 		double fractionalError = 0.001, absoluteError = 0.001;
 
 		// Check if the line is the same as any of the obstacle edges.
@@ -66,14 +65,14 @@ public class Obstacle {
 					&& MathExtended.ApproxEqual(edge.getP2(), l.getP1(), fractionalError, absoluteError);
 			
 			if (b1 || b2) {
-				return LineIntersectionResult.EQUAL_LINES;
+				return ObstacleLineIntersectionResult.EQUAL_LINES;
 			}
 		}
 
 		// Check if any obstacle edges intersect with the line.
 		for (Line2D edge : this.edges) {
 			if (MathExtended.strictIntersectsLine(l, edge)) {
-				return LineIntersectionResult.CROSSED;
+				return ObstacleLineIntersectionResult.CROSSED;
 			}
 		}
 		
@@ -82,20 +81,20 @@ public class Obstacle {
 			if (p1.equals(l.getP1())) {
 				for (Point2D p2 : this.points) {
 					if (p2.equals(l.getP2())) {
-						return LineIntersectionResult.CROSSED;
+						return ObstacleLineIntersectionResult.CROSSED;
 					}
 				}
 			}
 		}
 
-		return LineIntersectionResult.NONE;
+		return ObstacleLineIntersectionResult.NONE;
 	}
 	
 	public boolean touchesObstacle(Obstacle o) {
 		// For each vertex of this obstacle, check if it touches one of o's edges.
 		for (Point2D p : this.points) {
 			for (Line2D e : o.edges) {
-				if (MathExtended.isPointOnLine(p, e)) {
+				if (MathExtended.loosePointOnLine(p, e)) {
 					return true;
 				}
 			}
@@ -104,7 +103,7 @@ public class Obstacle {
 		// For each vertex of o, check if it touches one of this obstacle's edges.
 		for (Point2D p : o.points) {
 			for (Line2D e : this.edges) {
-				if (MathExtended.isPointOnLine(p, e)) {
+				if (MathExtended.loosePointOnLine(p, e)) {
 					return true;
 				}
 			}

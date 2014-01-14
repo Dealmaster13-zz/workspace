@@ -1,5 +1,6 @@
 package uk.ac.cam.oda22.pathplanning;
 
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -100,6 +101,41 @@ public class Path {
 		}
 		
 		return l;
+	}
+	
+	public List<Line2D> getEdges() {
+		List<Line2D> edges = new LinkedList<Line2D>();
+		
+		for (int i = 0; i < this.points.size() - 1; i++) {
+			Point2D p1 = this.points.get(i);
+			Point2D p2 = this.points.get(i + 1);
+			
+			edges.add(new Line2D.Double(p1.getX(), p1.getY(), p2.getX(), p2.getY()));
+		}
+		
+		return edges;
+	}
+	
+	/**
+	 * Returns a section of the path.
+	 * 
+	 * @return subpath
+	 */
+	public Path getSubpath(int startIndex, int endIndex) {
+		if (startIndex < 0 || endIndex >= this.points.size() || endIndex < startIndex) {
+			Log.warning("Invalid subpath indices.");
+			
+			startIndex = Math.max(0, startIndex);
+			endIndex = Math.min(this.points.size() - 1, Math.max(startIndex, endIndex));
+		}
+		
+		Path p = new Path();
+		
+		for (int i = startIndex; i <= endIndex; i++) {
+			p.addPoint(this.points.get(i));
+		}
+		
+		return p;
 	}
 	
 }

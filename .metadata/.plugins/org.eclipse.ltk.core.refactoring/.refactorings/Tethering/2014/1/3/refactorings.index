@@ -1,0 +1,6 @@
+1389658412658	Move compilation unit
+1389658465900	Rename type 'LineIntersectionResult'
+1389702627787	Rename method 'isPointOnLine'
+1389702718213	Rename method 'strictPathIntersectsLine'
+1389702737991	Rename local variable 'p2Edges'
+1389704943156	Rename local variable 'j'
