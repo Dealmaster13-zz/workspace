@@ -13,6 +13,7 @@ import uk.ac.cam.oda22.core.environment.Obstacle;
 import uk.ac.cam.oda22.core.environment.Room;
 import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.core.robots.PointRobot;
+import uk.ac.cam.oda22.core.robots.RectangularRobot;
 import uk.ac.cam.oda22.core.robots.Robot;
 import uk.ac.cam.oda22.core.tethers.SimpleTether;
 import uk.ac.cam.oda22.core.tethers.Tether;
@@ -45,10 +46,41 @@ public class Simulator {
 	 * @param args
 	 * @throws Exception 
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		// Create the visualiser.
 		createVisualiser();
 
+		Room room = createRoom1();
+
+		Robot robot;
+		
+		try {
+			Tether tether = createTether1_2();
+			robot = createRobot1_2(tether);
+		} catch (Exception e) {
+			Log.error("Could not create robot with tether.");
+			
+			e.printStackTrace();
+			
+			return;
+		}
+
+		tetherSegments = 1000;
+		
+		Point2D goal = new Point2D.Double(30, 5);
+
+		PathPlanningResult result = testPathPlanning(room, robot, goal);
+		
+		// Draw the graphics.
+		drawRoom(room);
+		drawRobot(robot);
+		drawGoal(goal);
+		drawTether(robot.tether);
+		drawAnchor(robot.tether.getAnchor());
+		drawPath(result.path);
+	}
+	
+	private static Room createRoom1() {
 		List<Obstacle> l = new ArrayList<Obstacle>();
 
 		List<Point2D> points = new ArrayList<Point2D>();
@@ -58,42 +90,77 @@ public class Simulator {
 		points.add(new Point2D.Double(10, 25));
 
 		Obstacle o = new Obstacle(points);
-
+		
 		l.add(o);
-
-		Room room = new Room(100, 100, l);
-
-		Point2D u = new Point2D.Double(80, 60);
-
+		
+		return new Room(100, 100, l);
+	}
+	
+	/**
+	 * Tether for room 1 configuration type 1.
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unused")
+	private static Tether createTether1_1() throws Exception {
 		Point2D anchor = new Point2D.Double(0, 0);
 
 		Path X = new Path();
 		X.addPoint(new Point2D.Double(50, 15));
 		X.addPoint(new Point2D.Double(80, 60));
 
-		Tether t = new SimpleTether(anchor, 150, X);
+		return new SimpleTether(anchor, 150, X);
+	}
+	
+	/**
+	 * Tether for room 1 configuration type 2.
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	private static Tether createTether1_2() throws Exception {
+		Point2D anchor = new Point2D.Double(0, 0);
 
-		Robot robot = new PointRobot(u, 0, Math.PI / 180, t);
+		Path X = new Path();
+		X.addPoint(new Point2D.Double(50, 15));
+		X.addPoint(new Point2D.Double(60, 55));
+		X.addPoint(new Point2D.Double(35, 45));
+		X.addPoint(new Point2D.Double(10, 25));
+		X.addPoint(new Point2D.Double(5, 10));
 
-		tetherSegments = 1000;
-		
-		Point2D goal = new Point2D.Double(5, 30);
-
-		PathPlanningResult result = testPathPlanning(room, robot, goal);
-		
-		// Draw the graphics.
-		drawRoom(room);
-		drawRobot(robot);
-		drawGoal(goal);
-		drawTether(robot.tether);
-		drawAnchor(anchor);
-		drawPath(result.path);
+		return new SimpleTether(anchor, 200, X);
+	}
+	
+	/**
+	 * Tether for room 1 configuration type 1.
+	 * 
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings("unused")
+	private static Robot createRobot1_1(Tether tether) throws Exception {
+		return new PointRobot(tether.getLastPoint(), 0, Math.PI / 180, tether);
+	}
+	
+	/**
+	 * Tether for room 1 configuration type 2.
+	 * 
+	 * @return
+	 * @throws Exception 
+	 */
+	private static Robot createRobot1_2(Tether tether) throws Exception {
+		return new RectangularRobot(tether.getLastPoint(), 0, Math.PI / 180, tether, 4, 4);
 	}
 
 	private static void createVisualiser() {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				visualiser = new VisualiserUsingJFrame();
+				Point2D offset = new Point2D.Double(50, 120);
+				double xScale = 4;
+				double yScale = 4;
+				
+				visualiser = new VisualiserUsingJFrame(offset, xScale, yScale);
 			}
 		});
 	}

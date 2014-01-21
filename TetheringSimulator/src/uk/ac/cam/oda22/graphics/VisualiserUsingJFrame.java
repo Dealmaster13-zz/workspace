@@ -1,5 +1,7 @@
 package uk.ac.cam.oda22.graphics;
 
+import java.awt.geom.Point2D;
+
 import javax.swing.JFrame;
 
 import uk.ac.cam.oda22.graphics.shapes.Circle;
@@ -15,15 +17,15 @@ public class VisualiserUsingJFrame extends JFrame implements IVisualiser {
 
 	private VisualiserJPanel panel;
 	
-	public VisualiserUsingJFrame() {
-		this.init();
+	public VisualiserUsingJFrame(Point2D offset, double xScale, double yScale) {
+		this.init(offset, xScale, yScale);
 	}
 
-	public void init() {
+	public void init(Point2D offset, double xScale, double yScale) {
 		this.setTitle("Simulation");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		this.panel = new VisualiserJPanel();
+		this.panel = new VisualiserJPanel(offset, xScale, yScale);
 		this.add(panel);
 
 		this.pack();

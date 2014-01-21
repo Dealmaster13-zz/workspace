@@ -28,12 +28,16 @@ public abstract class Robot {
 	
 	private RobotOutline outline;
 	
-	public Robot(Point2D position, double radius, double rotation, double rotationalSensitivity, Tether tether) {
+	public Robot(Point2D position, double radius, double rotation, double rotationalSensitivity, Tether tether) throws Exception {
 		this.position = position;
 		this.radius = radius;
 		this.rotation = rotation;
 		this.rotationalSensitivity = rotationalSensitivity;
 		this.tether = tether;
+		
+		if (!tether.getLastPoint().equals(position)) {
+			throw new Exception("Tether does not connect to robot.");
+		}
 	}
 
 	public Point2D getPosition() {
@@ -57,6 +61,12 @@ public abstract class Robot {
 		this.moveMotors(dist);
 	}
 	
+	public void rotate(double rads) {
+		this.rotation += rads;
+		
+		this.rotateMotors(rads / (2 * Math.PI));
+	}
+	
 	protected void setOutline(RobotOutline outline) {
 		this.outline = outline;
 	}
@@ -68,12 +78,6 @@ public abstract class Robot {
 	 */
 	protected void moveMotors(double dist) {
 		// Leave blank for overriding.
-	}
-	
-	public void rotate(double rads) {
-		this.rotation += rads;
-		
-		this.rotateMotors(rads / (2 * Math.PI));
 	}
 	
 	/**

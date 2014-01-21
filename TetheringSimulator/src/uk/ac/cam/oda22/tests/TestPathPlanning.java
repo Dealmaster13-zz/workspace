@@ -60,7 +60,15 @@ public class TestPathPlanning {
 			return;
 		}
 
-		Robot robot = new PointRobot(u, 0, Math.PI / 180, t);
+		Robot robot;
+		
+		try {
+			robot = new PointRobot(u, 0, Math.PI / 180, t);
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+			return;
+		}
 		
 		Point2D goal = new Point2D.Double(20, 20);
 		

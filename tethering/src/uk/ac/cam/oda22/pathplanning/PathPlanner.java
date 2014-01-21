@@ -39,14 +39,21 @@ public final class PathPlanner {
 		 * out by default in the Room class.
 		 */
 
+		// Expand all of the obstacles.
+		////List<Obstacle> expandedObstacles = room.getExpandedObstacles(robot.radius);
+
+		/*
+		 * TODO: Also check if the robot can reach this point despite its size.
+		 */
+		
 		if (!room.isPointInEmptySpace(goal)) {
 			Log.error("Goal (" + goal.getX() + ", " + goal.getY() + ") is not reachable.");
 
 			return null;
 		}
-		
+
 		VisibilityGraph visibilityGraph = room.getVisibilityGraph();
-		
+
 		// Add the goal node to the visibility graph.
 		visibilityGraph = room.addNode(visibilityGraph, goal);
 
@@ -73,13 +80,13 @@ public final class PathPlanner {
 
 		// Generate the robot actions which are required to be executed given the optimal path.
 		List<IRobotAction> actions = generateActionsFromPath(optimalPath, robot.getRotation(), robot.rotationalSensitivity);
-		
+
 		return new PathPlanningResult(actions, optimalPath);
 	}
-	
+
 	public static PathPlanningResult returnToBase() {
 		//TODO: Extension task: implement this method.
-		
+
 		return null;
 	}
 
@@ -151,10 +158,10 @@ public final class PathPlanner {
 		while (!complete) {
 			// Get the position starting from the robot, so use the reverse distance.
 			Point2D p = t.getPositionByDistance(l - w);
-			
+
 			if (p == null) {
 				Log.error("Tether point is undefined.");
-				
+
 				return null;
 			}
 
@@ -285,7 +292,7 @@ public final class PathPlanner {
 		Path currentPath;
 
 		double tetherUsedLength = t.getUsedLength();
-		
+
 		// For each vertex list in the visibility change list.
 		for (int i = 0; i < v.size(); i++) {
 			VisibilityChangeList v_i = v.get(i);
@@ -318,7 +325,7 @@ public final class PathPlanner {
 					SimpleTetherSegment tetherSegment = (SimpleTetherSegment) tether.getTetherSegment(0, tetherStartSegmentDistance);
 
 					// Ensure that the tether segment ends at the correct position.
-					if (!MathExtended.ApproxEqual(x.x, ListFunctions.getLast(tetherSegment.path.points), 0.0001, 0.0001)) {
+					if (!MathExtended.approxEqual(x.x, ListFunctions.getLast(tetherSegment.path.points), 0.0001, 0.0001)) {
 						Log.error("Malformed tether segment.");
 
 						return null;
@@ -331,6 +338,8 @@ public final class PathPlanner {
 
 					return null;
 				}
+
+				// TODO: Retract the tether due to movement from x to v.
 
 				// Compute the shortest path from vertex to the goal.
 				Path vToG = getShortestPath(vertex, goal, room, visibilityGraph);
@@ -357,15 +366,21 @@ public final class PathPlanner {
 
 				double newTetherLength = q.length();
 
+				boolean tetherLengthExceeded = newTetherLength > t.length && !MathExtended.approxEqual(newTetherLength, t.length, 0.0001, 0.0001);
+
+				boolean tetherCrossed = MathExtended.strictPathIntersectsItself(q);
+
+
 				/*
-				 * Step 5biii - skip if the tether length exceeds its limit.
+				 * Step 5biii - skip if the tether length exceeds its limit, or if the tether is crossed.
+				 * Note that we only need to make a check here as if the tether is ever crossed then it is crossed in the final configuration.
 				 */
-				
-				if (newTetherLength <= t.length || MathExtended.ApproxEqual(newTetherLength, t.length, 0.0001, 0.0001)) {
+
+				if (!tetherLengthExceeded && !tetherCrossed) {
 					/*
 					 * Step 5biv and step 5bv.
 					 */
-					
+
 					currentPath = new Path();
 
 					Path forwardTetherSegmentPath;
@@ -376,7 +391,7 @@ public final class PathPlanner {
 						SimpleTetherSegment tetherSegment = (SimpleTetherSegment) tether.getTetherSegment(tetherStartSegmentDistance, tetherUsedLength);
 
 						// Ensure that the tether segment starts at the correct position.
-						if (!MathExtended.ApproxEqual(x.x, tetherSegment.path.points.get(0), 0.0001, 0.0001)) {
+						if (!MathExtended.approxEqual(x.x, tetherSegment.path.points.get(0), 0.0001, 0.0001)) {
 							Log.error("Malformed tether segment.");
 
 							return null;
@@ -389,7 +404,7 @@ public final class PathPlanner {
 
 						return null;
 					}
-					
+
 					Path reversePath = forwardTetherSegmentPath.reverse();
 
 					// The path is the reverse tether segment from the robot to tether point x, concatenated with the 
@@ -397,7 +412,7 @@ public final class PathPlanner {
 					// Note that vertex is contained in vToG.
 					currentPath.addPoints(reversePath.points);
 					currentPath.addPoints(vToG.points);
-					
+
 					// If the current path length is the shortest found so far, then set the optimal path to this new path.
 					if (optimalPath == null || currentPath.length() < optimalPath.length()) {
 						optimalPath = currentPath;
@@ -411,7 +426,9 @@ public final class PathPlanner {
 
 	/**
 	 * Step 5bi (second half) and step 5bii.
-	 * Computes the shortest path from a vertex (obstacle) to the goal which is '.
+	 * Computes the shortest path from a vertex (obstacle) to the goal.
+	 * TODO: Do not cross tether.
+	 * TODO: Retract tether during movement.
 	 * 
 	 * @param source
 	 * @param destination
@@ -445,7 +462,7 @@ public final class PathPlanner {
 			if (node.vertex.equals(destination)) {
 				destinationNode = node;
 			}
-			
+
 			index ++;
 		}
 
@@ -490,39 +507,39 @@ public final class PathPlanner {
 
 		return AStarPathfinding.retrievePath(aStarDestination);
 	}
-	
+
 	private static List<IRobotAction> generateActionsFromPath(Path path, double initialRotation, double rotationalSensitivity) {
 		List<IRobotAction> actions = new LinkedList<IRobotAction>();
-		
+
 		// If there is no path to traverse then return an empty actions list.
 		if (path.points.size() <= 1) {
 			return actions;
 		}
-		
+
 		double currentRotation = initialRotation;
-		
+
 		Point2D currentPoint = path.points.get(0);
-		
+
 		for (int i = 1; i < path.points.size(); i++) {
 			Point2D nextPoint = path.points.get(i);
-			
+
 			double direction = Math.atan2(nextPoint.getY() - currentPoint.getY(), nextPoint.getX() - currentPoint.getX());
-			
+
 			double angularChange = MathExtended.getAngularChange(currentRotation, direction);
-			
+
 			if (Math.abs(angularChange) >= rotationalSensitivity) {
 				RotateAction rotateAction = new RotateAction(angularChange);
 				rotateAction.addAction(actions);
-				
+
 				currentRotation = direction;
 			}
-			
+
 			MoveAction moveAction = new MoveAction(currentPoint.distance(nextPoint));
 			moveAction.addAction(actions);
-			
+
 			currentPoint = nextPoint;
 		}
-		
+
 		return actions;
 	}
 

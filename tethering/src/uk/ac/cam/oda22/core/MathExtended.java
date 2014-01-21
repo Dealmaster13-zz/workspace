@@ -2,8 +2,10 @@ package uk.ac.cam.oda22.core;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.List;
 
+import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.pathplanning.Path;
 
 /**
@@ -12,7 +14,7 @@ import uk.ac.cam.oda22.pathplanning.Path;
  */
 public final class MathExtended {
 
-	public static boolean ApproxEqual(double m, double n, double fractionalError, double absoluteError) {
+	public static boolean approxEqual(double m, double n, double fractionalError, double absoluteError) {
 		if (Math.abs(n - m) <= absoluteError) {
 			return true;
 		}
@@ -24,19 +26,19 @@ public final class MathExtended {
 		return false;
 	}
 
-	public static boolean ApproxEqual(Point2D p, Point2D q, double fractionalError, double absoluteError) {
-		return ApproxEqual(p.getX(), q.getX(), fractionalError, absoluteError)
-				&& ApproxEqual(p.getY(), q.getY(), fractionalError, absoluteError);
+	public static boolean approxEqual(Point2D p, Point2D q, double fractionalError, double absoluteError) {
+		return approxEqual(p.getX(), q.getX(), fractionalError, absoluteError)
+				&& approxEqual(p.getY(), q.getY(), fractionalError, absoluteError);
 	}
 
-	public static boolean ApproxEqual(Line2D l, Line2D m, double fractionalError, double absoluteError) {
-		if (ApproxEqual(l.getP1(), m.getP1(), fractionalError, absoluteError)
-				&& ApproxEqual(l.getP2(), m.getP2(), fractionalError, absoluteError)) {
+	public static boolean approxEqual(Line2D l, Line2D m, double fractionalError, double absoluteError) {
+		if (approxEqual(l.getP1(), m.getP1(), fractionalError, absoluteError)
+				&& approxEqual(l.getP2(), m.getP2(), fractionalError, absoluteError)) {
 			return true;
 		}
 
-		if (ApproxEqual(l.getP1(), m.getP2(), fractionalError, absoluteError)
-				&& ApproxEqual(l.getP2(), m.getP1(), fractionalError, absoluteError)) {
+		if (approxEqual(l.getP1(), m.getP2(), fractionalError, absoluteError)
+				&& approxEqual(l.getP2(), m.getP1(), fractionalError, absoluteError)) {
 			return true;
 		}
 
@@ -99,11 +101,6 @@ public final class MathExtended {
 	}
 
 	public static PointOnLineResult pointOnLine(Point2D p, Line2D l) {
-		// Check if the point does not lie on the line.
-		if (!l.contains(p)) {
-			return PointOnLineResult.NONE;
-		}
-
 		// Check if the point is at the first endpoint.
 		if (p.equals(l.getP1())) {
 			return PointOnLineResult.AT_ENDPOINT;
@@ -114,12 +111,40 @@ public final class MathExtended {
 			return PointOnLineResult.AT_ENDPOINT;
 		}
 
-		return PointOnLineResult.WITHIN_LINE;
+		// If the line is vertical.
+		if (l.getX2() == l.getX1()) {
+			// Check if the point has the same x-coordinate.
+			if (p.getX() == l.getX1()) {
+				// Check if the point lies within the line.
+				if (inRange(p.getY(), l.getY1(), l.getY2(), true)) {
+					return PointOnLineResult.WITHIN_LINE;
+				}
+			}
+		}
+		else
+		{
+			// Calculate the gradient of the line.
+			double g = (l.getY2() - l.getY1()) / (l.getX2() - l.getX1());
+
+			// Calculate the y value for the point given its x value if it were on the line.
+			double y = l.getY1() + (g * (p.getX() - l.getX1()));
+
+			// Check if the point is on the line.
+			if (MathExtended.approxEqual(y, p.getY(), 0.00001, 0.00001)) {
+				// If the point is also within the line's bounds.
+				if (inRange(p.getX(), l.getX1(), l.getX2(), true))
+				{
+					return PointOnLineResult.WITHIN_LINE;
+				}
+			}
+		}
+
+		return PointOnLineResult.NONE;
 	}
-	
+
 	public static PointOnLineResult pointOnPath(Point2D point, Path path) {
 		List<Line2D> edges = path.getEdges();
-		
+
 		if (edges.size() == 0) {
 			return PointOnLineResult.NONE;
 		}
@@ -130,7 +155,7 @@ public final class MathExtended {
 		// Check if the point lies at one of the ends of the path.
 		// Note that the point could still lie within the path.
 		boolean pointAtEndPoint = point.equals(startPoint) || point.equals(endPoint);
-		
+
 		// For each segment of the path, check if the point lies on it.
 		for (int i = 0; i < edges.size(); i++) {
 			// Check if the point on the line.
@@ -149,7 +174,7 @@ public final class MathExtended {
 				}
 			}
 		}
-		
+
 		return pointAtEndPoint ? PointOnLineResult.AT_ENDPOINT : PointOnLineResult.NONE;
 	}
 
@@ -223,7 +248,7 @@ public final class MathExtended {
 		// For each path segment, check if it intersects with the line. 
 		for (int i = 0; i < pathEdges.size(); i++) {
 			Line2D edge = pathEdges.get(i);
-			
+
 			if (strictIntersectsLine(edge, l)) {
 				return true;
 			}
@@ -251,11 +276,11 @@ public final class MathExtended {
 		// For each segment of the first path, check if it intersects with the second path. 
 		for (int i = 0; i < p1Edges.size(); i++) {
 			Line2D edge = p1Edges.get(i);
-			
+
 			if (strictLineIntersectsPath(edge, p2)) {
 				return true;
 			}
-			
+
 			// Check if a joint in the first path intersects with a joint in the second path.
 			if (i != p1Edges.size() - 1) {
 				// Get the second endpoint of the current path segment.
@@ -270,22 +295,22 @@ public final class MathExtended {
 
 		return false;
 	}
-	
+
 	public static boolean strictPathIntersectsItself(Path p) {
 		List<Line2D> edges = p.getEdges();
-		
+
 		for (int i = 1; i < p.points.size() - 1; i++) {
 			// Get the subpath with indices 0 and i.
 			Path subpath = p.getSubpath(0, i);
-			
+
 			// Get the next edge in the path.
 			Line2D edge = edges.get(i);
-			
+
 			// Check if the edge intersects the subpath.
 			if (strictLineIntersectsPath(edge, subpath)) {
 				return true;
 			}
-			
+
 			// Check if a joint in the path intersects the subpath.
 			if (i != edges.size() - 1) {
 				// Get the second endpoint of the current path segment.
@@ -298,8 +323,50 @@ public final class MathExtended {
 				}
 			}
 		}
-		
+
 		return false;
+	}
+
+	/**
+	 * Gets the intersection point between two infinite lines.
+	 * The first line is defined as r1 = p1 + (m * v1) where m is any number, and similarly for the second line.
+	 * If the lines are parallel then the result is null.
+	 * 
+	 * @param p1
+	 * @param v1
+	 * @param p2
+	 * @param v2
+	 * @return intersection point
+	 */
+	public static Point2D getIntersectionPoint(Point2D p1, Vector2D v1, Point2D p2, Vector2D v2) {
+		// Get a second point on each line.
+		Point2D q1 = v1.addPoint(p1);
+		Point2D q2 = v2.addPoint(p2);
+
+		double x1 = p1.getX();
+		double y1 = p1.getY();
+		double x2 = q1.getX();
+		double y2 = q1.getY();
+		double x3 = p2.getX();
+		double y3 = p2.getY();
+		double x4 = q2.getX();
+		double y4 = q2.getY();
+
+		double d = ((x1 - x2) * (y3 - y4)) - ((y1 - y2) * (x3 - x4));
+
+		// If the lines are parallel.
+		if (d == 0) {
+			return null;
+		}
+
+		double a = (x1 * y2) - (y1 * x2);
+
+		double b = (x3 * y4) - (y3 * x4);
+
+		double x = ((a * (x3 - x4)) - ((x1 - x2) * b)) / d;
+		double y = ((a * (y3 - y4)) - ((y1 - y2) * b)) / d;
+
+		return new Point2D.Double(x, y);
 	}
 
 	public static Point2D getCartesian(double radius, double rads) {
@@ -318,6 +385,76 @@ public final class MathExtended {
 	 */
 	public static Point2D translate(Point2D p, Point2D t) {
 		return new Point2D.Double(p.getX() + t.getX(), p.getY() + t.getY());
+	}
+
+	public static List<Point2D> approximateArc(int numberOfInnerVertices, double startRads, double rads, double radius) {
+		List<Point2D> l = new ArrayList<Point2D>();
+
+		// If the circle has zero radius, then just return the zero point.
+		if (radius == 0) {
+			l.add(new Point2D.Double(0, 0));
+			
+			return l;
+		}
+
+		Point2D p = getCartesian(radius, startRads);
+
+		// Add the first vertex.
+		l.add(p);
+
+		double mag = Math.abs(rads);
+
+		if (mag > 2 * Math.PI) {
+			Log.warning("Cannot polygonise arc with angular distance greater than one revolution.");
+
+			rads = rads > 0 ? Math.PI : -Math.PI;
+		}
+
+		// Check if approximating an arc is not possible.
+		if (numberOfInnerVertices == 0
+				|| (mag >= Math.PI && numberOfInnerVertices == 2)
+				|| (mag == 2 * Math.PI && numberOfInnerVertices <= 3)) {
+			Log.error("Cannot polygonise arc due to insufficient number of verticies.");
+
+			return null;
+		}
+
+		// This point represents a point on the arc which lies in-between two result vertices.
+		Point2D previousM = p;
+
+		// Calculate the tangent vector.
+		Vector2D previousTangent = Vector2D.getTangentVector(previousM.getX(), previousM.getY(), true);
+
+		// Calculate the angular change at each inner vertex.
+		double a = rads / numberOfInnerVertices;
+
+		// Add all except for the last inner vertex.
+		for (int i = 1; i < numberOfInnerVertices; i++) {
+			// This point represents a point on the arc which lies in-between two result vertices.
+			Point2D m = getCartesian(radius, startRads + (a * i));
+
+			Vector2D tangent = Vector2D.getTangentVector(m.getX(), m.getY(), true);
+
+			// Add the next vertex as the intersection of the current and previous tangents.
+			Point2D v = getIntersectionPoint(previousM, previousTangent, m, tangent);
+			l.add(v);
+
+			previousM = m;
+			previousTangent = tangent;
+		}
+
+		// Get the last vertex and its tangent.
+		Point2D q = getCartesian(radius, startRads + rads);
+		Vector2D qTangent = Vector2D.getTangentVector(q.getX(), q.getY(), true);
+
+		// Add the last inner vertex as the intersection of the penultimate and last tangents.
+		Point2D v = getIntersectionPoint(previousM, previousTangent, q, qTangent);
+		l.add(v);
+
+		// Add the last vertex.
+		l.add(q);
+
+		return l;
 	}
 
 }

@@ -47,26 +47,26 @@ public class EnvironmentTriangle {
 		double fractionalError = 0.001, absoluteError = 0.001;
 
 		if (l.intersectsLine(this.edge1)
-				&& !MathExtended.ApproxEqual(this.edge1.getP1(), l.getP1(), fractionalError, absoluteError)
-				&& !MathExtended.ApproxEqual(this.edge1.getP1(), l.getP2(), fractionalError, absoluteError)
-				&& !MathExtended.ApproxEqual(this.edge1.getP2(), l.getP1(), fractionalError, absoluteError)
-				&& !MathExtended.ApproxEqual(this.edge1.getP2(), l.getP2(), fractionalError, absoluteError)) {
+				&& !MathExtended.approxEqual(this.edge1.getP1(), l.getP1(), fractionalError, absoluteError)
+				&& !MathExtended.approxEqual(this.edge1.getP1(), l.getP2(), fractionalError, absoluteError)
+				&& !MathExtended.approxEqual(this.edge1.getP2(), l.getP1(), fractionalError, absoluteError)
+				&& !MathExtended.approxEqual(this.edge1.getP2(), l.getP2(), fractionalError, absoluteError)) {
 			return true;
 		}
 
 		if (l.intersectsLine(this.edge2)
-				&& !MathExtended.ApproxEqual(this.edge2.getP1(), l.getP1(), fractionalError, absoluteError)
-				&& !MathExtended.ApproxEqual(this.edge2.getP1(), l.getP2(), fractionalError, absoluteError)
-				&& !MathExtended.ApproxEqual(this.edge2.getP2(), l.getP1(), fractionalError, absoluteError)
-				&& !MathExtended.ApproxEqual(this.edge2.getP2(), l.getP2(), fractionalError, absoluteError)) {
+				&& !MathExtended.approxEqual(this.edge2.getP1(), l.getP1(), fractionalError, absoluteError)
+				&& !MathExtended.approxEqual(this.edge2.getP1(), l.getP2(), fractionalError, absoluteError)
+				&& !MathExtended.approxEqual(this.edge2.getP2(), l.getP1(), fractionalError, absoluteError)
+				&& !MathExtended.approxEqual(this.edge2.getP2(), l.getP2(), fractionalError, absoluteError)) {
 			return true;
 		}
 
 		if (l.intersectsLine(this.edge3)
-				&& !MathExtended.ApproxEqual(this.edge3.getP1(), l.getP1(), fractionalError, absoluteError)
-				&& !MathExtended.ApproxEqual(this.edge3.getP1(), l.getP2(), fractionalError, absoluteError)
-				&& !MathExtended.ApproxEqual(this.edge3.getP2(), l.getP1(), fractionalError, absoluteError)
-				&& !MathExtended.ApproxEqual(this.edge3.getP2(), l.getP2(), fractionalError, absoluteError)) {
+				&& !MathExtended.approxEqual(this.edge3.getP1(), l.getP1(), fractionalError, absoluteError)
+				&& !MathExtended.approxEqual(this.edge3.getP1(), l.getP2(), fractionalError, absoluteError)
+				&& !MathExtended.approxEqual(this.edge3.getP2(), l.getP1(), fractionalError, absoluteError)
+				&& !MathExtended.approxEqual(this.edge3.getP2(), l.getP2(), fractionalError, absoluteError)) {
 			return true;
 		}
 
@@ -94,38 +94,38 @@ public class EnvironmentTriangle {
 
 		double fractionalError = 0.001, absoluteError = 0.001;
 
-		if (MathExtended.ApproxEqual(this.point1, t.point1, fractionalError, absoluteError)) {
-			if (MathExtended.ApproxEqual(this.point2, t.point2, fractionalError, absoluteError)) {
-				if (MathExtended.ApproxEqual(this.point3, t.point3, fractionalError, absoluteError)) {
+		if (MathExtended.approxEqual(this.point1, t.point1, fractionalError, absoluteError)) {
+			if (MathExtended.approxEqual(this.point2, t.point2, fractionalError, absoluteError)) {
+				if (MathExtended.approxEqual(this.point3, t.point3, fractionalError, absoluteError)) {
 					return true;
 				}
 			}
-			else if (MathExtended.ApproxEqual(this.point2, t.point3, fractionalError, absoluteError)) {
-				if (MathExtended.ApproxEqual(this.point3, t.point2, fractionalError, absoluteError)) {
-					return true;
-				}
-			}
-		}
-		else if (MathExtended.ApproxEqual(this.point1, t.point2, fractionalError, absoluteError)) {
-			if (MathExtended.ApproxEqual(this.point2, t.point1, fractionalError, absoluteError)) {
-				if (MathExtended.ApproxEqual(this.point3, t.point3, fractionalError, absoluteError)) {
-					return true;
-				}
-			}
-			else if (MathExtended.ApproxEqual(this.point2, t.point3, fractionalError, absoluteError)) {
-				if (MathExtended.ApproxEqual(this.point3, t.point1, fractionalError, absoluteError)) {
+			else if (MathExtended.approxEqual(this.point2, t.point3, fractionalError, absoluteError)) {
+				if (MathExtended.approxEqual(this.point3, t.point2, fractionalError, absoluteError)) {
 					return true;
 				}
 			}
 		}
-		else if (MathExtended.ApproxEqual(this.point1, t.point3, fractionalError, absoluteError)) {
-			if (MathExtended.ApproxEqual(this.point2, t.point1, fractionalError, absoluteError)) {
-				if (MathExtended.ApproxEqual(this.point3, t.point2, fractionalError, absoluteError)) {
+		else if (MathExtended.approxEqual(this.point1, t.point2, fractionalError, absoluteError)) {
+			if (MathExtended.approxEqual(this.point2, t.point1, fractionalError, absoluteError)) {
+				if (MathExtended.approxEqual(this.point3, t.point3, fractionalError, absoluteError)) {
 					return true;
 				}
 			}
-			else if (MathExtended.ApproxEqual(this.point2, t.point2, fractionalError, absoluteError)) {
-				if (MathExtended.ApproxEqual(this.point3, t.point1, fractionalError, absoluteError)) {
+			else if (MathExtended.approxEqual(this.point2, t.point3, fractionalError, absoluteError)) {
+				if (MathExtended.approxEqual(this.point3, t.point1, fractionalError, absoluteError)) {
+					return true;
+				}
+			}
+		}
+		else if (MathExtended.approxEqual(this.point1, t.point3, fractionalError, absoluteError)) {
+			if (MathExtended.approxEqual(this.point2, t.point1, fractionalError, absoluteError)) {
+				if (MathExtended.approxEqual(this.point3, t.point2, fractionalError, absoluteError)) {
+					return true;
+				}
+			}
+			else if (MathExtended.approxEqual(this.point2, t.point2, fractionalError, absoluteError)) {
+				if (MathExtended.approxEqual(this.point3, t.point1, fractionalError, absoluteError)) {
 					return true;
 				}
 			}

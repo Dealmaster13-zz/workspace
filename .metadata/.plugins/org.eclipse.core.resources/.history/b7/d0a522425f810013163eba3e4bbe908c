@@ -1,0 +1,34 @@
+package uk.ac.cam.oda22.core;
+
+import java.awt.geom.Point2D;
+
+/**
+ * @author Oliver
+ *
+ */
+public class Vector2D {
+
+	public final double x;
+
+	public final double y;
+	
+	public Vector2D(double x, double y) {
+		this.x = x;
+		this.y = y;
+	}
+	
+	public static Vector2D getTangentVector(double x, double y) {
+		double mag = Math.sqrt((x * x) + (y * y));
+		
+		return new Vector2D(y / mag, -x / mag);
+	}
+	
+	public Point2D addPoint(Point2D p) {
+		return new Point2D.Double(p.getX() + this.x, p.getY() + this.y);
+	}
+	
+	public Vector2D scale(double xScale, double yScale) {
+		return new Vector2D(this.x * xScale, this.y * yScale);
+	}
+	
+}

@@ -3,6 +3,7 @@ package uk.ac.cam.oda22.core.tethers;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import uk.ac.cam.oda22.core.ListFunctions;
 import uk.ac.cam.oda22.core.MathExtended;
 import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.pathplanning.Path;
@@ -17,8 +18,6 @@ import uk.ac.cam.oda22.pathplanning.Path;
 		)
 public class SimpleTether extends Tether {
 
-	private Path path;
-
 	/**
 	 * 
 	 * @param anchor
@@ -27,16 +26,7 @@ public class SimpleTether extends Tether {
 	 * @throws Exception 
 	 */
 	public SimpleTether(Point2D anchor, double length, Path path) throws Exception {
-		super(anchor, length);
-
-		this.path = path;
-
-		double usedLength = getUsedLength();
-
-		// Check that the tether does not exceed its length restriction.
-		if (usedLength > length && !MathExtended.ApproxEqual(length, usedLength, 0.001, 0)) {
-			throw new Exception("Used length (" + usedLength + ") exceeds maximum length (" + length + ").");
-		}
+		super(anchor, length, path);
 	}
 
 	public List<Point2D> getFixedPoints() {
@@ -104,6 +94,15 @@ public class SimpleTether extends Tether {
 	}
 
 	@Override
+	public Point2D getLastPoint() {
+		if (path.length() > 0) {
+			return ListFunctions.getLast(this.path.points);
+		}
+		
+		return this.anchor;
+	}
+
+	@Override
 	public ITetherSegment getTetherSegment(double startW, double endW) {
 		// Fail if either of the distance parameters are out of invalid.
 		if (startW > endW || startW < 0 || endW > this.length) {
@@ -146,14 +145,14 @@ public class SimpleTether extends Tether {
 
 				// If the end of the tether has been reached then check if the start distance is approximately equal to the tether's used length.
 				// If the start distance is at the end of the tether then simply add that point to the path and return it.
-				if (index == points.size() - 1 && MathExtended.ApproxEqual(startW, currentW, 0.0001, 0.0001)) {
+				if (index == points.size() - 1 && MathExtended.approxEqual(startW, currentW, 0.0001, 0.0001)) {
 					double x = currentPoint.getX();
 					double y = currentPoint.getY();
 					
 					path.addPoint(new Point2D.Double(x, y));
 					
 					// If the end distance is not at the end of the tether then produce a warning.
-					if (!MathExtended.ApproxEqual(endW, currentW, 0.0001, 0.0001)) {
+					if (!MathExtended.approxEqual(endW, currentW, 0.0001, 0.0001)) {
 						Log.warning("The given end distance is greater than the tether's used length.");
 					}
 					

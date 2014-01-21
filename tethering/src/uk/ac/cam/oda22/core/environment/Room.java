@@ -28,10 +28,7 @@ public class Room {
 		this.height = height;
 
 		this.obstacles = new ArrayList<Obstacle>(); 
-
-		for (Obstacle o : l) {
-			this.obstacles.add(o);
-		}
+		this.obstacles.addAll(l);
 
 		this.addRoomEdges();
 
@@ -47,6 +44,22 @@ public class Room {
 	 */
 	public VisibilityGraph getVisibilityGraph() {
 		return new VisibilityGraph(this.visibilityGraph);
+	}
+	
+	/**
+	 * Expand all of the obstacles in the room by a given radius.
+	 * 
+	 * @param radius
+	 * @return expanded obstacles
+	 */
+	public List<Obstacle> getExpandedObstacles(double radius) {
+		List<Obstacle> l = new ArrayList<Obstacle>();
+		
+		for (int i = 0; i < this.obstacles.size(); i++) {
+			l.add(this.obstacles.get(i).expandObstacle(radius));
+		}
+		
+		return l;
 	}
 
 	public boolean isPointInEmptySpace(Point2D p) {

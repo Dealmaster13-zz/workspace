@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;t&apos; in &apos;uk.ac.cam.oda22.simulation.Simulator.main(...)&apos; to &apos;tether&apos;&#x0D;&#x0A;- Original project: &apos;TetheringSimulator&apos;&#x0D;&#x0A;- Original element: &apos;uk.ac.cam.oda22.simulation.Simulator.main(String[]).t&apos;&#x0D;&#x0A;- Renamed element: &apos;t&apos;&#x0D;&#x0A;- Update references to refactored element" description="Rename local variable &apos;t&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src&lt;uk.ac.cam.oda22.simulation{Simulator.java[Simulator~main~\[QString;@t!1561!1589!1568!1568!QTether;!0!false" name="tether" references="true" stamp="1390337755711" version="1.0"/>
+</session>
