@@ -8,6 +8,7 @@ import java.util.List;
 import uk.ac.cam.oda22.core.MathExtended;
 import uk.ac.cam.oda22.core.Vector2D;
 import uk.ac.cam.oda22.core.logging.Log;
+import uk.ac.cam.oda22.pathplanning.Path;
 
 /**
  * @author Oliver
@@ -46,6 +47,21 @@ public class Obstacle {
 			this.edges.add(line);
 		}
 	}
+	
+	/**
+	 * Returns whether or not an obstacle intersects another (requires edge crossing).
+	 * 
+	 * @param o
+	 * @return true for intersection, false otherwise
+	 */
+	public boolean strictIntersects(Obstacle o) {
+		// TODO: Check if one obstacle lies within the other.
+		
+		Path p1 = new Path(this.points);
+		Path p2 = new Path(o.points);
+		
+		return MathExtended.strictPathIntersectsPath(p1, p2);
+	}
 
 	/**
 	 * Note that this does not deal with intersections within the polygon.
@@ -54,7 +70,7 @@ public class Obstacle {
 	 * TODO: Calculate intersections within the polygon.
 	 * 
 	 * @param l
-	 * @return
+	 * @return intersection result
 	 */
 	public ObstacleLineIntersectionResult intersectsLine(Line2D l) {
 		double fractionalError = 0.001, absoluteError = 0.001;

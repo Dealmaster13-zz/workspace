@@ -11,6 +11,7 @@ import uk.ac.cam.oda22.core.MathExtended;
 import uk.ac.cam.oda22.core.astar.AStarEdge;
 import uk.ac.cam.oda22.core.astar.AStarNode;
 import uk.ac.cam.oda22.core.astar.AStarPathfinding;
+import uk.ac.cam.oda22.core.environment.Obstacle;
 import uk.ac.cam.oda22.core.environment.Room;
 import uk.ac.cam.oda22.core.environment.VisibilityGraph;
 import uk.ac.cam.oda22.core.environment.VisibilityGraphEdge;
@@ -43,7 +44,7 @@ public final class PathPlanner {
 		////List<Obstacle> expandedObstacles = room.getExpandedObstacles(robot.radius);
 
 		/*
-		 * TODO: Also check if the robot can reach this point despite its size.
+		 * TODO: Also check if the robot can reach the goal despite its size.
 		 */
 		
 		if (!room.isPointInEmptySpace(goal)) {
@@ -52,10 +53,10 @@ public final class PathPlanner {
 			return null;
 		}
 
-		VisibilityGraph visibilityGraph = room.getVisibilityGraph();
+		VisibilityGraph visibilityGraph = generateVisibilityGraph(room.obstacles);
 
 		// Add the goal node to the visibility graph.
-		visibilityGraph = room.addNode(visibilityGraph, goal);
+		visibilityGraph.addNode(goal);
 
 		Point2D startNode = robot.getPosition();
 
@@ -63,7 +64,7 @@ public final class PathPlanner {
 		 * Step 3: Find the vertices visible from the start position 
 		 * and order them by their angle relative to s.
 		 */
-		List<VisibilityGraphNode> l = room.getVisibleNodes(startNode, visibilityGraph);
+		List<VisibilityGraphNode> l = visibilityGraph.getVisibleNodes(startNode);
 		sortNodesByAngle(startNode, l);
 
 		/*
@@ -88,6 +89,22 @@ public final class PathPlanner {
 		//TODO: Extension task: implement this method.
 
 		return null;
+	}
+
+	/**
+	 * Generates the visibility graph.
+	 * 
+	 * @return the visibility graph
+	 */
+	private static VisibilityGraph generateVisibilityGraph(List<Obstacle> obstacles) {
+		VisibilityGraph g = new VisibilityGraph();
+
+		// Add all of the obstacles which also adds the relevant points and edges of the visibility graph.
+		for (Obstacle o : obstacles) {
+			g.addObstacle(o, true);
+		}
+
+		return g;
 	}
 
 	/**
@@ -166,7 +183,7 @@ public final class PathPlanner {
 			}
 
 			// Compute the visible nodes.
-			List<VisibilityGraphNode> visibleNodes = room.getVisibleNodes(p, visibilityGraph);
+			List<VisibilityGraphNode> visibleNodes = visibilityGraph.getVisibleNodes(p);
 
 			List<Point2D> visibleVertices = new ArrayList<Point2D>();
 
@@ -443,8 +460,9 @@ public final class PathPlanner {
 
 		// Create a visibility graph including the source and destination nodes.
 		// Note that if either vertex already exists then a new node will not be added.
-		VisibilityGraph g = room.addNode(visibilityGraph, source);
-		g = room.addNode(g, destination);
+		VisibilityGraph g = new VisibilityGraph(visibilityGraph);
+		g.addNode(source);
+		g.addNode(destination);
 
 		VisibilityGraphNode sourceNode = null;
 		VisibilityGraphNode destinationNode = null;

@@ -15,8 +15,6 @@ public class Room {
 
 	public final List<Obstacle> obstacles;
 
-	private final VisibilityGraph visibilityGraph;
-
 	private final double width;
 
 	private final double height;
@@ -33,17 +31,6 @@ public class Room {
 		this.addRoomEdges();
 
 		this.triangles = this.triangulateRoom();
-
-		this.visibilityGraph = this.generateVisibilityGraph();
-	}
-	
-	/**
-	 * Returns a copy of the room's visibility graph.
-	 * 
-	 * @return the visibility graph
-	 */
-	public VisibilityGraph getVisibilityGraph() {
-		return new VisibilityGraph(this.visibilityGraph);
 	}
 	
 	/**
@@ -78,54 +65,6 @@ public class Room {
 		}
 
 		return inSpace;
-	}
-
-	/**
-	 * Adds a node, returning a new visibility graph.
-	 * This is typically used to add a start or goal node.
-	 * 
-	 * @param p
-	 * @return a visibility graph with the new node added
-	 */
-	public VisibilityGraph addNode(VisibilityGraph g1, Point2D p) {
-		VisibilityGraphNode node = new VisibilityGraphNode(p);
-		
-		VisibilityGraph g2 = new VisibilityGraph(g1);
-
-		boolean addedNode = g2.addNode(node);
-
-		if (!addedNode) {
-			return g2;
-		}
-		
-		for (VisibilityGraphNode n : g2.nodes) {
-			this.tryAddEdge(node, n, g2);
-		}
-		
-		return g2;
-	}
-
-	/**
-	 * Gets the list of nodes visible to a particular point.
-	 * This should not be used if point p exists in the visibility graph as a node.
-	 * 
-	 * @param p
-	 * @return the nodes visible to p
-	 */
-	public List<VisibilityGraphNode> getVisibleNodes(Point2D p, VisibilityGraph g) {
-		List<VisibilityGraphNode> l = new ArrayList<VisibilityGraphNode>();
-
-		for (VisibilityGraphNode node : g.nodes) {
-			// Calculate the visibility between nodes p and 'node'.
-			NodeVisibility nodeVisibility = this.getVisibility(p, node.vertex);
-			
-			// Add the node if it is at least partly visible.
-			if (nodeVisibility.isPartlyVisible()) {
-				l.add(node);
-			}
-		}
-
-		return l;
 	}
 	
 	/**
@@ -268,103 +207,6 @@ public class Room {
 		}
 
 		return t;
-	}
-
-	/**
-	 * Generates the visibility graph.
-	 * 
-	 * @return the visibility graph
-	 */
-	private VisibilityGraph generateVisibilityGraph() {
-		VisibilityGraph g = new VisibilityGraph();
-
-		for (Obstacle obstacle : this.obstacles) {
-			for (Point2D p : obstacle.points) {
-				g.addNode(new VisibilityGraphNode(p));
-			}
-		}
-
-		for (VisibilityGraphNode p : g.nodes) {
-			for (VisibilityGraphNode q : g.nodes) {
-				this.tryAddEdge(p, q, g);
-			}
-		}
-
-		return g;
-	}
-
-	/**
-	 * Checks if an edge can be added between two nodes, and adds the edge if possible.
-	 * Returns whether or not an edge was added.
-	 * 
-	 * @param p
-	 * @param q
-	 * @param g
-	 * @return whether or not the edge was added
-	 */
-	private boolean tryAddEdge(VisibilityGraphNode p, VisibilityGraphNode q, VisibilityGraph g) {
-		// Get the visibility between the two vertices by checking if any room obstacles are in the way.
-		NodeVisibility visibility = this.getVisibility(p.vertex, q.vertex);
-		
-		// Add the edge if q is at least partly visible from p.
-		if (visibility.isPartlyVisible()) {
-			double weight = p.vertex.distance(q.vertex);
-
-			boolean isObstacleEdge = visibility == NodeVisibility.ALONG_OBSTACLE_EDGE;
-			
-			g.addEdge(new VisibilityGraphEdge(p, q, weight, isObstacleEdge));
-
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Calculates the visibility between two points by checking if any room obstacles are in the way.
-	 * 
-	 * @param p
-	 * @param q
-	 * @return point-to-point visibility
-	 */
-	private NodeVisibility getVisibility(Point2D p, Point2D q) {
-		// If the points are not equal then check for visibility.
-		if (!p.equals(q)) {
-			Line2D l = new Line2D.Double();
-			l.setLine(p, q);
-
-			// Initialise visibility to 'fully visible.
-			NodeVisibility visibility = NodeVisibility.FULLY_VISIBLE;
-
-			int index = 0;
-
-			// For each obstacle, check if it blocks visibility.
-			while (visibility != NodeVisibility.NOT_VISIBLE && index < this.obstacles.size()) {
-				Obstacle o = this.obstacles.get(index);
-
-				// Calculate if the line formed between the two points intersects with the obstacle.
-				ObstacleLineIntersectionResult intersection = o.intersectsLine(l);
-
-				switch (intersection) {
-				case CROSSED:
-					visibility = NodeVisibility.NOT_VISIBLE;
-					break;
-
-				case EQUAL_LINES:
-					visibility = NodeVisibility.ALONG_OBSTACLE_EDGE;
-					break;
-
-				default:
-					break;
-				}
-
-				index ++;
-			}
-
-			return visibility;
-		}
-
-		return NodeVisibility.SAME_POINT;
 	}
 
 }
