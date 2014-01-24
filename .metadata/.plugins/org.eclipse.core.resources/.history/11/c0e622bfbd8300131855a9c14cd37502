@@ -1,0 +1,17 @@
+package uk.ac.cam.oda22.core.tethers;
+
+import uk.ac.cam.oda22.pathplanning.Path;
+
+/**
+ * @author Oliver
+ *
+ */
+public class TetherConfiguration extends Path {
+
+	public TetherConfiguration(TetherConfiguration tc) {
+		super();
+		
+		this.addPoints(tc.points);
+	}
+	
+}

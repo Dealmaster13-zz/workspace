@@ -66,7 +66,7 @@ public class VisibilityGraph {
 
 		for (VisibilityGraphNode node : this.nodes) {
 			// Calculate the visibility between nodes p and 'node'.
-			NodeVisibility nodeVisibility = this.getVisibility(p, node.vertex);
+			NodeVisibility nodeVisibility = this.getVisibility(p, node.p);
 
 			// Add the node if it is at least partly visible.
 			if (nodeVisibility.isPartlyVisible()) {
@@ -103,20 +103,27 @@ public class VisibilityGraph {
 	 * This is typically only used to add a start or goal node.
 	 * 
 	 * @param p
-	 * @return true if the node was added, false otherwise
+	 * @return node if added, null otherwise
 	 */
-	public boolean addNode(Point2D p) {
+	public VisibilityGraphNode addNode(Point2D p) {
 		VisibilityGraphNode node = new VisibilityGraphNode(p);
 
-		boolean addedNode = this.addNode(node);
+		// Check if there is already a node at point p.
+		VisibilityGraphNode existingNode = getNode(p);
+		
+		// If a node does not already exist at point p then add the node.
+		if (existingNode == null) {
+			this.nodes.add(node);
 
-		if (addedNode) {
 			for (VisibilityGraphNode n : this.nodes) {
 				this.tryAddEdge(node, n);
 			}
+
+			return node;
 		}
-		
-		return addedNode;
+
+		// Return null if the 
+		return existingNode;
 	}
 
 	/**
@@ -133,7 +140,7 @@ public class VisibilityGraph {
 				Log.warning("Added obstacle intersects with an existing obstacle.");
 			}
 		}
-		
+
 		this.obstacles.add(obstacle);
 
 		if (addPointsAndEdges) {
@@ -147,22 +154,20 @@ public class VisibilityGraph {
 	}
 
 	/**
-	 * Adds a node.
+	 * Gets the node at a given point.
 	 * 
-	 * @param node
-	 * @return true if the node was added, false otherwise
+	 * @param p
+	 * @return node if exists at point p, null otherwise
 	 */
-	private boolean addNode(VisibilityGraphNode node) {
-		// If the node already exists (by location) then do not add it.
+	public VisibilityGraphNode getNode(Point2D p) {
+		// Check if any node has the same point p.
 		for (VisibilityGraphNode n : this.nodes) {
-			if (n.equals(node)) {
-				return false;
+			if (n.p.equals(p)) {
+				return n;
 			}
 		}
 
-		this.nodes.add(node);
-
-		return true;
+		return null;
 	}
 
 	/**
@@ -171,16 +176,16 @@ public class VisibilityGraph {
 	 * 
 	 * @param p
 	 * @param q
-	 * @param g
+	 * @param h
 	 * @return true if the edge was added, false otherwise
 	 */
 	private boolean tryAddEdge(VisibilityGraphNode p, VisibilityGraphNode q) {
 		// Get the visibility between the two vertices by checking if any room obstacles are in the way.
-		NodeVisibility visibility = this.getVisibility(p.vertex, q.vertex);
+		NodeVisibility visibility = this.getVisibility(p.p, q.p);
 
 		// Add the edge if q is at least partly visible from p.
 		if (visibility != NodeVisibility.SAME_POINT && visibility.isPartlyVisible()) {
-			double weight = p.vertex.distance(q.vertex);
+			double weight = p.p.distance(q.p);
 
 			boolean isObstacleEdge = visibility == NodeVisibility.ALONG_OBSTACLE_EDGE;
 

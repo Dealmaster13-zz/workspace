@@ -3,7 +3,6 @@ package uk.ac.cam.oda22.core.tethers;
 import java.awt.geom.Point2D;
 
 import uk.ac.cam.oda22.core.MathExtended;
-import uk.ac.cam.oda22.pathplanning.Path;
 
 /**
  * @author Oliver
@@ -21,12 +20,12 @@ public abstract class Tether {
 	 */
 	public final double length;
 	
-	protected Path path;
+	protected TetherConfiguration configuration;
 
-	public Tether(Point2D anchor, double length, Path path) throws Exception {
+	public Tether(Point2D anchor, double length, TetherConfiguration configuration) throws Exception {
 		this.anchor = anchor;
 		this.length = length;
-		this.path = path;
+		this.configuration = configuration;
 
 		double usedLength = getUsedLength();
 
@@ -38,6 +37,10 @@ public abstract class Tether {
 	
 	public Point2D getAnchor() {
 		return this.anchor;
+	}
+	
+	public TetherConfiguration getConfiguration() {
+		return this.configuration;
 	}
 	
 	public abstract double getUsedLength();

@@ -9,7 +9,7 @@ public enum LineIntersectionResult {
 	CROSS,
 	
 	// This represents both lines overlapping each other.
-	COLINEAR,
+	COLLINEAR,
 	
 	// This represents one of the ends of the first line touching the second line.
 	A_TOUCHES_B,

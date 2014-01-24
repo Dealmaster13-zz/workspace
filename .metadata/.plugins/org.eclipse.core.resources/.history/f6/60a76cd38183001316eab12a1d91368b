@@ -1,0 +1,21 @@
+package uk.ac.cam.oda22.core.astar;
+
+import java.util.List;
+
+import uk.ac.cam.oda22.core.environment.VisibilityGraph;
+
+/**
+ * @author Oliver
+ *
+ */
+public class AStarGraph {
+
+	public final List<AStarNode> nodes;
+	
+	public final List<AStarEdge> edges;
+	
+	public AStarGraph(VisibilityGraph g) {
+		
+	}
+	
+}

@@ -1,0 +1,116 @@
+package uk.ac.cam.oda22.core.astar;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
+import uk.ac.cam.oda22.pathplanning.Path;
+
+/**
+ * @author Oliver
+ *
+ */
+public class TetheredAStarPathfinding {
+
+	/**
+	 * Performs A* pathfinding from the source to the destination, and returns whether or not a path was found.
+	 * The tether needs to be simulated as permanently taut, and must not exceed it's maximum length.
+	 * If the tether configuration is undefined then standard tether-less pathfinding will be used.
+	 * 
+	 * @param source
+	 * @param destination
+	 * @param nodes
+	 * @return shortest valid path
+	 */
+	public static boolean getShortestPath(AStarGraph g, AStarNode source, AStarNode destination, TetherConfiguration initialTetherConfiguration) {
+		//Initialise the nodes.
+		for (AStarNode node : g.nodes) {
+			node.predecessor = null;
+			node.discovered = false;
+			node.f = Double.POSITIVE_INFINITY;
+			node.g = node.distance(destination.p);
+			node.tc = null;
+		}
+
+		// Set the source's f cost to 0, and it's tether configuration to the initial configuration.
+		source.f = 0;
+		source.tc = initialTetherConfiguration;
+
+		// Create a queue of the nodes to check neighbours.
+		List<AStarNode> q = new LinkedList<AStarNode>();
+		q.add(source);
+
+		boolean optimalPathFound = false;
+
+		while (!q.isEmpty() && !optimalPathFound) {
+			// Get the lowest cost node and remove it from the queue.
+			AStarNode current = getLowestCostNode(q);
+			q.remove(current);
+
+			// Stop if a better path cannot be found.
+			if (current.f + current.g >= destination.f + destination.g) {
+				optimalPathFound = true;
+			}
+			else
+			{
+				for (AStarEdge edge : current.edges) {
+					AStarNode neighbour = (current == edge.p) ? edge.q : edge.p;
+					
+					// Relax the edge.
+					if (current.f + edge.cost < neighbour.f) {
+						neighbour.predecessor = current;
+						
+						neighbour.f = current.f + edge.cost;
+					}
+					
+					// Add the neighbour to the queue if it hasn't been discovered yet.
+					if (!neighbour.discovered) {
+						q.add(neighbour);
+						
+						neighbour.discovered = true;
+					}
+				}
+			}
+		}
+
+		return destination.predecessor != null;
+	}
+
+	public static AStarNode getLowestCostNode(List<AStarNode> nodes) {
+		AStarNode lowestCostNode = null;
+		double lowestH = Double.POSITIVE_INFINITY;
+
+		for (AStarNode node : nodes) {
+			if (node.f + node.g < lowestH) {
+				lowestCostNode = node;
+
+				lowestH = node.f + node.g;
+			}
+		}
+
+		return lowestCostNode;
+	}
+	
+	public static Path retrievePath(AStarNode destination) {
+		Path path = new Path();
+		
+		List<AStarNode> reversePath = new LinkedList<AStarNode>();
+		
+		AStarNode currentNode = destination;
+		
+		// Retrieve the reverse path.
+		while (currentNode != null) {
+			reversePath.add(currentNode);
+			
+			currentNode = currentNode.predecessor;
+		}
+		
+		// Reassemble the forward path.
+		for (int i = reversePath.size() - 1; i >= 0; i--) {
+			path.addPoint(reversePath.get(i).p);
+		}
+		
+		return path;
+	}
+
+}

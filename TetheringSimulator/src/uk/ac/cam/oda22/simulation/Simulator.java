@@ -17,6 +17,7 @@ import uk.ac.cam.oda22.core.robots.RectangularRobot;
 import uk.ac.cam.oda22.core.robots.Robot;
 import uk.ac.cam.oda22.core.tethers.SimpleTether;
 import uk.ac.cam.oda22.core.tethers.Tether;
+import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
 import uk.ac.cam.oda22.graphics.GraphicsFunctions;
 import uk.ac.cam.oda22.graphics.IVisualiser;
 import uk.ac.cam.oda22.graphics.VisualiserUsingJFrame;
@@ -106,7 +107,7 @@ public class Simulator {
 	private static Tether createTether1_1() throws Exception {
 		Point2D anchor = new Point2D.Double(0, 0);
 
-		Path X = new Path();
+		TetherConfiguration X = new TetherConfiguration();
 		X.addPoint(new Point2D.Double(50, 15));
 		X.addPoint(new Point2D.Double(80, 60));
 
@@ -122,7 +123,7 @@ public class Simulator {
 	private static Tether createTether1_2() throws Exception {
 		Point2D anchor = new Point2D.Double(0, 0);
 
-		Path X = new Path();
+		TetherConfiguration X = new TetherConfiguration();
 		X.addPoint(new Point2D.Double(50, 15));
 		X.addPoint(new Point2D.Double(60, 55));
 		X.addPoint(new Point2D.Double(35, 45));

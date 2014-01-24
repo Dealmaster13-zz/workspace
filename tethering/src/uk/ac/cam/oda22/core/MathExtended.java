@@ -57,7 +57,28 @@ public final class MathExtended {
 	 * @return angular change
 	 */
 	public static double getAngularChange(double radsFrom, double radsTo) {
-		return normaliseAngle(radsTo - radsFrom);
+		if (radsFrom != Double.NaN && radsTo != Double.NaN) {
+			return normaliseAngle(radsTo - radsFrom);
+		}
+		else {
+			return Double.NaN;
+		}
+	}
+
+	/**
+	 * Gets the shortest angular change from one vector to another.
+	 * 
+	 * @param vectorFrom
+	 * @param vectorTo
+	 * @return angular change
+	 */
+	public static double getAngularChange(Vector2D vectorFrom, Vector2D vectorTo) {
+		if (!vectorFrom.isZeroVector() && !vectorTo.isZeroVector()) {
+			return normaliseAngle(vectorTo.getAngle() - vectorFrom.getAngle());
+		}
+		else {
+			return Double.NaN;
+		}
 	}
 
 	/**
@@ -182,7 +203,7 @@ public final class MathExtended {
 		return pointOnLine(p, l) != PointOnLineResult.NONE;
 	}
 
-	public static boolean colinear(Line2D l1, Line2D l2) {
+	public static boolean collinear(Line2D l1, Line2D l2) {
 		int i = 0;
 
 		if (pointOnLine(l1.getP1(), l2) != PointOnLineResult.NONE) {
@@ -207,13 +228,14 @@ public final class MathExtended {
 
 	public static LineIntersectionResult intersectsLine(Line2D l1, Line2D l2) {
 		// Check if the lines do not intersect.
+		// TODO: Check the functionality of this function and possibly replace it.
 		if (!l1.intersectsLine(l2)) {
 			return LineIntersectionResult.NONE;
 		}
 
-		// Check if the lines are colinear.
-		if (colinear(l1, l2)) {
-			return LineIntersectionResult.COLINEAR;
+		// Check if the lines are collinear.
+		if (collinear(l1, l2)) {
+			return LineIntersectionResult.COLLINEAR;
 		}
 
 		// Check if the an endpoint of one line lies on the other line.
@@ -338,7 +360,7 @@ public final class MathExtended {
 	 * @param v2
 	 * @return intersection point
 	 */
-	public static Point2D getIntersectionPoint(Point2D p1, Vector2D v1, Point2D p2, Vector2D v2) {
+	public static Point2D getExtendedIntersectionPoint(Point2D p1, Vector2D v1, Point2D p2, Vector2D v2) {
 		// Get a second point on each line.
 		Point2D q1 = v1.addPoint(p1);
 		Point2D q2 = v2.addPoint(p2);
@@ -369,6 +391,37 @@ public final class MathExtended {
 		return new Point2D.Double(x, y);
 	}
 
+	/**
+	 * Gets the intersection point between two finite lines.
+	 * The first line is defined as the line between p1 and p1 + v1, and similarly for the second line.
+	 * If the lines are parallel then the result is null.
+	 * 
+	 * @param p1
+	 * @param v1
+	 * @param p2
+	 * @param v2
+	 * @return intersection point
+	 */
+	public static Point2D getIntersectionPoint(Point2D p1, Vector2D v1, Point2D p2, Vector2D v2) {
+		// Get the extended intersection point.
+		Point2D c = getExtendedIntersectionPoint(p1, v1, p2, v2);
+
+		// Get corresponding lines.
+		Line2D l1 = getLine(p1, v1);
+		Line2D l2 = getLine(p2, v2);
+
+		// If c lies on both lines, then it is valid, otherwise return null.
+		if (c != null && loosePointOnLine(c, l1) && loosePointOnLine(c, l2)) {
+			return c;
+		}
+
+		return null;
+	}
+
+	public static Line2D getLine(Point2D p, Vector2D v) {
+		return new Line2D.Double(p.getX(), p.getY(), p.getX() + v.x, p.getY() + v.y);
+	}
+
 	public static Point2D getCartesian(double radius, double rads) {
 		double x = radius * Math.cos(rads);
 		double y = radius * Math.sin(rads);
@@ -393,7 +446,7 @@ public final class MathExtended {
 		// If the circle has zero radius, then just return the zero point.
 		if (radius == 0) {
 			l.add(new Point2D.Double(0, 0));
-			
+
 			return l;
 		}
 
@@ -436,8 +489,14 @@ public final class MathExtended {
 			Vector2D tangent = Vector2D.getTangentVector(m.getX(), m.getY(), true);
 
 			// Add the next vertex as the intersection of the current and previous tangents.
-			Point2D v = getIntersectionPoint(previousM, previousTangent, m, tangent);
-			l.add(v);
+			Point2D v = getExtendedIntersectionPoint(previousM, previousTangent, m, tangent);
+
+			if (v == null) {
+				Log.warning("Invalid intermediate point.");
+			}
+			else {
+				l.add(v);
+			}
 
 			previousM = m;
 			previousTangent = tangent;
@@ -448,8 +507,14 @@ public final class MathExtended {
 		Vector2D qTangent = Vector2D.getTangentVector(q.getX(), q.getY(), true);
 
 		// Add the last inner vertex as the intersection of the penultimate and last tangents.
-		Point2D v = getIntersectionPoint(previousM, previousTangent, q, qTangent);
-		l.add(v);
+		Point2D v = getExtendedIntersectionPoint(previousM, previousTangent, q, qTangent);
+
+		if (v == null) {
+			Log.warning("Invalid intermediate point.");
+		}
+		else {
+			l.add(v);
+		}
 
 		// Add the last vertex.
 		l.add(q);

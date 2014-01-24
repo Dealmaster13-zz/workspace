@@ -14,7 +14,7 @@ import uk.ac.cam.oda22.core.robots.PointRobot;
 import uk.ac.cam.oda22.core.robots.Robot;
 import uk.ac.cam.oda22.core.tethers.SimpleTether;
 import uk.ac.cam.oda22.core.tethers.Tether;
-import uk.ac.cam.oda22.pathplanning.Path;
+import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
 import uk.ac.cam.oda22.pathplanning.PathPlanner;
 import uk.ac.cam.oda22.pathplanning.PathPlanningResult;
 
@@ -46,7 +46,7 @@ public class TestPathPlanning {
 
 		Point2D anchor = new Point2D.Double(0, 0);
 
-		Path X = new Path();
+		TetherConfiguration X = new TetherConfiguration();
 		X.addPoint(new Point2D.Double(50, 15));
 		X.addPoint(new Point2D.Double(80, 60));
 

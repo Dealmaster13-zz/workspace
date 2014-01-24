@@ -37,12 +37,20 @@ public class Vector2D {
 		return Math.sqrt((x * x) + (y * y));
 	}
 
+	public static double getAngle(Point2D p) {
+		return Math.atan2(p.getY(), p.getX());
+	}
+
+	public static double getAngle(Point2D p, Point2D q) {
+		return Math.atan2(q.getY() - p.getY(), q.getX() - p.getX());
+	}
+
 	public Vector2D getTangentVector(boolean leftSide) {
 		return getTangentVector(this.x, this.y, leftSide);
 	}
 
 	public double getAngle() {
-		return Math.atan2(this.y, this.x);
+		return (this.x != 0 || this.y != 0) ? Math.atan2(this.y, this.x) : Double.NaN;
 	}
 
 	public Point2D addPoint(Point2D p) {
@@ -55,6 +63,10 @@ public class Vector2D {
 
 	public double getLength() {
 		return getLength(this.x, this.y);
+	}
+	
+	public boolean isZeroVector() {
+		return this.x == 0 && this.y == 0;
 	}
 
 	public Vector2D setLength(double length) {

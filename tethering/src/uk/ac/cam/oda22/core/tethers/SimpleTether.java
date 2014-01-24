@@ -25,12 +25,12 @@ public class SimpleTether extends Tether {
 	 * @param fixedPoints
 	 * @throws Exception 
 	 */
-	public SimpleTether(Point2D anchor, double length, Path path) throws Exception {
-		super(anchor, length, path);
+	public SimpleTether(Point2D anchor, double length, TetherConfiguration configuration) throws Exception {
+		super(anchor, length, configuration);
 	}
 
 	public List<Point2D> getFixedPoints() {
-		return this.path.points;
+		return this.configuration.points;
 	}
 
 	@Override
@@ -95,8 +95,8 @@ public class SimpleTether extends Tether {
 
 	@Override
 	public Point2D getLastPoint() {
-		if (path.length() > 0) {
-			return ListFunctions.getLast(this.path.points);
+		if (configuration.length() > 0) {
+			return ListFunctions.getLast(this.configuration.points);
 		}
 		
 		return this.anchor;

@@ -13,13 +13,15 @@
 		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="visibilityGraph" key="selection"/>
+		<item value="" key="selection"/>
 		<list key="findhistory">
+			<item value="this.edges"/>
 			<item value="visibilityGraph"/>
 			<item value="contains"/>
 			<item value="todo"/>
 		</list>
 		<list key="replacehistory">
+			<item value="edges"/>
 		</list>
 	</section>
 </section>

@@ -2,21 +2,19 @@ package uk.ac.cam.oda22.pathplanning;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 
 import uk.ac.cam.oda22.core.ListFunctions;
 import uk.ac.cam.oda22.core.MathExtended;
-import uk.ac.cam.oda22.core.astar.AStarEdge;
-import uk.ac.cam.oda22.core.astar.AStarNode;
-import uk.ac.cam.oda22.core.astar.AStarPathfinding;
 import uk.ac.cam.oda22.core.environment.Obstacle;
 import uk.ac.cam.oda22.core.environment.Room;
 import uk.ac.cam.oda22.core.environment.VisibilityGraph;
-import uk.ac.cam.oda22.core.environment.VisibilityGraphEdge;
 import uk.ac.cam.oda22.core.environment.VisibilityGraphNode;
 import uk.ac.cam.oda22.core.logging.Log;
+import uk.ac.cam.oda22.core.pathfinding.astar.AStarGraph;
+import uk.ac.cam.oda22.core.pathfinding.astar.AStarNode;
+import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarPathfinding;
 import uk.ac.cam.oda22.core.robots.Robot;
 import uk.ac.cam.oda22.core.robots.actions.IRobotAction;
 import uk.ac.cam.oda22.core.robots.actions.MoveAction;
@@ -24,6 +22,7 @@ import uk.ac.cam.oda22.core.robots.actions.RotateAction;
 import uk.ac.cam.oda22.core.tethers.SimpleTether;
 import uk.ac.cam.oda22.core.tethers.SimpleTetherSegment;
 import uk.ac.cam.oda22.core.tethers.Tether;
+import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
 import uk.ac.cam.oda22.core.tethers.TetherPoint;
 
 /**
@@ -118,7 +117,7 @@ public final class PathPlanner {
 		List<Double> angles = new ArrayList<Double>();
 
 		for (int i = 0; i < neighbours.size(); i++) {
-			Point2D p = neighbours.get(i).vertex;
+			Point2D p = neighbours.get(i).p;
 
 			double angle = Math.atan2(startNode.getY() - p.getY(), startNode.getX() - p.getX());
 
@@ -189,7 +188,7 @@ public final class PathPlanner {
 
 			// Store the vertices from the nodes.
 			for (VisibilityGraphNode node : visibleNodes) {
-				visibleVertices.add(node.vertex);
+				visibleVertices.add(node.p);
 			}
 
 			double nextW = w + interval;
@@ -359,7 +358,7 @@ public final class PathPlanner {
 				// TODO: Retract the tether due to movement from x to v.
 
 				// Compute the shortest path from vertex to the goal.
-				Path vToG = getShortestPath(vertex, goal, room, visibilityGraph);
+				Path vToG = getShortestPath(vertex, goal, visibilityGraph, t.getConfiguration(), t.length);
 
 				// If the path is null or empty then fail.
 				if (vToG == null || vToG.isEmpty()) {
@@ -381,12 +380,9 @@ public final class PathPlanner {
 				q.addPoints(tetherStartSegmentPath.points);
 				q.addPoints(vToG.points);
 
-				double newTetherLength = q.length();
-
-				boolean tetherLengthExceeded = newTetherLength > t.length && !MathExtended.approxEqual(newTetherLength, t.length, 0.0001, 0.0001);
+				boolean tetherLengthExceeded = q.lengthExceeded(t.length, 0.0001, 0.0001);
 
 				boolean tetherCrossed = MathExtended.strictPathIntersectsItself(q);
-
 
 				/*
 				 * Step 5biii - skip if the tether length exceeds its limit, or if the tether is crossed.
@@ -408,7 +404,7 @@ public final class PathPlanner {
 						SimpleTetherSegment tetherSegment = (SimpleTetherSegment) tether.getTetherSegment(tetherStartSegmentDistance, tetherUsedLength);
 
 						// Ensure that the tether segment starts at the correct position.
-						if (!MathExtended.approxEqual(x.x, tetherSegment.path.points.get(0), 0.0001, 0.0001)) {
+						if (!MathExtended.approxEqual(x.x, tetherSegment.path.points.get(0), 0.00001, 0.00001)) {
 							Log.error("Malformed tether segment.");
 
 							return null;
@@ -444,45 +440,30 @@ public final class PathPlanner {
 	/**
 	 * Step 5bi (second half) and step 5bii.
 	 * Computes the shortest path from a vertex (obstacle) to the goal.
-	 * TODO: Do not cross tether.
-	 * TODO: Retract tether during movement.
 	 * 
 	 * @param source
 	 * @param destination
-	 * @param room
+	 * @param visibilityGraph
+	 * @param tetherConfiguration
+	 * @param maxTetherLength
 	 * @return
 	 */
-	private static Path getShortestPath(Point2D source, Point2D destination, Room room, VisibilityGraph visibilityGraph) {
+	private static Path getShortestPath(
+			Point2D source,
+			Point2D destination,
+			VisibilityGraph visibilityGraph,
+			TetherConfiguration tetherConfiguration,
+			double maxTetherLength) {
 		// If the points are equal then return the path with a single node.
 		if (source.equals(destination)) {
 			return new Path(destination);
 		}
 
 		// Create a visibility graph including the source and destination nodes.
-		// Note that if either vertex already exists then a new node will not be added.
+		// Note that if either vertex already exists then a new node will not be added, and the existing node will be returned.
 		VisibilityGraph g = new VisibilityGraph(visibilityGraph);
-		g.addNode(source);
-		g.addNode(destination);
-
-		VisibilityGraphNode sourceNode = null;
-		VisibilityGraphNode destinationNode = null;
-
-		int index = 0;
-
-		// Find the source and destination nodes.
-		while ((sourceNode == null || destinationNode == null) && index < g.nodes.size()) {
-			VisibilityGraphNode node = g.nodes.get(index);
-
-			if (node.vertex.equals(source)) {
-				sourceNode = node;
-			}
-
-			if (node.vertex.equals(destination)) {
-				destinationNode = node;
-			}
-
-			index ++;
-		}
+		VisibilityGraphNode sourceNode = g.addNode(source);
+		VisibilityGraphNode destinationNode = g.addNode(destination);
 
 		// If either the source or destination nodes were not found then fail.
 		if (sourceNode == null || destinationNode == null) {
@@ -491,39 +472,19 @@ public final class PathPlanner {
 			return null;
 		}
 
-		List<AStarNode> aStarNodes = new LinkedList<AStarNode>();
+		AStarGraph aStarGraph = new AStarGraph(g);
 
-		Hashtable<VisibilityGraphNode, AStarNode> nodeMapping = new Hashtable<VisibilityGraphNode, AStarNode>();
+		AStarNode aStarSource = aStarGraph.getNode(sourceNode);
+		AStarNode aStarDestination = aStarGraph.getNode(destinationNode);
 
-		// Create all of the A* nodes.
-		for (VisibilityGraphNode node : g.nodes) {
-			AStarNode aStarNode = new AStarNode(node.vertex);
-
-			aStarNodes.add(aStarNode);
-
-			nodeMapping.put(node, aStarNode);
-		}
-
-		// Create all of the A* edges.
-		for (VisibilityGraphEdge edge : g.edges) {
-			AStarNode aStarNode1 = nodeMapping.get(edge.startNode);
-			AStarNode aStarNode2 = nodeMapping.get(edge.endNode);
-
-			AStarEdge aStarEdge = new AStarEdge(aStarNode1, aStarNode2, aStarNode1.distance(aStarNode2.p));
-			AStarNode.addEdge(aStarEdge);
-		}
-
-		AStarNode aStarSource = nodeMapping.get(sourceNode);
-		AStarNode aStarDestination = nodeMapping.get(destinationNode);
-
-		boolean pathFound = AStarPathfinding.getShortestPath(aStarSource, aStarDestination, aStarNodes);
+		boolean pathFound = TetheredAStarPathfinding.getShortestPath(aStarGraph, aStarSource, aStarDestination, tetherConfiguration, maxTetherLength);
 
 		// Fail if no path was found.
 		if (!pathFound) {
 			return null;
 		}
 
-		return AStarPathfinding.retrievePath(aStarDestination);
+		return TetheredAStarPathfinding.retrievePath(aStarDestination);
 	}
 
 	private static List<IRobotAction> generateActionsFromPath(Path path, double initialRotation, double rotationalSensitivity) {

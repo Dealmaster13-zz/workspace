@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import uk.ac.cam.oda22.core.PointInTriangleResult;
 import uk.ac.cam.oda22.core.logging.Log;
 
 /**
@@ -57,7 +58,7 @@ public class Room {
 		while (!inSpace && index < this.triangles.size()) {
 			EnvironmentTriangle t = this.triangles.get(index);
 
-			if (!t.isObstacle && t.containsPoint(p)) {
+			if (!t.isObstacle && t.containsPoint(p) != PointInTriangleResult.NONE) {
 				inSpace = true;
 			}
 

@@ -49,6 +49,62 @@ public class Obstacle {
 	}
 	
 	/**
+	 * Gets the previous vertex in the obstacle, before v.
+	 * 
+	 * @param v
+	 * @return previous vertex
+	 */
+	public Point2D getPreviousVertex(Point2D v) {
+		int index = 0;
+		
+		int s = this.points.size();
+		
+		if (s == 1) {
+			Log.warning("Obstacle only has one vertex.");
+		}
+		
+		while (index < s) {
+			if (v.equals(this.points.get(index))) {
+				return this.points.get((index - 1 + s) % s);
+			}
+			
+			index++;
+		}
+		
+		Log.error("Vertex not found.");
+		
+		return null;
+	}
+	
+	/**
+	 * Gets the next vertex in the obstacle, after v.
+	 * 
+	 * @param v
+	 * @return next vertex
+	 */
+	public Point2D getNextVertex(Point2D v) {
+		int index = 0;
+		
+		int s = this.points.size();
+		
+		if (s == 1) {
+			Log.warning("Obstacle only has one vertex.");
+		}
+		
+		while (index < s) {
+			if (v.equals(this.points.get(index))) {
+				return this.points.get((index + 1) % s);
+			}
+			
+			index++;
+		}
+		
+		Log.error("Vertex not found.");
+		
+		return null;
+	}
+
+	/**
 	 * Returns whether or not an obstacle intersects another (requires edge crossing).
 	 * 
 	 * @param o
@@ -56,10 +112,10 @@ public class Obstacle {
 	 */
 	public boolean strictIntersects(Obstacle o) {
 		// TODO: Check if one obstacle lies within the other.
-		
+
 		Path p1 = new Path(this.points);
 		Path p2 = new Path(o.points);
-		
+
 		return MathExtended.strictPathIntersectsPath(p1, p2);
 	}
 
@@ -213,26 +269,26 @@ public class Obstacle {
 					// If the obstacle is clockwise then the outer normal is on the left, otherwise it is on the right.
 					Vector2D t1 = v1.getTangentVector(this.clockwise);
 					Vector2D t2 = v2.getTangentVector(this.clockwise);
-					
+
 					// If the obstacle is convex at the vertex, then add an arced expansion, otherwise add a point expansion.
 					// If the angular change matches the obstacle's rotational orientation then it is convex at this point.
 					if (vertexClockwise == this.clockwise) {
 						/*
 						 * Add an arced expansion.
 						 */
-						
+
 						// Get the start rotation of the arc.
 						double startRads = t1.getAngle();
-						
+
 						// Get the number of radians of rotation for the arc.
 						// Note that this should be negative in the clockwise case.
 						double rads = MathExtended.getAngularChange(startRads, t2.getAngle());
-						
+
 						// Approximate an arc with one inner vertex for every 45 degrees.
 						int numberOfInnerVertices = (int) Math.ceil(Math.abs(rads) / Math.PI * 4);
-						
+
 						List<Point2D> arcPoints = MathExtended.approximateArc(numberOfInnerVertices, startRads, rads, radius);
-						
+
 						// Add all of the arc points.
 						for (int j = 0; j < arcPoints.size(); j++) {
 							l.add(MathExtended.translate(p, arcPoints.get(j)));
@@ -242,20 +298,25 @@ public class Obstacle {
 						/*
 						 * Add a point expansion
 						 */
-						
+
 						// Get the earlier expanded edge parameters.
 						Vector2D t3 = t1.setLength(radius);
 						Point2D p3 = t3.addPoint(p);
-						
+
 						// Get the later expanded edge parameters.
 						Vector2D t4 = t2.setLength(radius);
 						Point2D p4 = t4.addPoint(p);
-						
+
 						// Get the intersection point between the two expanded edges.
-						Point2D intersectionPoint = MathExtended.getIntersectionPoint(p3, v1, p4, v2);
-						
-						// Add the intersection point as the sole expansion vertex.
-						l.add(intersectionPoint);
+						Point2D intersectionPoint = MathExtended.getExtendedIntersectionPoint(p3, v1, p4, v2);
+
+						if (intersectionPoint == null) {
+							Log.warning("Invalid intersection point.");
+						}
+						else {
+							// Add the intersection point as the sole expansion vertex.
+							l.add(intersectionPoint);
+						}
 					}
 				}
 			}

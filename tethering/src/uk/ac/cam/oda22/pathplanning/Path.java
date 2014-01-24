@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import uk.ac.cam.oda22.core.MathExtended;
 import uk.ac.cam.oda22.core.logging.Log;
 
 /**
@@ -37,7 +38,7 @@ public class Path {
 		this.points.addAll(ps);
 	}
 	
-	public boolean removePoint() {
+	public boolean removeLastPoint() {
 		if (this.points.size() == 0) {
 			Log.error("Cannot remove point from empty path.");
 			
@@ -103,6 +104,12 @@ public class Path {
 		return l;
 	}
 	
+	public boolean lengthExceeded(double maxLength, double fractionalError, double absoluteError) {
+		double length = this.length();
+		
+		return length > maxLength && !MathExtended.approxEqual(length, maxLength, fractionalError, absoluteError);
+	}
+	
 	public List<Line2D> getEdges() {
 		List<Line2D> edges = new LinkedList<Line2D>();
 		
@@ -118,8 +125,9 @@ public class Path {
 	
 	/**
 	 * Returns a section of the path.
+	 * The index range is inclusive.
 	 * 
-	 * @return subpath
+	 * @return sub-path
 	 */
 	public Path getSubpath(int startIndex, int endIndex) {
 		if (startIndex < 0 || endIndex >= this.points.size() || endIndex < startIndex) {
@@ -136,6 +144,30 @@ public class Path {
 		}
 		
 		return p;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) {
+			return false;
+		}
+		
+		Path p = (Path) o;
+		
+		// Return false if the number of points do not match.
+		if (this.points.size() != p.points.size()) {
+			return false;
+		}
+		
+		// Return false if any point does not match.
+		// Note that we will not deal with path homotopy.
+		for (int i = 0; i < this.points.size(); i++) {
+			if (!this.points.get(i).equals(p.points.get(i))) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 }
