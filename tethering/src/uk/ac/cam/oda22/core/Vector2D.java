@@ -1,5 +1,6 @@
 package uk.ac.cam.oda22.core;
 
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 /**
@@ -20,6 +21,11 @@ public class Vector2D {
 	public Vector2D(Point2D p, Point2D q) {
 		this.x = q.getX() - p.getX();
 		this.y = q.getY() - p.getY();
+	}
+
+	public Vector2D(Line2D l) {
+		this.x = l.getX2() - l.getX1();
+		this.y = l.getY2() - l.getY1();
 	}
 
 	public static Vector2D getTangentVector(double x, double y, boolean leftSide) {
@@ -59,6 +65,10 @@ public class Vector2D {
 
 	public Vector2D scale(double xScale, double yScale) {
 		return new Vector2D(this.x * xScale, this.y * yScale);
+	}
+	
+	public Vector2D negate() {
+		return new Vector2D(-x, -y);
 	}
 
 	public double getLength() {

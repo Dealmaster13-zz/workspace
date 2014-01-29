@@ -7,7 +7,7 @@ import uk.ac.cam.oda22.pathplanning.Path;
 
 /**
  * @author Oliver
- *
+ * 
  */
 public class TetherConfiguration extends Path {
 
@@ -30,8 +30,8 @@ public class TetherConfiguration extends Path {
 	}
 
 	/**
-	 * Changes the last point on the tether, and returns whether or not the last point had to be removed.
-	 * This is useful for movement.
+	 * Changes the last point on the tether, and returns whether or not the last
+	 * point had to be removed. This is useful for movement.
 	 * 
 	 * @param newPoint
 	 * @return true if last point was removed, false otherwise
@@ -46,4 +46,43 @@ public class TetherConfiguration extends Path {
 		return removedPoint;
 	}
 
+	/**
+	 * Returns a cropped tether which does not overlap with the robot near its
+	 * attachment point. This should work for all attachment points.
+	 * Note that this will not ensure that the tether is connected to the robot.
+	 * 
+	 * @param robotPosition
+	 * @param radius
+	 * @return cropped tether
+	 */
+	public TetherConfiguration getCroppedTetherToPreventRobotOverlap(
+			Point2D robotPosition, double radius) {
+		TetherConfiguration newTC = new TetherConfiguration(this);
+
+		int s = this.points.size();
+		
+		int index = s - 1;
+
+		boolean crossPointFound = false;
+
+		// Find the point at which the tether exits the robot area.
+		while (index >= 0 && !crossPointFound) {
+			Point2D p = this.points.get(index);
+
+			// If the tether is outside the robot area or on the circumference,
+			// then stop.
+			if (robotPosition.distance(p) >= radius) {
+				crossPointFound = true;
+			} else {
+				index--;
+			}
+		}
+
+		// Remove every tether segment which is outside of the robot area.
+		for (int i = s - 1; i > index; i--) {
+			newTC.removeLastPoint();
+		}
+		
+		return newTC;
+	}
 }

@@ -32,3 +32,8 @@
 1390581805420	Rename method 'removePoint'
 1390588369049	Rename local variable 'sourceSubPath'
 1390588373601	Rename local variable 'predecessors'
+1390699492169	Rename method 'retrievePath'
+1390699608095	Rename type 'TetheredAStarResult'
+1390700143916	Rename method 'getShortestPath'
+1390704149919	Rename local variable 'unchangedTether'
+1390704180486	Rename local variable 'u'

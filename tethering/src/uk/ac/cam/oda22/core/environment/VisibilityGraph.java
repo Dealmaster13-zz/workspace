@@ -10,7 +10,7 @@ import uk.ac.cam.oda22.core.logging.Log;
 
 /**
  * @author Oliver
- *
+ * 
  */
 public class VisibilityGraph {
 
@@ -31,7 +31,8 @@ public class VisibilityGraph {
 		this.edges = new ArrayList<VisibilityGraphEdge>();
 		this.obstacles = new ArrayList<Obstacle>();
 
-		// Ensure that the new edges use the new nodes by storing the appropriate node mapping.
+		// Ensure that the new edges use the new nodes by storing the
+		// appropriate node mapping.
 		Hashtable<VisibilityGraphNode, VisibilityGraphNode> nodeMapping = new Hashtable<VisibilityGraphNode, VisibilityGraphNode>();
 
 		for (VisibilityGraphNode node : g.nodes) {
@@ -46,7 +47,8 @@ public class VisibilityGraph {
 			VisibilityGraphNode startNode = nodeMapping.get(edge.startNode);
 			VisibilityGraphNode endNode = nodeMapping.get(edge.endNode);
 
-			this.edges.add(new VisibilityGraphEdge(startNode, endNode, edge.weight, edge.isObstacleEdge));
+			this.edges.add(new VisibilityGraphEdge(startNode, endNode,
+					edge.weight, edge.isObstacleEdge));
 		}
 
 		for (Obstacle o : g.obstacles) {
@@ -55,8 +57,8 @@ public class VisibilityGraph {
 	}
 
 	/**
-	 * Gets the list of nodes visible to a particular point.
-	 * This should not be used if point p exists in the visibility graph as a node.
+	 * Gets the list of nodes visible to a particular point. This should not be
+	 * used if point p exists in the visibility graph as a node.
 	 * 
 	 * @param p
 	 * @return nodes visible to p
@@ -89,8 +91,7 @@ public class VisibilityGraph {
 		for (VisibilityGraphEdge e : this.edges) {
 			if (e.startNode == node) {
 				l.add(e.endNode);
-			}
-			else if (e.endNode == node) {
+			} else if (e.endNode == node) {
 				l.add(e.startNode);
 			}
 		}
@@ -99,8 +100,8 @@ public class VisibilityGraph {
 	}
 
 	/**
-	 * Adds a node to the visibility graph at the given point.
-	 * This is typically only used to add a start or goal node.
+	 * Adds a node to the visibility graph at the given point. This is typically
+	 * only used to add a start or goal node.
 	 * 
 	 * @param p
 	 * @return node if added, null otherwise
@@ -110,7 +111,7 @@ public class VisibilityGraph {
 
 		// Check if there is already a node at point p.
 		VisibilityGraphNode existingNode = getNode(p);
-		
+
 		// If a node does not already exist at point p then add the node.
 		if (existingNode == null) {
 			this.nodes.add(node);
@@ -122,7 +123,7 @@ public class VisibilityGraph {
 			return node;
 		}
 
-		// Return null if the 
+		// Return null if the
 		return existingNode;
 	}
 
@@ -144,7 +145,8 @@ public class VisibilityGraph {
 		this.obstacles.add(obstacle);
 
 		if (addPointsAndEdges) {
-			// Add a new node for each obstacle vertex, and add the visible edges to any existing nodes.
+			// Add a new node for each obstacle vertex, and add the visible
+			// edges to any existing nodes.
 			for (Point2D p : obstacle.points) {
 				this.addNode(p);
 			}
@@ -171,8 +173,8 @@ public class VisibilityGraph {
 	}
 
 	/**
-	 * Checks if an edge can be added between two nodes, and adds the edge if possible.
-	 * Returns whether or not an edge was added.
+	 * Checks if an edge can be added between two nodes, and adds the edge if
+	 * possible. Returns whether or not an edge was added.
 	 * 
 	 * @param p
 	 * @param q
@@ -180,11 +182,13 @@ public class VisibilityGraph {
 	 * @return true if the edge was added, false otherwise
 	 */
 	private boolean tryAddEdge(VisibilityGraphNode p, VisibilityGraphNode q) {
-		// Get the visibility between the two vertices by checking if any room obstacles are in the way.
+		// Get the visibility between the two vertices by checking if any room
+		// obstacles are in the way.
 		NodeVisibility visibility = this.getVisibility(p.p, q.p);
 
 		// Add the edge if q is at least partly visible from p.
-		if (visibility != NodeVisibility.SAME_POINT && visibility.isPartlyVisible()) {
+		if (visibility != NodeVisibility.SAME_POINT
+				&& visibility.isPartlyVisible()) {
 			double weight = p.p.distance(q.p);
 
 			boolean isObstacleEdge = visibility == NodeVisibility.ALONG_OBSTACLE_EDGE;
@@ -211,7 +215,8 @@ public class VisibilityGraph {
 	}
 
 	/**
-	 * Calculates the visibility between two points by checking if any room obstacles are in the way.
+	 * Calculates the visibility between two points by checking if any room
+	 * obstacles are in the way.
 	 * 
 	 * @param p
 	 * @param q
@@ -229,11 +234,14 @@ public class VisibilityGraph {
 			int index = 0;
 
 			// For each obstacle, check if it blocks visibility.
-			while (visibility != NodeVisibility.NOT_VISIBLE && index < this.obstacles.size()) {
+			while (visibility != NodeVisibility.NOT_VISIBLE
+					&& index < this.obstacles.size()) {
 				Obstacle o = this.obstacles.get(index);
 
-				// Calculate if the line formed between the two points intersects with the obstacle.
-				ObstacleLineIntersectionResult intersection = o.intersectsLine(l);
+				// Calculate if the line formed between the two points
+				// intersects with the obstacle.
+				ObstacleLineIntersectionResult intersection = o
+						.intersectsLine(l);
 
 				switch (intersection) {
 				case CROSSED:
@@ -248,7 +256,7 @@ public class VisibilityGraph {
 					break;
 				}
 
-				index ++;
+				index++;
 			}
 
 			return visibility;

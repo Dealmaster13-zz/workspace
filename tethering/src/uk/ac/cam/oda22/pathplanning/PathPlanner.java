@@ -15,6 +15,8 @@ import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.core.pathfinding.astar.AStarGraph;
 import uk.ac.cam.oda22.core.pathfinding.astar.AStarNode;
 import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarPathfinding;
+import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarShortestPathResult;
+import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarSinglePathResult;
 import uk.ac.cam.oda22.core.robots.Robot;
 import uk.ac.cam.oda22.core.robots.actions.IRobotAction;
 import uk.ac.cam.oda22.core.robots.actions.MoveAction;
@@ -27,30 +29,37 @@ import uk.ac.cam.oda22.core.tethers.TetherPoint;
 
 /**
  * @author Oliver
- *
+ * 
  */
 public final class PathPlanner {
 
-	public static PathPlanningResult performPathPlanning(Room room, Robot robot, Point2D goal, int tetherSegments) {
+	public static PathPlanningResult performPathPlanning(Room room,
+			Robot robot, Point2D goal, int tetherSegments) {
 		/*
-		 * Note that Step 1 (triangulate the environment) is carried 
-		 * out by default in the Room class.
-		 * Note that Step 2 (compute the visibility graph) is carried 
-		 * out by default in the Room class.
+		 * Note that Step 1 (triangulate the environment) is carried out by
+		 * default in the Room class. Note that Step 2 (compute the visibility
+		 * graph) is carried out by default in the Room class.
 		 */
 
 		// Expand all of the obstacles.
-		////List<Obstacle> expandedObstacles = room.getExpandedObstacles(robot.radius);
+		// //List<Obstacle> expandedObstacles =
+		// room.getExpandedObstacles(robot.radius);
 
 		/*
 		 * TODO: Also check if the robot can reach the goal despite its size.
 		 */
-		
+
+		// Fail if the goal is not in empty space.
 		if (!room.isPointInEmptySpace(goal)) {
-			Log.error("Goal (" + goal.getX() + ", " + goal.getY() + ") is not reachable.");
+			Log.error("Goal (" + goal.getX() + ", " + goal.getY()
+					+ ") is not reachable.");
 
 			return null;
 		}
+
+		/*
+		 * TODO: Fail if the robot in not in empty space.
+		 */
 
 		VisibilityGraph visibilityGraph = generateVisibilityGraph(room.obstacles);
 
@@ -60,32 +69,38 @@ public final class PathPlanner {
 		Point2D startNode = robot.getPosition();
 
 		/*
-		 * Step 3: Find the vertices visible from the start position 
-		 * and order them by their angle relative to s.
+		 * Step 3: Find the vertices visible from the start position and order
+		 * them by their angle relative to s.
 		 */
-		List<VisibilityGraphNode> l = visibilityGraph.getVisibleNodes(startNode);
+		List<VisibilityGraphNode> l = visibilityGraph
+				.getVisibleNodes(startNode);
 		sortNodesByAngle(startNode, l);
 
 		/*
-		 * Step 4: Compute the changes that occur in the visible 
-		 * vertices of the reverse path.
+		 * Step 4: Compute the changes that occur in the visible vertices of the
+		 * reverse path.
 		 */
-		List<TetherPointVisibility> visibility = getTetherPointVisibilitySets(robot.tether, tetherSegments, room, visibilityGraph);
+		List<TetherPointVisibility> visibility = getTetherPointVisibilitySets(
+				robot.tether, tetherSegments, room, visibilityGraph);
 
 		/*
-		 * Step 5: Compute the optimal distance to backtrack and then proceed to the goal via the shortest path.
+		 * Step 5: Compute the optimal distance to backtrack and then proceed to
+		 * the goal via the shortest path.
 		 */
 		List<VisibilityChangeList> vList = calculateVisibilitySetChanges(visibility);
-		Path optimalPath = computeOptimalPath(vList, robot.tether, room, visibilityGraph, goal);
+		TetheredPath optimalPath = computeOptimalPath(vList, robot.tether,
+				room, visibilityGraph, goal, robot.radius);
 
-		// Generate the robot actions which are required to be executed given the optimal path.
-		List<IRobotAction> actions = generateActionsFromPath(optimalPath, robot.getRotation(), robot.rotationalSensitivity);
+		// Generate the robot actions which are required to be executed given
+		// the optimal path.
+		List<IRobotAction> actions = generateActionsFromPath(optimalPath.path,
+				robot.getRotation(), robot.rotationalSensitivity);
 
 		return new PathPlanningResult(actions, optimalPath);
 	}
 
 	public static PathPlanningResult returnToBase() {
-		//TODO: Extension task: implement this method.
+		// TODO: Extension task: implement this method.
 
 		return null;
 	}
@@ -95,10 +110,12 @@ public final class PathPlanner {
 	 * 
 	 * @return the visibility graph
 	 */
-	private static VisibilityGraph generateVisibilityGraph(List<Obstacle> obstacles) {
+	private static VisibilityGraph generateVisibilityGraph(
+			List<Obstacle> obstacles) {
 		VisibilityGraph g = new VisibilityGraph();
 
-		// Add all of the obstacles which also adds the relevant points and edges of the visibility graph.
+		// Add all of the obstacles which also adds the relevant points and
+		// edges of the visibility graph.
 		for (Obstacle o : obstacles) {
 			g.addObstacle(o, true);
 		}
@@ -107,19 +124,21 @@ public final class PathPlanner {
 	}
 
 	/**
-	 * Step 3 (second half).
-	 * Sorts the neighbouring nodes of a particular start node by their angle relative to the start node.
+	 * Step 3 (second half). Sorts the neighbouring nodes of a particular start
+	 * node by their angle relative to the start node.
 	 * 
 	 * @param startNode
 	 * @param neighbours
 	 */
-	private static void sortNodesByAngle(Point2D startNode, List<VisibilityGraphNode> neighbours) {
+	private static void sortNodesByAngle(Point2D startNode,
+			List<VisibilityGraphNode> neighbours) {
 		List<Double> angles = new ArrayList<Double>();
 
 		for (int i = 0; i < neighbours.size(); i++) {
 			Point2D p = neighbours.get(i).p;
 
-			double angle = Math.atan2(startNode.getY() - p.getY(), startNode.getX() - p.getX());
+			double angle = Math.atan2(startNode.getY() - p.getY(),
+					startNode.getX() - p.getX());
 
 			angles.add(angle);
 		}
@@ -145,9 +164,9 @@ public final class PathPlanner {
 	}
 
 	/**
-	 * Step 4.
-	 * Computes which vertices are visible from different points on the tether, from the robot to the anchor point.
-	 * TODO: Replace algorithm with continuous solution.
+	 * Step 4. Computes which vertices are visible from different points on the
+	 * tether, from the robot to the anchor point. TODO: Replace algorithm with
+	 * continuous solution.
 	 * 
 	 * @param t
 	 * @param tetherSegments
@@ -155,9 +174,7 @@ public final class PathPlanner {
 	 * @return tether point visibility sets
 	 */
 	private static List<TetherPointVisibility> getTetherPointVisibilitySets(
-			Tether t,
-			int tetherSegments,
-			Room room,
+			Tether t, int tetherSegments, Room room,
 			VisibilityGraph visibilityGraph) {
 		List<TetherPointVisibility> tetherPointVisibilitySets = new LinkedList<TetherPointVisibility>();
 
@@ -165,14 +182,17 @@ public final class PathPlanner {
 
 		double interval = l / tetherSegments;
 
-		// w is the distance along the tether from the robot to the anchor point.
+		// w is the distance along the tether from the robot to the anchor
+		// point.
 		double w = 0;
 
 		boolean complete = false;
 
-		// Compute the visible vertices from equally spaced points on the tether.
+		// Compute the visible vertices from equally spaced points on the
+		// tether.
 		while (!complete) {
-			// Get the position starting from the robot, so use the reverse distance.
+			// Get the position starting from the robot, so use the reverse
+			// distance.
 			Point2D p = t.getPositionByDistance(l - w);
 
 			if (p == null) {
@@ -182,7 +202,8 @@ public final class PathPlanner {
 			}
 
 			// Compute the visible nodes.
-			List<VisibilityGraphNode> visibleNodes = visibilityGraph.getVisibleNodes(p);
+			List<VisibilityGraphNode> visibleNodes = visibilityGraph
+					.getVisibleNodes(p);
 
 			List<Point2D> visibleVertices = new ArrayList<Point2D>();
 
@@ -201,7 +222,8 @@ public final class PathPlanner {
 			List<TetherPoint> pList = new ArrayList<TetherPoint>();
 			pList.add(new TetherPoint(p, w));
 
-			tetherPointVisibilitySets.add(new TetherPointVisibility(w, nextW, pList, visibleVertices));
+			tetherPointVisibilitySets.add(new TetherPointVisibility(w, nextW,
+					pList, visibleVertices));
 
 			// Finish once the whole tether has been analysed.
 			if (w >= l) {
@@ -210,8 +232,7 @@ public final class PathPlanner {
 				if (w > l) {
 					Log.error("Tether position is out of range.");
 				}
-			}
-			else {
+			} else {
 				w = nextW;
 			}
 		}
@@ -223,13 +244,14 @@ public final class PathPlanner {
 	}
 
 	/**
-	 * Step 4 (second half).
-	 * Merges the visibility sets.
+	 * Step 4 (second half). Merges the visibility sets.
 	 * 
 	 * @param sets
 	 */
-	private static void mergeDuplicateVisibilitySets(List<TetherPointVisibility> sets) {
-		// Iterate backwards over the list of sets, merging any duplicates containing the same visibility set as the previous element.
+	private static void mergeDuplicateVisibilitySets(
+			List<TetherPointVisibility> sets) {
+		// Iterate backwards over the list of sets, merging any duplicates
+		// containing the same visibility set as the previous element.
 		for (int i = sets.size() - 2; i >= 0; i--) {
 			TetherPointVisibility previous = sets.get(i + 1);
 			TetherPointVisibility current = sets.get(i);
@@ -244,12 +266,12 @@ public final class PathPlanner {
 	}
 
 	/**
-	 * Step 5a.
-	 * Calculates the changes in the visibility sets.
+	 * Step 5a. Calculates the changes in the visibility sets.
 	 * 
 	 * @param s
 	 */
-	private static List<VisibilityChangeList> calculateVisibilitySetChanges(List<TetherPointVisibility> s) {
+	private static List<VisibilityChangeList> calculateVisibilitySetChanges(
+			List<TetherPointVisibility> s) {
 		List<VisibilityChangeList> v = new ArrayList<VisibilityChangeList>();
 
 		// Keep all visible vertices for the first section.
@@ -260,13 +282,14 @@ public final class PathPlanner {
 			visibleVertices.add(vs.get(i));
 		}
 
-		VisibilityChangeList v_0 = new VisibilityChangeList(visibleVertices, s.get(0).tetherPoints);
+		VisibilityChangeList v_0 = new VisibilityChangeList(visibleVertices,
+				s.get(0).tetherPoints);
 
 		v.add(v_0);
 
-		// For each section of unchanging visible vertices, compute 
-		// the set of vertices containing each visible vertex which 
-		// was not visible in the previous section.
+		// For each section of unchanging visible vertices, compute the set of
+		// vertices containing each visible vertex which was not visible in the
+		// previous section.
 		for (int i = 1; i < s.size(); i++) {
 			List<Point2D> previousVertices = s.get(i - 1).visibleVertices;
 			List<Point2D> currentVertices = s.get(i).visibleVertices;
@@ -282,7 +305,8 @@ public final class PathPlanner {
 				}
 			}
 
-			VisibilityChangeList v_i = new VisibilityChangeList(changes, s.get(i).tetherPoints);
+			VisibilityChangeList v_i = new VisibilityChangeList(changes,
+					s.get(i).tetherPoints);
 
 			v.add(v_i);
 		}
@@ -291,21 +315,24 @@ public final class PathPlanner {
 	}
 
 	/**
-	 * Step 5b.
-	 * Computes the optimal path using the visibility change lists.
-	 * TODO: Prevent the ability to cross the robot's tether.
+	 * Step 5b. Computes the optimal path, and its associated final tether
+	 * configuration, using the visibility change lists.
 	 * 
 	 * @param v
-	 * @return
+	 * @param t
+	 * @param room
+	 * @param visibilityGraph
+	 * @param goal
+	 * @param robotRadius
+	 * @return optimal tethered path
 	 */
-	private static Path computeOptimalPath(
-			List<VisibilityChangeList> v,
-			Tether t,
-			Room room,
-			VisibilityGraph visibilityGraph,
-			Point2D goal) {
+	private static TetheredPath computeOptimalPath(
+			List<VisibilityChangeList> v, Tether t, Room room,
+			VisibilityGraph visibilityGraph, Point2D goal, double robotRadius) {
 		Path optimalPath = null;
 		Path currentPath;
+
+		TetherConfiguration optimalTC = null;
 
 		double tetherUsedLength = t.getUsedLength();
 
@@ -315,152 +342,177 @@ public final class PathPlanner {
 
 			// For each visible vertex.
 			for (int j = 0; j < v_i.vertices.size(); j++) {
-				currentPath = new Path();
-
 				// Get the visible vertex.
 				Point2D vertex = v_i.vertices.get(j);
 
-				// Get the point closest to the robot, along the tether, in this visibility change section.
+				// Get the point closest to the robot, along the tether, in this
+				// visibility change section.
 				TetherPoint x = v_i.getClosestPoint(true);
 
 				/*
-				 * Step 5bi and step 5bii.
+				 * Step 5bi and step 5bii. Compute the tether configuration if
+				 * the robot were to retract to point x, move to vertex, and
+				 * finally take the shortest path to the goal without crossing
+				 * the tether or exceeding its length.
 				 */
 
-				Path q = new Path();
+				// Get the portion of the tether which should be kept as is,
+				// i.e. from the anchor point to x.
+				// Note that x.w is a reverse distance, so we subtract it from
+				// the tether length.
+				double tetherSegmentDistance = tetherUsedLength - x.w;
+				TetherConfiguration tetherConfiguration = getTetherConfigurationSegment(
+						t, 0, tetherSegmentDistance);
 
-				Path tetherStartSegmentPath;
+				// Calculate the updated configuration having travelled to
+				// vertex.
+				tetherConfiguration = TetheredAStarPathfinding
+						.computeTetherChange(tetherConfiguration, t.length,
+								vertex, room.obstacles, robotRadius);
 
-				// This is the portion of the tether which should be kept as is, i.e. from the anchor point to x.
-				// Note that x.w is a reverse distance, so we subtract it from the tether length.
-				double tetherStartSegmentDistance = tetherUsedLength - x.w;
+				boolean tetherLengthExceeded = tetherConfiguration == null
+						|| tetherConfiguration.lengthExceeded(t.length,
+								0.00001, 0.00001);
 
-				if (t instanceof SimpleTether) {
-					SimpleTether tether = (SimpleTether) t;
+				// Compute the shortest paths from vertex to the goal, if the
+				// tether length has not already been exceeded.
+				TetheredAStarShortestPathResult shortestPaths = !tetherLengthExceeded ? getShortestPaths(
+						vertex, goal, visibilityGraph, tetherConfiguration,
+						t.length, robotRadius) : null;
 
-					SimpleTetherSegment tetherSegment = (SimpleTetherSegment) tether.getTetherSegment(0, tetherStartSegmentDistance);
+				// Skip if no shortest path was found.
+				if (shortestPaths != null
+						&& shortestPaths.shortestPathResults.size() > 0) {
+					// Take an arbitrary shortest path and tether configuration
+					// - in this case the first one.
+					// Note that q-bar is the new tether configuration.
+					TetheredAStarSinglePathResult shortestPath = shortestPaths.shortestPathResults
+							.get(0);
+					Path vToG = shortestPath.path;
+					TetherConfiguration newTC = shortestPath.tetherConfiguration;
 
-					// Ensure that the tether segment ends at the correct position.
-					if (!MathExtended.approxEqual(x.x, ListFunctions.getLast(tetherSegment.path.points), 0.0001, 0.0001)) {
-						Log.error("Malformed tether segment.");
+					// Fail if the path is null, empty, or does not reach the
+					// goal.
+					if (vToG == null || vToG.isEmpty()
+							|| !ListFunctions.getLast(vToG.points).equals(goal)) {
+						Log.error("The shortest path from v to the goal was not found.");
 
 						return null;
 					}
 
-					tetherStartSegmentPath = tetherSegment.path;
-				}
-				else {
-					Log.error("Unsupported tether type.");
+					// Fail if the path does not contain vertex.
+					if (!vToG.contains(vertex)) {
+						Log.error("The shortest path from v to the goal does not contain v.");
 
-					return null;
-				}
+						return null;
+					}
 
-				// TODO: Retract the tether due to movement from x to v.
+					tetherLengthExceeded = newTC.lengthExceeded(t.length,
+							0.0001, 0.0001);
 
-				// Compute the shortest path from vertex to the goal.
-				Path vToG = getShortestPath(vertex, goal, visibilityGraph, t.getConfiguration(), t.length);
+					boolean tetherCrossed = MathExtended
+							.strictPathIntersectsItself(newTC);
 
-				// If the path is null or empty then fail.
-				if (vToG == null || vToG.isEmpty()) {
-					Log.error("The shortest path from v to g was not found.");
-
-					return null;
-				}
-
-				// If the path does not contain vertex then fail.
-				if (!vToG.contains(vertex)) {
-					Log.error("The shortest path from v to g does not contain v.");
-
-					return null;
-				}
-
-				// The path is the tether up to x, concatenated with the direct path from x to vertex, 
-				// concatenated with the shortest path from vertex to the goal.
-				// Note that vertex is contained in vToG.
-				q.addPoints(tetherStartSegmentPath.points);
-				q.addPoints(vToG.points);
-
-				boolean tetherLengthExceeded = q.lengthExceeded(t.length, 0.0001, 0.0001);
-
-				boolean tetherCrossed = MathExtended.strictPathIntersectsItself(q);
-
-				/*
-				 * Step 5biii - skip if the tether length exceeds its limit, or if the tether is crossed.
-				 * Note that we only need to make a check here as if the tether is ever crossed then it is crossed in the final configuration.
-				 */
-
-				if (!tetherLengthExceeded && !tetherCrossed) {
 					/*
-					 * Step 5biv and step 5bv.
+					 * Step 5biii. Skip if the tether length exceeds its limit,
+					 * or if the tether is crossed.
 					 */
 
-					currentPath = new Path();
+					if (!tetherLengthExceeded && !tetherCrossed) {
+						/*
+						 * Step 5biv and step 5bv. Compute the path that the
+						 * robot has to take - retract down the tether to x,
+						 * move to vertex, and take the shortest valid path to
+						 * goal. Compare this result with the best one found so
+						 * far.
+						 */
 
-					Path forwardTetherSegmentPath;
+						currentPath = new Path();
 
-					if (t instanceof SimpleTether) {
-						SimpleTether tether = (SimpleTether) t;
+						// Get the (reverse) path from the robot's initial
+						// position
+						// to tether point x.
+						Path forwardTetherSegmentPath = getTetherConfigurationSegment(
+								t, tetherSegmentDistance, tetherUsedLength);
+						Path reversePath = forwardTetherSegmentPath.reverse();
 
-						SimpleTetherSegment tetherSegment = (SimpleTetherSegment) tether.getTetherSegment(tetherStartSegmentDistance, tetherUsedLength);
+						// The overall path is the reverse tether segment from
+						// the robot to tether point x, concatenated with the
+						// direct path from x to vertex, concatenated with the
+						// shortest path from vertex to the goal.
+						// Note that vertex is contained in vToG.
+						currentPath.addPoints(reversePath.points);
+						currentPath.addPoints(vToG.points);
 
-						// Ensure that the tether segment starts at the correct position.
-						if (!MathExtended.approxEqual(x.x, tetherSegment.path.points.get(0), 0.00001, 0.00001)) {
-							Log.error("Malformed tether segment.");
-
-							return null;
+						// If the current path length is the shortest found so
+						// far, then set the optimal path to this new path.
+						if (optimalPath == null
+								|| currentPath.length() < optimalPath.length()) {
+							optimalPath = currentPath;
+							optimalTC = tetherConfiguration;
 						}
-
-						forwardTetherSegmentPath = tetherSegment.path;
-					}
-					else {
-						Log.error("Unsupported tether type.");
-
-						return null;
-					}
-
-					Path reversePath = forwardTetherSegmentPath.reverse();
-
-					// The path is the reverse tether segment from the robot to tether point x, concatenated with the 
-					// direct path from x to vertex, concatenated with the shortest path from vertex to the goal.
-					// Note that vertex is contained in vToG.
-					currentPath.addPoints(reversePath.points);
-					currentPath.addPoints(vToG.points);
-
-					// If the current path length is the shortest found so far, then set the optimal path to this new path.
-					if (optimalPath == null || currentPath.length() < optimalPath.length()) {
-						optimalPath = currentPath;
 					}
 				}
 			}
 		}
 
-		return optimalPath;
+		return new TetheredPath(optimalPath, optimalTC);
 	}
 
 	/**
-	 * Step 5bi (second half) and step 5bii.
-	 * Computes the shortest path from a vertex (obstacle) to the goal.
+	 * Helper function for step 5bi, to get a tether segment as a tether
+	 * configuration.
+	 * 
+	 * @param t
+	 * @param startW
+	 * @param endW
+	 * @return tether configuration
+	 */
+	private static TetherConfiguration getTetherConfigurationSegment(Tether t,
+			double startW, double endW) {
+		if (t instanceof SimpleTether) {
+			SimpleTether tether = (SimpleTether) t;
+
+			SimpleTetherSegment tetherSegment = (SimpleTetherSegment) tether
+					.getTetherSegment(startW, endW);
+			return new TetherConfiguration(tetherSegment.path.points);
+		} else {
+			Log.error("Unsupported tether type.");
+
+			return null;
+		}
+	}
+
+	/**
+	 * Step 5bi (second half) and step 5bii. Computes the shortest paths from a
+	 * vertex (obstacle) to the goal.
 	 * 
 	 * @param source
 	 * @param destination
 	 * @param visibilityGraph
 	 * @param tetherConfiguration
 	 * @param maxTetherLength
+	 * @param robotRadius
 	 * @return
 	 */
-	private static Path getShortestPath(
-			Point2D source,
-			Point2D destination,
+	private static TetheredAStarShortestPathResult getShortestPaths(
+			Point2D source, Point2D destination,
 			VisibilityGraph visibilityGraph,
-			TetherConfiguration tetherConfiguration,
-			double maxTetherLength) {
+			TetherConfiguration tetherConfiguration, double maxTetherLength,
+			double robotRadius) {
 		// If the points are equal then return the path with a single node.
 		if (source.equals(destination)) {
-			return new Path(destination);
+			Path path = new Path(destination);
+			TetherConfiguration tc = new TetherConfiguration(
+					tetherConfiguration);
+			TetheredAStarSinglePathResult shortestPathResult = new TetheredAStarSinglePathResult(
+					path, tc);
+			return new TetheredAStarShortestPathResult(shortestPathResult);
 		}
 
 		// Create a visibility graph including the source and destination nodes.
-		// Note that if either vertex already exists then a new node will not be added, and the existing node will be returned.
+		// Note that if either vertex already exists then a new node will not be
+		// added, and the existing node will be returned.
 		VisibilityGraph g = new VisibilityGraph(visibilityGraph);
 		VisibilityGraphNode sourceNode = g.addNode(source);
 		VisibilityGraphNode destinationNode = g.addNode(destination);
@@ -477,17 +529,29 @@ public final class PathPlanner {
 		AStarNode aStarSource = aStarGraph.getNode(sourceNode);
 		AStarNode aStarDestination = aStarGraph.getNode(destinationNode);
 
-		boolean pathFound = TetheredAStarPathfinding.getShortestPath(aStarGraph, aStarSource, aStarDestination, tetherConfiguration, maxTetherLength);
+		boolean pathFound = TetheredAStarPathfinding.getShortestPath(
+				aStarGraph, aStarSource, aStarDestination, tetherConfiguration,
+				maxTetherLength, robotRadius);
 
-		// Fail if no path was found.
+		// Return null if no path was found.
 		if (!pathFound) {
 			return null;
 		}
 
-		return TetheredAStarPathfinding.retrievePath(aStarDestination);
+		return TetheredAStarPathfinding
+				.retrieveShortestPathResult(aStarDestination);
 	}
 
-	private static List<IRobotAction> generateActionsFromPath(Path path, double initialRotation, double rotationalSensitivity) {
+	/**
+	 * Generates robot actions given a path.
+	 * 
+	 * @param path
+	 * @param initialRotation
+	 * @param rotationalSensitivity
+	 * @return robot actions
+	 */
+	private static List<IRobotAction> generateActionsFromPath(Path path,
+			double initialRotation, double rotationalSensitivity) {
 		List<IRobotAction> actions = new LinkedList<IRobotAction>();
 
 		// If there is no path to traverse then return an empty actions list.
@@ -502,9 +566,12 @@ public final class PathPlanner {
 		for (int i = 1; i < path.points.size(); i++) {
 			Point2D nextPoint = path.points.get(i);
 
-			double direction = Math.atan2(nextPoint.getY() - currentPoint.getY(), nextPoint.getX() - currentPoint.getX());
+			double direction = Math.atan2(
+					nextPoint.getY() - currentPoint.getY(), nextPoint.getX()
+							- currentPoint.getX());
 
-			double angularChange = MathExtended.getAngularChange(currentRotation, direction);
+			double angularChange = MathExtended.getAngularChange(
+					currentRotation, direction);
 
 			if (Math.abs(angularChange) >= rotationalSensitivity) {
 				RotateAction rotateAction = new RotateAction(angularChange);
@@ -513,7 +580,8 @@ public final class PathPlanner {
 				currentRotation = direction;
 			}
 
-			MoveAction moveAction = new MoveAction(currentPoint.distance(nextPoint));
+			MoveAction moveAction = new MoveAction(
+					currentPoint.distance(nextPoint));
 			moveAction.addAction(actions);
 
 			currentPoint = nextPoint;
