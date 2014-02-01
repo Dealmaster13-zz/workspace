@@ -3,6 +3,7 @@ package uk.ac.cam.oda22.simulation;
 import java.awt.Color;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Line2D.Double;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,8 @@ import javax.swing.SwingUtilities;
 import uk.ac.cam.oda22.core.ShapeFunctions;
 import uk.ac.cam.oda22.core.environment.Obstacle;
 import uk.ac.cam.oda22.core.environment.Room;
+import uk.ac.cam.oda22.core.environment.VisibilityGraph;
+import uk.ac.cam.oda22.core.environment.VisibilityGraphEdge;
 import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.core.robots.PointRobot;
 import uk.ac.cam.oda22.core.robots.RectangularRobot;
@@ -46,7 +49,7 @@ public class Simulator {
 
 	/**
 	 * @param args
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws InterruptedException {
@@ -76,9 +79,9 @@ public class Simulator {
 
 		// Sleep for one second so that the visualiser has time to initialise.
 		Thread.sleep(1000);
-		
+
 		// Draw the graphics.
-		drawRoom(room, robot.radius);
+		drawRoom(room, robot.radius, true, false, true);
 		drawRobot(robot);
 		drawGoal(goal);
 		drawTether(robot.tether);
@@ -131,7 +134,8 @@ public class Simulator {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unused")
-	private static Tether createTether1_1(double maxTetherLength) throws Exception {
+	private static Tether createTether1_1(double maxTetherLength)
+			throws Exception {
 		Point2D anchor = new Point2D.Double(0, 0);
 
 		TetherConfiguration X = new TetherConfiguration();
@@ -147,7 +151,8 @@ public class Simulator {
 	 * @return
 	 * @throws Exception
 	 */
-	private static Tether createTether1_2(double maxTetherLength) throws Exception {
+	private static Tether createTether1_2(double maxTetherLength)
+			throws Exception {
 		Point2D anchor = new Point2D.Double(0, 0);
 
 		TetherConfiguration X = new TetherConfiguration();
@@ -194,22 +199,36 @@ public class Simulator {
 		});
 	}
 
-	private static void drawRoom(Room room, double robotRadius) {
+	private static void drawRoom(Room room, double robotRadius,
+			boolean drawExpandedObstacles, boolean drawVisibilityGraph,
+			boolean drawExpandedVisibilityGraph) {
 		for (Obstacle o : room.obstacles) {
-			for (Line2D edge : o.edges) {
-				Line line = new Line(edge, Color.black, 2);
-
-				visualiser.drawLine(line);
-			}
+			drawLines(o.edges, Color.black, 2);
 		}
 		
-		List<Obstacle> expandedObstacles = room.getExpandedObstacles(robotRadius);
-		
-		for (Obstacle o : expandedObstacles) {
-			for (Line2D edge : o.edges) {
-				Line line = new Line(edge, Color.yellow, 2);
+		if (drawVisibilityGraph) {
+			// Draw the visibility graph.
+			VisibilityGraph g = new VisibilityGraph(room.obstacles);
+			
+			drawVisibilityGraph(g);
+		}
 
-				visualiser.drawLine(line);
+		if (drawExpandedObstacles || drawExpandedVisibilityGraph) {
+			List<Obstacle> expandedObstacles = room
+					.getExpandedObstacles(robotRadius);
+
+			if (drawExpandedObstacles) {
+				// Draw the expanded obstacles.
+				for (Obstacle o : expandedObstacles) {
+					drawLines(o.edges, Color.orange, 2);
+				}
+			}
+			
+			if (drawExpandedVisibilityGraph) {
+				// Draw the expanded visibility graph.
+				VisibilityGraph g = new VisibilityGraph(expandedObstacles);
+				
+				drawVisibilityGraph(g);
 			}
 		}
 	}
@@ -275,6 +294,22 @@ public class Simulator {
 			visualiser.drawLine(line);
 
 			previousPoint = path.points.get(i);
+		}
+	}
+	
+	private static void drawVisibilityGraph(VisibilityGraph g) {
+		for (VisibilityGraphEdge edge : g.edges) {
+			Line line = new Line(edge.getLine(), Color.yellow, 1);
+			
+			visualiser.drawLine(line);
+		}
+	}
+	
+	private static void drawLines(List<Line2D> lines, Color colour, double thickness) {
+		for (Line2D l : lines) {
+			Line line = new Line(l, colour, 2);
+
+			visualiser.drawLine(line);
 		}
 	}
 

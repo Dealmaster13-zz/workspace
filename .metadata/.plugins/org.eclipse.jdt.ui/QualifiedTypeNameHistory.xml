@@ -5,7 +5,6 @@
 <fullyQualifiedTypeName name="org.testng.Assert"/>
 <fullyQualifiedTypeName name="java.util.HashSet"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.SimpleTether"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.VisibilityGraphEdge"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.astar.AStarEdge"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.astar.AStarPathfinding"/>
 <fullyQualifiedTypeName name="java.awt.geom.Ellipse2D"/>
@@ -13,7 +12,6 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.actions.MoveAction"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.actions.IRobotAction"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.actions.RotateAction"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.VisibilityGraph"/>
 <fullyQualifiedTypeName name="lejos.robotics.navigation.DestinationUnreachableException"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.PathPlanningResult"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.StraightSweepSegment"/>
@@ -32,12 +30,9 @@
 <fullyQualifiedTypeName name="java.awt.geom.Rectangle2D"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ShapeFunctions"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.RectangularRobot"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.NodeVisibility"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.VisibilityGraphNode"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.astar.AStarNode"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.graphs.Node"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.astar.AStarGraph"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.Obstacle"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.PointOnLineResult"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.Triangle2D"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.logging.Log"/>
@@ -47,10 +42,8 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarResult"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarShortestPathResult"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarSinglePathResult"/>
-<fullyQualifiedTypeName name="java.awt.geom.Line2D.Double"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.MathExtended"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.Vector2D"/>
-<fullyQualifiedTypeName name="java.awt.geom.Line2D"/>
 <fullyQualifiedTypeName name="java.awt.geom.Point2D.Double"/>
 <fullyQualifiedTypeName name="java.awt.geom.Point2D"/>
 <fullyQualifiedTypeName name="java.util.List"/>
@@ -60,4 +53,11 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarPathfinding"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.TetherConfiguration"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.TetheredPath"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.Obstacle"/>
+<fullyQualifiedTypeName name="java.awt.geom.Line2D"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.VisibilityGraph"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.NodeVisibility"/>
+<fullyQualifiedTypeName name="java.awt.geom.Line2D.Double"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.VisibilityGraphEdge"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.VisibilityGraphNode"/>
 </qualifiedTypeNameHistroy>

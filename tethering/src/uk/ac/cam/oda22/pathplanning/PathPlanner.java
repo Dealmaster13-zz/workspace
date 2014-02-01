@@ -41,9 +41,12 @@ public final class PathPlanner {
 		 * graph) is carried out by default in the Room class.
 		 */
 
+		// Get the room's obstacles.
+		List<Obstacle> obstacles = room.obstacles;
+
 		// Expand all of the obstacles.
-		// //List<Obstacle> expandedObstacles =
-		// room.getExpandedObstacles(robot.radius);
+		List<Obstacle> expandedObstacles = room
+				.getExpandedObstacles(robot.radius);
 
 		/*
 		 * TODO: Also check if the robot can reach the goal despite its size.
@@ -61,7 +64,7 @@ public final class PathPlanner {
 		 * TODO: Fail if the robot in not in empty space.
 		 */
 
-		VisibilityGraph visibilityGraph = generateVisibilityGraph(room.obstacles);
+		VisibilityGraph visibilityGraph = new VisibilityGraph(expandedObstacles);
 
 		// Add the goal node to the visibility graph.
 		visibilityGraph.addNode(goal);
@@ -89,7 +92,7 @@ public final class PathPlanner {
 		 */
 		List<VisibilityChangeList> vList = calculateVisibilitySetChanges(visibility);
 		TetheredPath optimalPath = computeOptimalPath(vList, robot.tether,
-				room, visibilityGraph, goal, robot.radius);
+				expandedObstacles, visibilityGraph, goal, robot.radius);
 
 		// Generate the robot actions which are required to be executed given
 		// the optimal path.
@@ -103,24 +106,6 @@ public final class PathPlanner {
 		// TODO: Extension task: implement this method.
 
 		return null;
-	}
-
-	/**
-	 * Generates the visibility graph.
-	 * 
-	 * @return the visibility graph
-	 */
-	private static VisibilityGraph generateVisibilityGraph(
-			List<Obstacle> obstacles) {
-		VisibilityGraph g = new VisibilityGraph();
-
-		// Add all of the obstacles which also adds the relevant points and
-		// edges of the visibility graph.
-		for (Obstacle o : obstacles) {
-			g.addObstacle(o, true);
-		}
-
-		return g;
 	}
 
 	/**
@@ -327,8 +312,9 @@ public final class PathPlanner {
 	 * @return optimal tethered path
 	 */
 	private static TetheredPath computeOptimalPath(
-			List<VisibilityChangeList> v, Tether t, Room room,
-			VisibilityGraph visibilityGraph, Point2D goal, double robotRadius) {
+			List<VisibilityChangeList> v, Tether t,
+			List<Obstacle> expandedObstacles, VisibilityGraph visibilityGraph,
+			Point2D goal, double robotRadius) {
 		Path optimalPath = null;
 		Path currentPath;
 
@@ -368,7 +354,7 @@ public final class PathPlanner {
 				// vertex.
 				tetherConfiguration = TetheredAStarPathfinding
 						.computeTetherChange(tetherConfiguration, t.length,
-								vertex, room.obstacles, robotRadius);
+								vertex, expandedObstacles, robotRadius);
 
 				boolean tetherLengthExceeded = tetherConfiguration == null
 						|| tetherConfiguration.lengthExceeded(t.length,
