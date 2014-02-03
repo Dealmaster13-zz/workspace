@@ -51,8 +51,16 @@ public final class MathExtended {
 		return false;
 	}
 
+	public static double length(double w, double h) {
+		return Math.sqrt((w * w) + (h * h));
+	}
+	
+	public static double length(Line2D l) {
+		return length(l.getX2() - l.getX1(), l.getY2() - l.getY1());
+	}
+
 	public static double getRadius(double w, double h) {
-		return Math.sqrt((w * w) + (h * h)) / 2;
+		return length(w, h) / 2;
 	}
 
 	/**
@@ -476,6 +484,15 @@ public final class MathExtended {
 
 		return null;
 	}
+	
+	public static Point2D getIntersectionPoint(Line2D l1, Line2D l2) {
+		Point2D p1 = l1.getP1();
+		Vector2D v1 = new Vector2D(l1);
+		Point2D p2 = l2.getP1();
+		Vector2D v2 = new Vector2D(l2);
+		
+		return getIntersectionPoint(p1, v1, p2, v2);
+	}
 
 	public static Line2D getLine(Point2D p, Vector2D v) {
 		return new Line2D.Double(p.getX(), p.getY(), p.getX() + v.x, p.getY()
@@ -601,6 +618,31 @@ public final class MathExtended {
 		l.add(q);
 
 		return l;
+	}
+	
+	/**
+	 * Gets the fraction along the line l at which point p lies.
+	 * p should lie on the line l.
+	 * 
+	 * @param p
+	 * @param l
+	 * @return fraction [0,1]
+	 */
+	public static double getFractionAlongLine(Point2D p, Line2D l) {
+		// Rotate the line and point such that the line is horizontal.
+		Vector2D v = new Vector2D(l);
+		double rads = v.getAngle();
+		Point2D pR = rotate(p, -rads);
+		Line2D lR = rotate(l, -rads);
+		
+		// The point should lie on the (extended) line.
+		if (!approxEqual(pR.getY(), lR.getY1(), 0.00001, 0.00001)) {
+			Log.warning("Point does not lie on the line.");
+		}
+
+		double distanceToP1 = pR.distance(lR.getP1());
+		
+		return distanceToP1 / (length(l));
 	}
 
 }

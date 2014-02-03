@@ -3,6 +3,8 @@ package uk.ac.cam.oda22.core.tethers;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import uk.ac.cam.oda22.core.MathExtended;
+import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.pathplanning.Path;
 
 /**
@@ -84,5 +86,35 @@ public class TetherConfiguration extends Path {
 		}
 		
 		return newTC;
+	}
+	
+	/**
+	 * Checks if the tether has a valid configuration.
+	 * 
+	 * @return true if the configuration is valid, false otherwise
+	 */
+	public boolean assertConfigurationValid() {
+		int s = this.points.size();
+		
+		if (s == 0) {
+			Log.error("Tether configuration is empty.");
+			
+			return false;
+		}
+		
+		if (s == 1) {
+			return true;
+		}
+		
+		for (int i = 0; i < s - 1; i++) {
+			Point2D currentPoint = this.points.get(i);
+			Point2D nextPoint = this.points.get(i + 1);
+			
+			if (MathExtended.approxEqual(currentPoint, nextPoint, 0.00001, 0.00001)) {
+				Log.warning("Two adjacent points are roughly equal.");
+			}
+		}
+		
+		return true;
 	}
 }

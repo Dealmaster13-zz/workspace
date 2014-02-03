@@ -41,4 +41,34 @@ public final class ListFunctions {
 		return l;
 	}
 	
+	/**
+	 * Performs bubble sort.
+	 * 
+	 * @param l
+	 * @return sorted list
+	 */
+	public static List<Double> getSortedList(List<Double> l) {
+		List<Double> lS = new ArrayList<Double>();
+		lS.addAll(l);
+		
+		boolean swapMade = true;
+		
+		while (swapMade) {
+			swapMade = false;
+			
+			for (int i = 0; i < lS.size() - 1; i++) {
+				// Swap the two numbers if they are in the wrong order.
+				if (lS.get(i) < lS.get(i + 1)) {
+					double temp = lS.get(i);
+					lS.set(i, lS.get(i + 1));
+					lS.set(i + 1, temp);
+					
+					swapMade = true;
+				}
+			}
+		}
+		
+		return lS;
+	}
+	
 }

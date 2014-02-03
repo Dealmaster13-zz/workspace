@@ -1,2 +1,2 @@
 eclipse.preferences.version=1
-prefWatchExpressions=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\r\n<watchExpressions>\r\n<expression enabled\="true" text\="visibilityGraph"/>\r\n<expression enabled\="true" text\="nodes"/>\r\n</watchExpressions>\r\n
+prefWatchExpressions=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\r\n<watchExpressions>\r\n<expression enabled\="true" text\="visibilityGraph"/>\r\n<expression enabled\="true" text\="nodes"/>\r\n<expression enabled\="true" text\="edge"/>\r\n<expression enabled\="true" text\="oEdge"/>\r\n<expression enabled\="true" text\="this"/>\r\n<expression enabled\="true" text\="o"/>\r\n<expression enabled\="true" text\="wrapZone"/>\r\n</watchExpressions>\r\n

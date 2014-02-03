@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;rotation&apos; in &apos;uk.ac.cam.oda22.core.MathExtended.getFractionAlongLine(...)&apos; to &apos;rads&apos;&#x0D;&#x0A;- Original project: &apos;Tethering&apos;&#x0D;&#x0A;- Original element: &apos;uk.ac.cam.oda22.core.MathExtended.getFractionAlongLine(Point2D, Line2D).rotation&apos;&#x0D;&#x0A;- Renamed element: &apos;rotation&apos;&#x0D;&#x0A;- Update references to refactored element" description="Rename local variable &apos;rotation&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src&lt;uk.ac.cam.oda22.core{MathExtended.java[MathExtended~getFractionAlongLine~QPoint2D;~QLine2D;@rotation!17838!17868!17845!17852!D!0!false" name="rads" references="true" stamp="1391350245058" version="1.0"/>
+</session>

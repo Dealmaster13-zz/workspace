@@ -10,12 +10,9 @@ import uk.ac.cam.oda22.pathplanning.Path;
 
 /**
  * @author Oliver
- *
+ * 
  */
-@TetherDetails (
-		light = true,
-		selfRetracting = true
-		)
+@TetherDetails(light = true, selfRetracting = true)
 public class SimpleTether extends Tether {
 
 	/**
@@ -23,9 +20,10 @@ public class SimpleTether extends Tether {
 	 * @param anchor
 	 * @param length
 	 * @param fixedPoints
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	public SimpleTether(Point2D anchor, double length, TetherConfiguration configuration) throws Exception {
+	public SimpleTether(Point2D anchor, double length,
+			TetherConfiguration configuration) throws Exception {
 		super(anchor, length, configuration);
 	}
 
@@ -78,8 +76,10 @@ public class SimpleTether extends Tether {
 			if (w < (currentW + segmentLength) * 1.0001) {
 				double ratio = (w - currentW) / segmentLength;
 
-				double x = currentPoint.getX() + (nextPoint.getX() - currentPoint.getX()) * ratio;
-				double y = currentPoint.getY() + (nextPoint.getY() - currentPoint.getY()) * ratio;
+				double x = currentPoint.getX()
+						+ (nextPoint.getX() - currentPoint.getX()) * ratio;
+				double y = currentPoint.getY()
+						+ (nextPoint.getY() - currentPoint.getY()) * ratio;
 
 				return new Point2D.Double(x, y);
 			}
@@ -98,7 +98,7 @@ public class SimpleTether extends Tether {
 		if (configuration.length() > 0) {
 			return ListFunctions.getLast(this.configuration.points);
 		}
-		
+
 		return this.anchor;
 	}
 
@@ -131,37 +131,50 @@ public class SimpleTether extends Tether {
 			if (startW < (currentW + segmentLength)) {
 				double ratio = (startW - currentW) / segmentLength;
 
-				double x = currentPoint.getX() + (nextPoint.getX() - currentPoint.getX()) * ratio;
-				double y = currentPoint.getY() + (nextPoint.getY() - currentPoint.getY()) * ratio;
+				double x = currentPoint.getX()
+						+ (nextPoint.getX() - currentPoint.getX()) * ratio;
+				double y = currentPoint.getY()
+						+ (nextPoint.getY() - currentPoint.getY()) * ratio;
 
 				path.addPoint(new Point2D.Double(x, y));
 
 				pointFound = true;
-			}
-			else {
+			} else {
 				currentPoint = nextPoint;
 
 				currentW += segmentLength;
 
-				// If the end of the tether has been reached then check if the start distance is approximately equal to the tether's used length.
-				// If the start distance is at the end of the tether then simply add that point to the path and return it.
-				if (index == points.size() - 1 && MathExtended.approxEqual(startW, currentW, 0.0001, 0.0001)) {
+				// If the end of the tether has been reached then check if the
+				// start distance is approximately equal to the tether's used
+				// length.
+				// If the start distance is at the end of the tether then simply
+				// add that point to the path and return it.
+				if (index == points.size() - 1
+						&& MathExtended.approxEqual(startW, currentW, 0.0001,
+								0.0001)) {
 					double x = currentPoint.getX();
 					double y = currentPoint.getY();
-					
+
 					path.addPoint(new Point2D.Double(x, y));
-					
-					// If the end distance is not at the end of the tether then produce a warning.
-					if (!MathExtended.approxEqual(endW, currentW, 0.0001, 0.0001)) {
+
+					// If the end distance is not at the end of the tether then
+					// produce a warning.
+					if (!MathExtended.approxEqual(endW, currentW, 0.0001,
+							0.0001)) {
 						Log.warning("The given end distance is greater than the tether's used length.");
 					}
-					
+
 					return new SimpleTetherSegment(path);
-				}
-				else {
-					index ++;
+				} else {
+					index++;
 				}
 			}
+		}
+
+		// Check if the tether segment has no length, if which case we do not
+		// need to search for the end point.
+		if (startW == endW) {
+			return new SimpleTetherSegment(path);
 		}
 
 		pointFound = false;
@@ -176,21 +189,22 @@ public class SimpleTether extends Tether {
 			if (endW < (currentW + segmentLength) * 1.0001) {
 				double ratio = (endW - currentW) / segmentLength;
 
-				double x = currentPoint.getX() + (nextPoint.getX() - currentPoint.getX()) * ratio;
-				double y = currentPoint.getY() + (nextPoint.getY() - currentPoint.getY()) * ratio;
+				double x = currentPoint.getX()
+						+ (nextPoint.getX() - currentPoint.getX()) * ratio;
+				double y = currentPoint.getY()
+						+ (nextPoint.getY() - currentPoint.getY()) * ratio;
 
 				path.addPoint(new Point2D.Double(x, y));
 
 				pointFound = true;
-			}
-			else {
+			} else {
 				path.addPoint(nextPoint);
 
 				currentPoint = nextPoint;
 
 				currentW += segmentLength;
 
-				index ++;
+				index++;
 			}
 		}
 

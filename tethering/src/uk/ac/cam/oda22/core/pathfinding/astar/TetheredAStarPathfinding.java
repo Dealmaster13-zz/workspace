@@ -42,13 +42,18 @@ public class TetheredAStarPathfinding {
 			AStarNode destination,
 			TetherConfiguration initialTetherConfiguration,
 			double maxTetherLength, double robotRadius) {
-		// Fail if the source does not match the end of the tether configuration.
-		if (!source.p.equals(ListFunctions.getLast(initialTetherConfiguration.points))) {
+		Point2D lastTetherPoint = ListFunctions
+				.getLast(initialTetherConfiguration.points);
+
+		// Fail if the source does not match the end of the tether
+		// configuration.
+		if (!MathExtended.approxEqual(source.p, lastTetherPoint, 0.00001,
+				0.00001)) {
 			Log.error("Mismatch between source and tether.");
-			
+
 			return false;
 		}
-		
+
 		// Initialise the nodes.
 		for (AStarNode node : g.nodes) {
 			node.subPaths = new ArrayList<AStarSubPath>();
@@ -81,9 +86,9 @@ public class TetheredAStarPathfinding {
 			if (current == null) {
 				return false;
 			}
-			
+
 			q.remove(current);
-			
+
 			// Stop if a better path cannot be found.
 			// Note that we use a strict inequality to allow the possibility of
 			// multiple optimal paths.
@@ -115,7 +120,7 @@ public class TetheredAStarPathfinding {
 							if (newTC != null) {
 								List<AStarNode> newPredecessorList = new ArrayList<AStarNode>();
 								newPredecessorList
-										.addAll(subPath.predecessorList);
+								.addAll(subPath.predecessorList);
 								newPredecessorList.add(current);
 
 								AStarSubPath newSubPath = new AStarSubPath(
@@ -125,7 +130,8 @@ public class TetheredAStarPathfinding {
 
 								neighbour.g = current.g + edge.cost;
 
-								// Add the neighbour to the queue if it hasn't been
+								// Add the neighbour to the queue if it hasn't
+								// been
 								// discovered yet.
 								if (!neighbour.discovered) {
 									q.add(neighbour);
@@ -216,8 +222,11 @@ public class TetheredAStarPathfinding {
 	public static TetherConfiguration computeTetherChange(
 			TetherConfiguration tc, double maxTetherLength,
 			Point2D destination, List<Obstacle> obstacles, double robotRadius) {
+		double fractionalError = 0.00001;
+		double absoluteError = 0.00001;
+
 		// Fail if we have already exceeded the maximum tether length.
-		if (tc.lengthExceeded(maxTetherLength, 0.00001, 0.00001)) {
+		if (tc.lengthExceeded(maxTetherLength, fractionalError, absoluteError)) {
 			Log.warning("Tether length already exceeded before moving.");
 
 			return null;
@@ -228,11 +237,27 @@ public class TetheredAStarPathfinding {
 
 		// Iteratively move towards the destination, altering the tether
 		// configuration appropriately on each iteration.
-		while (!currentPoint.equals(destination)) {
+		while (!MathExtended.approxEqual(currentPoint, destination,
+				fractionalError, absoluteError)) {
 			// Get the next tether configuration by moving towards the
 			// destination.
 			TetherConfiguration nextTC = getNextTetherConfiguration(currentTC,
 					destination, obstacles);
+
+			int nextTCSize = nextTC.points.size();
+
+			boolean lastPointsEqual = nextTCSize >= 2
+					&& MathExtended
+					.approxEqual(nextTC.points.get(nextTCSize - 1),
+							nextTC.points.get(nextTCSize - 2), 0.00001,
+							0.00001);
+
+			// Fail if the tether configuration is malformed.
+			if (nextTCSize == 0 || lastPointsEqual) {
+				Log.error("Last two tether points coincide.");
+
+				return null;
+			}
 
 			// Fail if the tether configuration did not change.
 			// Note that it is fine if the robot did not move, so long as
@@ -245,6 +270,13 @@ public class TetheredAStarPathfinding {
 
 			// Get the new robot position.
 			Point2D nextPoint = ListFunctions.getLast(nextTC.points);
+
+			// Fail if the next point is undefined.
+			if (nextPoint == null) {
+				Log.error("Next point is undefined.");
+
+				return null;
+			}
 
 			// Stop if the tether was crossed by the robot.
 			if (tetherCrossed(currentPoint, nextPoint, currentTC, robotRadius)) {
@@ -265,6 +297,11 @@ public class TetheredAStarPathfinding {
 
 	private static boolean tetherCrossed(Point2D currentPoint,
 			Point2D nextPoint, TetherConfiguration tc, double robotRadius) {
+		// Stop if the tether has no edges.
+		if (tc.points.size() <= 1) {
+			return true;
+		}
+		
 		// Get the unchanged tether configuration.
 		// This is the entire original tether except for the segment
 		// connected to the robot.
@@ -464,11 +501,26 @@ public class TetheredAStarPathfinding {
 	 */
 	private static TetherConfiguration getNextTetherConfiguration(
 			TetherConfiguration tc, Point2D d, List<Obstacle> obstacles) {
+		// Assert that the tether configuration is valid.
+		if (!tc.assertConfigurationValid()) {
+			return null;
+		}
+
 		TetherConfiguration newTC = new TetherConfiguration(tc);
+
+		// Fail if the destination is undefined.
+		if (d == null) {
+			Log.error("Destination is undefined.");
+		}
 
 		int s = tc.points.size();
 
 		if (s == 0) {
+			/*
+			 * Note that we should never enter this state if the check is
+			 * handled correctly in the configuration validity check.
+			 */
+
 			// If the tether configuration is empty then fail.
 			Log.error("Invalid tether configuration (empty).");
 
@@ -480,6 +532,12 @@ public class TetheredAStarPathfinding {
 			// the tether configuration accordingly.
 			// Change the last point on the tether to d.
 			newTC.moveLastPoint(d);
+
+			// Assert that the tether configuration is valid.
+			if (!tc.assertConfigurationValid()) {
+				return null;
+			}
+
 			return newTC;
 		}
 
@@ -525,6 +583,12 @@ public class TetheredAStarPathfinding {
 		if (angularChange == 0) {
 			// Change the last point on the tether (from p) to d.
 			newTC.moveLastPoint(d);
+
+			// Assert that the tether configuration is valid.
+			if (!tc.assertConfigurationValid()) {
+				return null;
+			}
+
 			return newTC;
 		}
 
@@ -543,7 +607,7 @@ public class TetheredAStarPathfinding {
 		// For qpd, if no obstacle lies within the triangle then the robot can
 		// proceed straight to d (whilst keeping it's tether taut).
 		Triangle2D wrapZone = u != null ? new Triangle2D(q, p, u)
-				: new Triangle2D(q, p, d);
+		: new Triangle2D(q, p, d);
 
 		// Store the minimum angle between line qp and the line from q to an
 		// obstacle vertex, as well as the obstacle vertex itself.
@@ -609,11 +673,31 @@ public class TetheredAStarPathfinding {
 			Point2D newP = MathExtended.getExtendedIntersectionPoint(q, qv, p,
 					pd);
 
-			// Remove the last point on the tether (p), and add new vertices,
-			// minVertex and newP.
+			if (newP == null) {
+				Log.error("Next tether point is undefined.");
+
+				return null;
+			}
+
+			/*
+			 * Remove the last point on the tether (p), and add new vertices,
+			 * minVertex and newP.
+			 */
+
 			newTC.removeLastPoint();
-			newTC.addPoint(minVertex);
+
+			// Add v if it is distinct from newP.
+			if (!MathExtended.approxEqual(minVertex, newP, 0.00001, 0.00001)) {
+				newTC.addPoint(minVertex);
+			}
+
 			newTC.addPoint(newP);
+
+			// Assert that the tether configuration is valid.
+			if (!tc.assertConfigurationValid()) {
+				return null;
+			}
+
 			return newTC;
 		}
 
@@ -625,6 +709,12 @@ public class TetheredAStarPathfinding {
 			newTC.removeLastPoint();
 			newTC.removeLastPoint();
 			newTC.addPoint(u);
+
+			// Assert that the tether configuration is valid.
+			if (!tc.assertConfigurationValid()) {
+				return null;
+			}
+
 			return newTC;
 		}
 
@@ -632,6 +722,12 @@ public class TetheredAStarPathfinding {
 		// tether configuration accordingly.
 		// Change the last point on the tether (from p) to d.
 		newTC.moveLastPoint(d);
+
+		// Assert that the tether configuration is valid.
+		if (!tc.assertConfigurationValid()) {
+			return null;
+		}
+
 		return newTC;
 	}
 

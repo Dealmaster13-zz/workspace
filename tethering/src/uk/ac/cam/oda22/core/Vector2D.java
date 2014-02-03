@@ -66,6 +66,10 @@ public class Vector2D {
 	public Vector2D scale(double xScale, double yScale) {
 		return new Vector2D(this.x * xScale, this.y * yScale);
 	}
+
+	public Vector2D scale(double scale) {
+		return new Vector2D(this.x * scale, this.y * scale);
+	}
 	
 	public Vector2D negate() {
 		return new Vector2D(-x, -y);

@@ -154,9 +154,14 @@ public class VisibilityGraph {
 	public boolean addObstacle(Obstacle obstacle, boolean addPointsAndEdges) {
 		// Check if the obstacle intersects with any existing obstacles.
 		for (Obstacle o : this.obstacles) {
-			if (o.strictIntersects(obstacle)) {
-				Log.debug("Added obstacle intersects with an existing obstacle.");
-			}
+			/*
+			 * Note that we cannot simply merge the obstacles because holes
+			 * cannot be represented.
+			 */
+
+			// Add vertices to the current obstacle where its edges intersect
+			// with other obstacle's edges.
+			obstacle.addNewVerticesAtIntersectionPoints(o);
 		}
 
 		this.obstacles.add(obstacle);
