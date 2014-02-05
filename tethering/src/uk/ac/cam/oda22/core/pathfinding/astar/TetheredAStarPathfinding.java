@@ -120,7 +120,7 @@ public class TetheredAStarPathfinding {
 							if (newTC != null) {
 								List<AStarNode> newPredecessorList = new ArrayList<AStarNode>();
 								newPredecessorList
-								.addAll(subPath.predecessorList);
+										.addAll(subPath.predecessorList);
 								newPredecessorList.add(current);
 
 								AStarSubPath newSubPath = new AStarSubPath(
@@ -207,7 +207,7 @@ public class TetheredAStarPathfinding {
 	}
 
 	/**
-	 * Computes the change in a tether's configuration as it's endpoint moves
+	 * Computes the change in a tether's configuration as it's end point moves
 	 * directly to a destination point. Returns null if the tether length has
 	 * been exceeded.
 	 * 
@@ -232,8 +232,13 @@ public class TetheredAStarPathfinding {
 			return null;
 		}
 
+		List<TetherConfiguration> tcHistory = new ArrayList<TetherConfiguration>();
+
 		TetherConfiguration currentTC = new TetherConfiguration(tc);
 		Point2D currentPoint = ListFunctions.getLast(currentTC.points);
+		
+		Point2D lastWrappedPoint = null;
+		Point2D lastUnwrappedPoint = null;
 
 		// Iteratively move towards the destination, altering the tether
 		// configuration appropriately on each iteration.
@@ -241,16 +246,26 @@ public class TetheredAStarPathfinding {
 				fractionalError, absoluteError)) {
 			// Get the next tether configuration by moving towards the
 			// destination.
-			TetherConfiguration nextTC = getNextTetherConfiguration(currentTC,
-					destination, obstacles);
+			NextTetherConfigurationResult nextTCResult = getNextTetherConfiguration(currentTC,
+					destination, obstacles, lastWrappedPoint, lastUnwrappedPoint);
+			
+			if (nextTCResult == null) {
+				return null;
+			}
+			else {
+				lastWrappedPoint = nextTCResult.lastWrappedPoint;
+				lastUnwrappedPoint = nextTCResult.lastUnwrappedPoint;
+			}
 
+			TetherConfiguration nextTC = nextTCResult.tc;
+			
 			int nextTCSize = nextTC.points.size();
 
 			boolean lastPointsEqual = nextTCSize >= 2
 					&& MathExtended
-					.approxEqual(nextTC.points.get(nextTCSize - 1),
-							nextTC.points.get(nextTCSize - 2), 0.00001,
-							0.00001);
+							.approxEqual(nextTC.points.get(nextTCSize - 1),
+									nextTC.points.get(nextTCSize - 2), 0.00001,
+									0.00001);
 
 			// Fail if the tether configuration is malformed.
 			if (nextTCSize == 0 || lastPointsEqual) {
@@ -264,6 +279,13 @@ public class TetheredAStarPathfinding {
 			// wrapping or unwrapping of the tether occurred.
 			if (currentTC.equals(nextTC)) {
 				Log.error("Tether configuration stagnant.");
+
+				return null;
+			}
+
+			// Fail if the tether configuration has been tried before.
+			if (hasStateBeenRevisited(nextTC, tcHistory)) {
+				Log.error("Tether configuration has been tried already.");
 
 				return null;
 			}
@@ -290,18 +312,63 @@ public class TetheredAStarPathfinding {
 
 			currentTC = nextTC;
 			currentPoint = nextPoint;
+			tcHistory.add(currentTC);
 		}
 
 		return currentTC;
 	}
 
+	/**
+	 * Computes the tether configuration which is taut and is homotopy
+	 * equivalent to tc.
+	 * 
+	 * @param tc
+	 * @param obstacles
+	 * @param robotRadius
+	 * @return taut tether configuration
+	 */
+	public static TetherConfiguration getTautTetherConfiguration(
+			TetherConfiguration tc, List<Obstacle> obstacles, double robotRadius) {
+		int s = tc.points.size();
+
+		// Check if the tether configuration has no length.
+		if (s <= 1) {
+			return new TetherConfiguration(tc);
+		}
+
+		Point2D anchorPoint = tc.points.get(0);
+
+		// Initialise a tether configuration with just the anchor point.
+		TetherConfiguration tcResult = new TetherConfiguration(anchorPoint);
+
+		// For each tether segment, perform retraction by 'moving' to the next
+		// point.
+		for (int i = 1; i < s; i++) {
+			Point2D nextPoint = tc.points.get(i);
+
+			tcResult = computeTetherChange(tcResult, Double.POSITIVE_INFINITY,
+					nextPoint, obstacles, robotRadius);
+
+			if (tcResult == null) {
+				return null;
+			}
+		}
+
+		return tcResult;
+	}
+
 	private static boolean tetherCrossed(Point2D currentPoint,
 			Point2D nextPoint, TetherConfiguration tc, double robotRadius) {
+		// Stop if the robot did not move.
+		if (MathExtended.approxEqual(currentPoint, nextPoint, 0.00001, 0.00001)) {
+			return false;
+		}
+
 		// Stop if the tether has no edges.
 		if (tc.points.size() <= 1) {
-			return true;
+			return false;
 		}
-		
+
 		// Get the unchanged tether configuration.
 		// This is the entire original tether except for the segment
 		// connected to the robot.
@@ -323,6 +390,7 @@ public class TetheredAStarPathfinding {
 		}
 
 		// Check if the robot intersects the tether at the next point.
+		// Note that this will disallow tether retraction.
 		if (MathExtended.strictCircleIntersectsPath(nextPoint, robotRadius,
 				croppedUnchangedTC)) {
 			return true;
@@ -376,12 +444,12 @@ public class TetheredAStarPathfinding {
 		// Get the equivalent line for pd.
 		Line2D pdLine = MathExtended.getLine(p, pd);
 
-		// Fail if u is not on the finite line pd.
+		// Stop if u is not on the finite line pd.
 		if (u == null || !MathExtended.loosePointOnLine(u, pdLine)) {
 			return null;
 		}
 
-		// Fail if u is closer to r than q.
+		// Stop if u is closer to r than q.
 		// If this is the case then travelling to d will cause the tether to
 		// fully wrap around the obstacle with edge rq.
 		// Note that this does not necessarily mean that the tether will cross.
@@ -475,13 +543,13 @@ public class TetheredAStarPathfinding {
 		if (clockwise) {
 			// If either neighbouring obstacle vertex, x, and q are distinct
 			// then the angle from q to v must be less negative than that to x.
-			if ((!u.equals(q) && aQPV > aQPU) || (!w.equals(q) && aQPV > aQPW)) {
+			if ((!u.equals(q) && aQPV < aQPU) || (!w.equals(q) && aQPV < aQPW)) {
 				return false;
 			}
 		} else {
 			// If either neighbouring obstacle vertex, x, and q are distinct
 			// then the angle from q to v must be less positive than that to x.
-			if ((!u.equals(q) && aQPV < aQPU) || (!w.equals(q) && aQPV < aQPW)) {
+			if ((!u.equals(q) && aQPV > aQPU) || (!w.equals(q) && aQPV > aQPW)) {
 				return false;
 			}
 		}
@@ -499,8 +567,9 @@ public class TetheredAStarPathfinding {
 	 * @param obstacles
 	 * @return next tether configuration
 	 */
-	private static TetherConfiguration getNextTetherConfiguration(
-			TetherConfiguration tc, Point2D d, List<Obstacle> obstacles) {
+	private static NextTetherConfigurationResult getNextTetherConfiguration(
+			TetherConfiguration tc, Point2D d, List<Obstacle> obstacles,
+			Point2D lastWrapPoint, Point2D lastUnwrapPoint) {
 		// Assert that the tether configuration is valid.
 		if (!tc.assertConfigurationValid()) {
 			return null;
@@ -511,6 +580,8 @@ public class TetheredAStarPathfinding {
 		// Fail if the destination is undefined.
 		if (d == null) {
 			Log.error("Destination is undefined.");
+			
+			return null;
 		}
 
 		int s = tc.points.size();
@@ -530,15 +601,18 @@ public class TetheredAStarPathfinding {
 			// anchor point.
 			// Since we cannot wrap nor unwrap, move straight to d, and alter
 			// the tether configuration accordingly.
-			// Change the last point on the tether to d.
-			newTC.moveLastPoint(d);
+			// Add d as the next point on the tether.
+			newTC.addPoint(d);
 
 			// Assert that the tether configuration is valid.
 			if (!tc.assertConfigurationValid()) {
 				return null;
 			}
 
-			return newTC;
+			NextTetherConfigurationResult result = new NextTetherConfigurationResult(
+					newTC, null, null);
+
+			return result;
 		}
 
 		/*
@@ -577,7 +651,7 @@ public class TetheredAStarPathfinding {
 				qd.getAngle());
 
 		// If the angular change is zero then the tether will not wrap around
-		// anything.
+		// anything, nor will it unwrap.
 		// This assumes that we only make legitimate movements, i.e. the robot's
 		// path from p to d is clear of obstacles.
 		if (angularChange == 0) {
@@ -589,15 +663,22 @@ public class TetheredAStarPathfinding {
 				return null;
 			}
 
-			return newTC;
+			NextTetherConfigurationResult result = new NextTetherConfigurationResult(
+					newTC, null, null);
+
+			return result;
 		}
+		
+		boolean doNotUnwrap = lastWrapPoint != null && lastWrapPoint.equals(q);
 
 		// Get the point at which unwrapping would occur along the line pd.
 		// This is the intersection point between (directed infinite line) rq
 		// and (finite line) pd, if it exists.
 		// It is not sufficient to simply compare angles of qp, rq and qd.
 		// This point should still be defined if r, q and p are collinear.
-		Point2D u = r != null ? getUnwrapPoint(r, q, rq, p, pd) : null;
+		// We should not unwrap if we just wrapped around q.
+		Point2D u = (r != null && !doNotUnwrap) ? getUnwrapPoint(r,
+				q, rq, p, pd) : null;
 
 		// Create a triangle qpu (if u exists) or qpd (if u does not exist).
 		// If an obstacle point lies within this triangle then the tether will
@@ -607,7 +688,7 @@ public class TetheredAStarPathfinding {
 		// For qpd, if no obstacle lies within the triangle then the robot can
 		// proceed straight to d (whilst keeping it's tether taut).
 		Triangle2D wrapZone = u != null ? new Triangle2D(q, p, u)
-		: new Triangle2D(q, p, d);
+				: new Triangle2D(q, p, d);
 
 		// Store the minimum angle between line qp and the line from q to an
 		// obstacle vertex, as well as the obstacle vertex itself.
@@ -623,38 +704,41 @@ public class TetheredAStarPathfinding {
 		// Check all obstacle vertices for this first wrap point.
 		for (Obstacle o : obstacles) {
 			for (Point2D v : o.points) {
-				// Check if the neighbouring points of v do not prevent the
-				// wrapping of the tether.
-				// This is used to take care of cases where q, p and v are
-				// collinear, or q is collinear with v and one of its
-				// neighbouring vertices.
-				boolean canWrap = isWrappingPossible(q, p, qp, qd, v, o);
+				// Skip this point if it was previously unwrapped.
+				if (lastUnwrapPoint == null || !v.equals(lastUnwrapPoint)) {
+					// Check if the neighbouring points of v do not prevent the
+					// wrapping of the tether.
+					// This is used to take care of cases where q, p and v are
+					// collinear, or q is collinear with v and one of its
+					// neighbouring vertices.
+					boolean canWrap = isWrappingPossible(q, p, qp, qd, v, o);
 
-				// Check if the vertex lies within the wrap zone.
-				boolean inWrapZone = wrapZone.containsPoint(v) != PointInTriangleResult.NONE;
+					// Check if the vertex lies within the wrap zone.
+					boolean inWrapZone = wrapZone.containsPoint(v) != PointInTriangleResult.NONE;
 
-				// If the vertex is valid from wrapping, and lies within the
-				// wrap zone, then check if it has the smallest angle to qp.
-				if (canWrap && inWrapZone) {
-					// Get the vector from q to the obstacle vertex.
-					Vector2D qv = new Vector2D(q, v);
+					// If the vertex is valid from wrapping, and lies within the
+					// wrap zone, then check if it has the smallest angle to qp.
+					if (canWrap && inWrapZone) {
+						// Get the vector from q to the obstacle vertex.
+						Vector2D qv = new Vector2D(q, v);
 
-					// Use the magnitude of the angle, since d (and thus v)
-					// could be on either side of qp.
-					double angleToQP = Math.abs(MathExtended.getAngularChange(
-							startAngle, qv.getAngle()));
+						// Use the magnitude of the angle, since d (and thus v)
+						// could be on either side of qp.
+						double angleToQP = Math.abs(MathExtended
+								.getAngularChange(startAngle, qv.getAngle()));
 
-					if (angleToQP < minAngleToQP) {
-						minAngleToQP = angleToQP;
-						minVertex = v;
-					} else if (angleToQP == minAngleToQP) {
-						// Given that the angular changes are equal, the point
-						// closer to p should be chosen.
-						// This means that there will be no wrapping around the
-						// point closer to q.
-						if (v.distance(p) < minVertex.distance(p)) {
+						if (angleToQP < minAngleToQP) {
 							minAngleToQP = angleToQP;
 							minVertex = v;
+						} else if (angleToQP == minAngleToQP) {
+							// Given that the angular changes are equal, the
+							// point closer to p should be chosen. This means
+							// that there will be no wrapping around the point
+							// closer to q.
+							if (v.distance(p) < minVertex.distance(p)) {
+								minAngleToQP = angleToQP;
+								minVertex = v;
+							}
 						}
 					}
 				}
@@ -698,7 +782,10 @@ public class TetheredAStarPathfinding {
 				return null;
 			}
 
-			return newTC;
+			NextTetherConfigurationResult result = new NextTetherConfigurationResult(
+					newTC, minVertex, null);
+
+			return result;
 		}
 
 		// If an unwrap point exists then unwrap, and alter the tether
@@ -715,7 +802,12 @@ public class TetheredAStarPathfinding {
 				return null;
 			}
 
-			return newTC;
+			// Note that q is obstacle vertex at which unwrapping occurs rather
+			// than u.
+			NextTetherConfigurationResult result = new NextTetherConfigurationResult(
+					newTC, null, q);
+
+			return result;
 		}
 
 		// Since we cannot wrap nor unwrap, move straight to d, and alter the
@@ -728,11 +820,32 @@ public class TetheredAStarPathfinding {
 			return null;
 		}
 
-		return newTC;
+		NextTetherConfigurationResult result = new NextTetherConfigurationResult(
+				newTC, null, null);
+
+		return result;
 	}
 
 	private static boolean isTetherMovementClockwise(Vector2D qp, Vector2D qd) {
 		return MathExtended.getAngularChange(qp.getAngle(), qd.getAngle()) < 0;
+	}
+
+	/**
+	 * Checks if the given tether configuration has been tried before or not.
+	 * 
+	 * @param newTC
+	 * @param tcHistory
+	 * @return true if the tether configuration is not new, false otherwise
+	 */
+	private static boolean hasStateBeenRevisited(TetherConfiguration newTC,
+			List<TetherConfiguration> tcHistory) {
+		for (TetherConfiguration tc : tcHistory) {
+			if (newTC.equals(tc)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

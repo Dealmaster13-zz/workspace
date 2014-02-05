@@ -4,8 +4,7 @@ import java.awt.geom.Point2D;
 
 import javax.swing.JFrame;
 
-import uk.ac.cam.oda22.graphics.shapes.Circle;
-import uk.ac.cam.oda22.graphics.shapes.Line;
+import uk.ac.cam.oda22.graphics.shapes.DisplayShape;
 
 /**
  * @author Oliver Allbless
@@ -36,18 +35,13 @@ public class VisualiserUsingJFrame extends JFrame implements IVisualiser {
 	}
 
 	@Override
-	public void drawLine(Line line) {
-		this.panel.drawLine(line);
+	public void drawShape(DisplayShape s) {
+		this.panel.drawShape(s);
 	}
 
 	@Override
-	public void drawLines(Line[] lines) {
-		this.panel.drawLines(lines);
-	}
-
-	@Override
-	public void drawCircle(Circle circle) {
-		this.panel.drawCircle(circle);
+	public void drawShapes(DisplayShape[] ss) {
+		this.panel.drawShapes(ss);
 	}
 
 }

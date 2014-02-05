@@ -237,7 +237,7 @@ public final class MathExtended {
 
 		// Check if the point lies to the right of the line.
 		// Note that the second point of the line is on the right.
-		if (p2.getX() < l2.getX2()) {
+		if (p2.getX() > l2.getX2()) {
 			// Return the distance to the right endpoint.
 			return p2.distance(l2.getP2());
 		}
@@ -267,6 +267,30 @@ public final class MathExtended {
 
 		// Return true if at least two endpoints lie on the other line.
 		return i >= 2;
+	}
+
+	/**
+	 * Checks if three points are collinear.
+	 * 
+	 * @param p1
+	 * @param p2
+	 * @param p3
+	 * @return true if the points are collinear, false otherwise
+	 */
+	public static boolean collinear(Point2D p1, Point2D p2, Point2D p3) {
+		// Stop if any two points are equal.
+		if (p1.equals(p2) || p1.equals(p3) || p2.equals(p3)) {
+			return true;
+		}
+
+		// Get the vector from p1 to p2.
+		Vector2D v12 = new Vector2D(p1, p2);
+		
+		// Get the vector from p2 to p3.
+		Vector2D v23 = new Vector2D(p2, p3);
+		
+		// Check if the angles of the vectors are equal.
+		return v12.getAngle() == v23.getAngle();
 	}
 
 	public static LineIntersectionResult intersectsLine(Line2D l1, Line2D l2) {

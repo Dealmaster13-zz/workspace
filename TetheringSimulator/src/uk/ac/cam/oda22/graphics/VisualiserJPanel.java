@@ -1,42 +1,37 @@
 package uk.ac.cam.oda22.graphics;
 
-import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.Point2D;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import uk.ac.cam.oda22.graphics.shapes.Circle;
 import uk.ac.cam.oda22.graphics.shapes.DisplayShape;
-import uk.ac.cam.oda22.graphics.shapes.Line;
 
 /**
  * @author Oliver
- *
+ * 
  */
 public class VisualiserJPanel extends JPanel implements IVisualiser {
 
 	private static final long serialVersionUID = 4146428062464803588L;
-	
+
 	private static final Object drawLock = new Object();
-	
-	private List<Line> lines;
-	
-	private List<Circle> circles;
-	
+
+	private List<DisplayShape> shapes;
+
 	private Point2D offset;
-	
+
 	private double xScale;
-	
+
 	private double yScale;
-	
+
 	public VisualiserJPanel(Point2D offset, double xScale, double yScale) {
-		this.lines = new LinkedList<Line>();
-		this.circles = new LinkedList<Circle>();
+		this.shapes = new ArrayList<DisplayShape>();
 		
 		this.offset = offset;
 		this.xScale = xScale;
@@ -46,70 +41,57 @@ public class VisualiserJPanel extends JPanel implements IVisualiser {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		
+
 		draw(g);
 	}
 
 	@Override
-	public void drawLine(Line line) {
+	public void drawShape(DisplayShape s) {
 		synchronized (drawLock) {
-			this.lines.add(line);
+			this.shapes.add(s);
 			updateGraphics();
 		}
 	}
 
 	@Override
-	public void drawLines(Line[] lines) {
-		for (Line line : lines) {
-			drawLine(line);
-		}
-	}
-
-	@Override
-	public void drawCircle(Circle circle) {
-		synchronized (drawLock) {
-			this.circles.add(circle);
-			updateGraphics();
+	public void drawShapes(DisplayShape[] ss) {
+		for (DisplayShape s : ss) {
+			this.drawShape(s);
 		}
 	}
 
 	private void draw(Graphics g) {
 		synchronized (drawLock) {
-			Graphics2D graphics = (Graphics2D)g;
+			Graphics2D graphics = (Graphics2D) g;
 
-			// Add all lines to the graphics.
-			for (Line line : this.lines) {
-				graphics.setColor(line.colour);
-				graphics.setStroke(new BasicStroke(line.thickness));
+			// Draw all shapes.
+			for (DisplayShape s : this.shapes) {
+				graphics.setColor(s.colour);
+				graphics.setStroke(s.stroke);
 
-				Line newLine = (Line) transformShape(line);
-				
-				graphics.draw(newLine.l);
-			}
-			
-			// Add all circles to the graphics.
-			for (Circle circle : this.circles) {
-				graphics.setColor(circle.colour);
-				graphics.setStroke(new BasicStroke(circle.thickness));
+				DisplayShape newS = this.transformShape(s);
 
-				Circle newCircle = (Circle) transformShape(circle);
-				
-				graphics.draw(newCircle.c);
+				Shape[] shapes = newS.getShapes();
+
+				for (Shape shape : shapes) {
+					graphics.draw(shape);
+				}
 			}
 		}
 	}
-	
+
 	private void updateGraphics() {
-	    SwingUtilities.invokeLater(new Runnable() {
-	        public void run() {
-	            validate();
-	            repaint();
-	        }
-	    });
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				validate();
+				repaint();
+			}
+		});
 	}
-	
+
 	private DisplayShape transformShape(DisplayShape s) {
-		return s.flipY().translate(this.offset.getX(), this.offset.getY()).stretch(this.xScale, this.yScale);
+		return s.flipY().translate(this.offset.getX(), this.offset.getY())
+				.stretch(this.xScale, this.yScale);
 	}
 
 }

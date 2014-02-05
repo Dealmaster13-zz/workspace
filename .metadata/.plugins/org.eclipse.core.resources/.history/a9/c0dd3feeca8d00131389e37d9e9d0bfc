@@ -1,0 +1,47 @@
+package uk.ac.cam.oda22.graphics.shapes;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Stroke;
+
+/**
+ * @author Oliver
+ * 
+ */
+public abstract class DisplayShape {
+
+	private final static float dash1[] = { 10.0f };
+
+	public final static BasicStroke dashed = new BasicStroke(1.0f,
+			BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash1, 0.0f);
+
+	public final Color colour;
+
+	public final float thickness;
+
+	public final Stroke stroke;
+
+	public DisplayShape(Color colour, float thickness, Stroke stroke) {
+		this.colour = colour;
+		this.thickness = thickness;
+		this.stroke = stroke;
+	}
+
+	public DisplayShape(Color colour, float thickness) {
+		this.colour = colour;
+		this.thickness = thickness;
+		this.stroke = new BasicStroke();
+	}
+
+	public DisplayShape(float thickness) {
+		this.colour = Color.black;
+		this.thickness = thickness;
+	}
+
+	public abstract DisplayShape translate(double x, double y);
+
+	public abstract DisplayShape stretch(double xScale, double yScale);
+
+	public abstract DisplayShape flipY();
+
+}
