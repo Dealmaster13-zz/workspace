@@ -12,6 +12,8 @@ import uk.ac.cam.oda22.core.PointInTriangleResult;
 import uk.ac.cam.oda22.core.Triangle2D;
 import uk.ac.cam.oda22.core.Vector2D;
 import uk.ac.cam.oda22.core.environment.Obstacle;
+import uk.ac.cam.oda22.core.environment.VisibilityGraph;
+import uk.ac.cam.oda22.core.environment.VisibilityGraphNode;
 import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
 import uk.ac.cam.oda22.pathplanning.Path;
@@ -145,6 +147,64 @@ public class TetheredAStarPathfinding {
 		}
 
 		return destination.subPaths.size() != 0;
+	}
+
+	/**
+	 * Computes the shortest paths from a source point to a destination point.
+	 * 
+	 * @param source
+	 * @param destination
+	 * @param visibilityGraph
+	 * @param tetherConfiguration
+	 * @param maxTetherLength
+	 * @param robotRadius
+	 * @return
+	 */
+	public static TetheredAStarShortestPathResult getShortestPaths(
+			Point2D source, Point2D destination,
+			VisibilityGraph visibilityGraph,
+			TetherConfiguration tetherConfiguration, double maxTetherLength,
+			double robotRadius) {
+		// If the points are equal then return the path with a single node.
+		if (source.equals(destination)) {
+			Path path = new Path(destination);
+			TetherConfiguration tc = new TetherConfiguration(
+					tetherConfiguration);
+			TetheredAStarSinglePathResult shortestPathResult = new TetheredAStarSinglePathResult(
+					path, tc);
+			return new TetheredAStarShortestPathResult(shortestPathResult);
+		}
+
+		// Create a visibility graph including the source and destination nodes.
+		// Note that if either vertex already exists then a new node will not be
+		// added, and the existing node will be returned.
+		VisibilityGraph g = new VisibilityGraph(visibilityGraph);
+		VisibilityGraphNode sourceNode = g.addNode(source);
+		VisibilityGraphNode destinationNode = g.addNode(destination);
+
+		// If either the source or destination nodes were not found then fail.
+		if (sourceNode == null || destinationNode == null) {
+			Log.warning("Source or destination node not found.");
+
+			return null;
+		}
+
+		AStarGraph aStarGraph = new AStarGraph(g);
+
+		AStarNode aStarSource = aStarGraph.getNode(sourceNode);
+		AStarNode aStarDestination = aStarGraph.getNode(destinationNode);
+
+		boolean pathFound = TetheredAStarPathfinding.getShortestPath(
+				aStarGraph, aStarSource, aStarDestination, tetherConfiguration,
+				maxTetherLength, robotRadius);
+
+		// Return null if no path was found.
+		if (!pathFound) {
+			return null;
+		}
+
+		return TetheredAStarPathfinding
+				.retrieveShortestPathResult(aStarDestination);
 	}
 
 	public static AStarNode getLowestCostNode(List<AStarNode> nodes) {

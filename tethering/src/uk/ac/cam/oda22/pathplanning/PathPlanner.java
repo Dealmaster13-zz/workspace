@@ -12,8 +12,6 @@ import uk.ac.cam.oda22.core.environment.Room;
 import uk.ac.cam.oda22.core.environment.VisibilityGraph;
 import uk.ac.cam.oda22.core.environment.VisibilityGraphNode;
 import uk.ac.cam.oda22.core.logging.Log;
-import uk.ac.cam.oda22.core.pathfinding.astar.AStarGraph;
-import uk.ac.cam.oda22.core.pathfinding.astar.AStarNode;
 import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarPathfinding;
 import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarShortestPathResult;
 import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarSinglePathResult;
@@ -383,9 +381,11 @@ public final class PathPlanner {
 
 				// Compute the shortest paths from vertex to the goal, if the
 				// tether length has not already been exceeded.
-				TetheredAStarShortestPathResult shortestPaths = !tetherLengthExceeded ? getShortestPaths(
-						vertex, goal, visibilityGraph, tetherConfiguration,
-						t.length, robotRadius) : null;
+
+				TetheredAStarShortestPathResult shortestPaths = !tetherLengthExceeded ? TetheredAStarPathfinding
+						.getShortestPaths(vertex, goal, visibilityGraph,
+								tetherConfiguration, t.length, robotRadius)
+						: null;
 
 				// Skip if no shortest path was found.
 				if (shortestPaths != null
@@ -488,65 +488,6 @@ public final class PathPlanner {
 
 			return null;
 		}
-	}
-
-	/**
-	 * Step 5bi (second half) and step 5bii. Computes the shortest paths from a
-	 * vertex (obstacle) to the goal.
-	 * 
-	 * @param source
-	 * @param destination
-	 * @param visibilityGraph
-	 * @param tetherConfiguration
-	 * @param maxTetherLength
-	 * @param robotRadius
-	 * @return
-	 */
-	private static TetheredAStarShortestPathResult getShortestPaths(
-			Point2D source, Point2D destination,
-			VisibilityGraph visibilityGraph,
-			TetherConfiguration tetherConfiguration, double maxTetherLength,
-			double robotRadius) {
-		// If the points are equal then return the path with a single node.
-		if (source.equals(destination)) {
-			Path path = new Path(destination);
-			TetherConfiguration tc = new TetherConfiguration(
-					tetherConfiguration);
-			TetheredAStarSinglePathResult shortestPathResult = new TetheredAStarSinglePathResult(
-					path, tc);
-			return new TetheredAStarShortestPathResult(shortestPathResult);
-		}
-
-		// Create a visibility graph including the source and destination nodes.
-		// Note that if either vertex already exists then a new node will not be
-		// added, and the existing node will be returned.
-		VisibilityGraph g = new VisibilityGraph(visibilityGraph);
-		VisibilityGraphNode sourceNode = g.addNode(source);
-		VisibilityGraphNode destinationNode = g.addNode(destination);
-
-		// If either the source or destination nodes were not found then fail.
-		if (sourceNode == null || destinationNode == null) {
-			Log.warning("Source or destination node not found.");
-
-			return null;
-		}
-
-		AStarGraph aStarGraph = new AStarGraph(g);
-
-		AStarNode aStarSource = aStarGraph.getNode(sourceNode);
-		AStarNode aStarDestination = aStarGraph.getNode(destinationNode);
-
-		boolean pathFound = TetheredAStarPathfinding.getShortestPath(
-				aStarGraph, aStarSource, aStarDestination, tetherConfiguration,
-				maxTetherLength, robotRadius);
-
-		// Return null if no path was found.
-		if (!pathFound) {
-			return null;
-		}
-
-		return TetheredAStarPathfinding
-				.retrieveShortestPathResult(aStarDestination);
 	}
 
 	/**

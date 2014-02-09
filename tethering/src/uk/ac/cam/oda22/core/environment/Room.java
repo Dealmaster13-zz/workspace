@@ -10,30 +10,55 @@ import uk.ac.cam.oda22.core.logging.Log;
 
 /**
  * @author Oliver
- *
+ * 
  */
 public class Room {
 
 	public final List<Obstacle> obstacles;
 
-	private final double width;
+	public final double width;
 
-	private final double height;
+	public final double height;
 
-	private final List<EnvironmentTriangle> triangles;
+	public final List<EnvironmentTriangle> triangles;
 
 	public Room(double width, double height, List<Obstacle> l) {
 		this.width = width;
 		this.height = height;
 
-		this.obstacles = new ArrayList<Obstacle>(); 
+		this.obstacles = new ArrayList<Obstacle>();
 		this.obstacles.addAll(l);
 
 		this.addRoomEdges();
 
 		this.triangles = this.triangulateRoom();
 	}
-	
+
+	/**
+	 * Returns whether or not an obstacle is internal (not touching the rooms
+	 * sides). Note that we are assuming that all obstacles are normalised (no
+	 * two non-room-boundary obstacles touching sides).
+	 * 
+	 * @param o
+	 * @return true if the obstacle is internal, and false otherwise
+	 */
+	public static boolean isObstacleInternal(Obstacle o, List<Obstacle> os) {
+		if (!os.contains(o)) {
+			Log.error("Obstacle not found in the room");
+
+			return false;
+		}
+
+		// For each obstacle check if it touches o.
+		for (Obstacle obstacle : os) {
+			if (obstacle != o && obstacle.touchesObstacle(o)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	/**
 	 * Expand all of the obstacles in the room by a given radius.
 	 * 
@@ -42,11 +67,11 @@ public class Room {
 	 */
 	public List<Obstacle> getExpandedObstacles(double radius) {
 		List<Obstacle> l = new ArrayList<Obstacle>();
-		
+
 		for (int i = 0; i < this.obstacles.size(); i++) {
 			l.add(this.obstacles.get(i).expandObstacle(radius));
 		}
-		
+
 		return l;
 	}
 
@@ -58,38 +83,15 @@ public class Room {
 		while (!inSpace && index < this.triangles.size()) {
 			EnvironmentTriangle t = this.triangles.get(index);
 
-			if (!t.isObstacle && t.containsPoint(p) != PointInTriangleResult.NONE) {
+			if (!t.isObstacle
+					&& t.containsPoint(p) != PointInTriangleResult.NONE) {
 				inSpace = true;
 			}
 
-			index ++;
+			index++;
 		}
 
 		return inSpace;
-	}
-	
-	/**
-	 * Returns whether or not an obstacle is internal (not touching the rooms sides).
-	 * Note that we are assuming that all obstacles are normalised (no two obstacles touching sides)
-	 * 
-	 * @param o
-	 * @return true if the obstacle is internal, and false otherwise
-	 */
-	public boolean isObstacleInternal(Obstacle o) {
-		if (!this.obstacles.contains(o)) {
-			Log.error("Obstacle not found in the room");
-			
-			return false;
-		}
-		
-		// For each obstacle check if it touches o.
-		for (Obstacle obstacle : this.obstacles) {
-			if (obstacle != o && obstacle.touchesObstacle(o)) {
-				return false;
-			}
-		}
-		
-		return true;
 	}
 
 	/**
@@ -136,16 +138,19 @@ public class Room {
 			if (o.points.size() > 0) {
 				// Add a triangle if obstacle is a point.
 				if (o.points.size() == 1) {
-					t.add(new EnvironmentTriangle(true, o.points.get(0), o.points.get(0), o.points.get(0)));
+					t.add(new EnvironmentTriangle(true, o.points.get(0),
+							o.points.get(0), o.points.get(0)));
 				}
 				// Add a triangle if obstacle is a line.
 				else if (o.points.size() == 2) {
-					t.add(new EnvironmentTriangle(true, o.points.get(0), o.points.get(0), o.points.get(1)));
-				}
-				else {
-					// Add a triangle with one point always being the first point.
+					t.add(new EnvironmentTriangle(true, o.points.get(0),
+							o.points.get(0), o.points.get(1)));
+				} else {
+					// Add a triangle with one point always being the first
+					// point.
 					for (int i = 1; i < o.points.size() - 1; i++) {
-						t.add(new EnvironmentTriangle(true, o.points.get(0), o.points.get(i), o.points.get(i + 1)));
+						t.add(new EnvironmentTriangle(true, o.points.get(0),
+								o.points.get(i), o.points.get(i + 1)));
 					}
 				}
 			}
@@ -155,11 +160,13 @@ public class Room {
 		for (Obstacle p : obstacles) {
 			for (Obstacle q : obstacles) {
 				if (p != q) {
-					// Try to form a triangle with one of p's edges and a point from q.
+					// Try to form a triangle with one of p's edges and a point
+					// from q.
 					for (int i = 0; i < p.points.size(); i++) {
 						if (p.points.size() >= 2) {
 							Point2D point1 = p.points.get(i);
-							Point2D point2 = p.points.get((i + 1) % p.points.size());
+							Point2D point2 = p.points.get((i + 1)
+									% p.points.size());
 
 							for (int j = 0; j < q.points.size(); j++) {
 								boolean cross = false;
@@ -174,16 +181,20 @@ public class Room {
 								Line2D l2 = new Line2D.Double();
 								l2.setLine(point2, q.points.get(j));
 
-								// Do not add the triangle if its edges cross any other triangles.
+								// Do not add the triangle if its edges cross
+								// any other triangles.
 								while (!cross && index < t.size()) {
-									if (t.get(index).looseIntersectsLine(l1) || t.get(index).looseIntersectsLine(l2)) {
+									if (t.get(index).looseIntersectsLine(l1)
+											|| t.get(index)
+													.looseIntersectsLine(l2)) {
 										cross = true;
 									}
 
-									index ++;
+									index++;
 								}
 
-								EnvironmentTriangle s = new EnvironmentTriangle(false, point1, point2, point3);
+								EnvironmentTriangle s = new EnvironmentTriangle(
+										false, point1, point2, point3);
 
 								boolean unique = true;
 
@@ -194,7 +205,7 @@ public class Room {
 										unique = false;
 									}
 
-									index2 ++;
+									index2++;
 								}
 
 								if (!cross && unique) {
