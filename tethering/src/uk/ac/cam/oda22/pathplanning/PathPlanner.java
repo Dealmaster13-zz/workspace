@@ -48,6 +48,22 @@ public final class PathPlanner {
 		List<Obstacle> expandedObstacles = room
 				.getExpandedObstacles(robot.radius);
 
+		// Tighten the tether.
+		TetherConfiguration tightenedTC = TetheredAStarPathfinding
+				.getTautTetherConfiguration(
+						robot.tether.getFullConfiguration(), obstacles,
+						robot.radius);
+
+		// If the taut tether configuration is undefined then the original
+		// tether configuration is invalid.
+		if (tightenedTC == null) {
+			Log.error("Could not tighten tether.");
+
+			return null;
+		}
+
+		robot.tether.setFullConfiguration(tightenedTC);
+
 		/*
 		 * TODO: Also check if the robot can reach the goal despite its size.
 		 */

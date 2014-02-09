@@ -82,7 +82,6 @@ public class TetheredAStarPathfinding {
 			AStarNode current = getLowestCostNode(q);
 
 			// Return no path if there are no more nodes to check.
-			// Although nodes
 			if (current == null) {
 				return false;
 			}
@@ -232,11 +231,22 @@ public class TetheredAStarPathfinding {
 			return null;
 		}
 
-		List<TetherConfiguration> tcHistory = new ArrayList<TetherConfiguration>();
+		int tcSize = tc.points.size();
+
+		// Stop if we are retracting down the tether.
+		// Tether retraction should be carried out by a separate process.
+		if (tcSize >= 2
+				&& MathExtended.approxEqual(tc.points.get(tcSize - 2),
+						destination, fractionalError, absoluteError)) {
+			return null;
+		}
 
 		TetherConfiguration currentTC = new TetherConfiguration(tc);
 		Point2D currentPoint = ListFunctions.getLast(currentTC.points);
-		
+
+		List<TetherConfiguration> tcHistory = new ArrayList<TetherConfiguration>();
+		tcHistory.add(currentTC);
+
 		Point2D lastWrappedPoint = null;
 		Point2D lastUnwrappedPoint = null;
 
@@ -246,19 +256,19 @@ public class TetheredAStarPathfinding {
 				fractionalError, absoluteError)) {
 			// Get the next tether configuration by moving towards the
 			// destination.
-			NextTetherConfigurationResult nextTCResult = getNextTetherConfiguration(currentTC,
-					destination, obstacles, lastWrappedPoint, lastUnwrappedPoint);
-			
+			NextTetherConfigurationResult nextTCResult = getNextTetherConfiguration(
+					currentTC, destination, obstacles, lastWrappedPoint,
+					lastUnwrappedPoint);
+
 			if (nextTCResult == null) {
 				return null;
-			}
-			else {
+			} else {
 				lastWrappedPoint = nextTCResult.lastWrappedPoint;
 				lastUnwrappedPoint = nextTCResult.lastUnwrappedPoint;
 			}
 
 			TetherConfiguration nextTC = nextTCResult.tc;
-			
+
 			int nextTCSize = nextTC.points.size();
 
 			boolean lastPointsEqual = nextTCSize >= 2
@@ -382,6 +392,17 @@ public class TetheredAStarPathfinding {
 		TetherConfiguration croppedUnchangedTC = unchangedTC
 				.getCroppedTetherToPreventRobotOverlap(currentPoint,
 						robotRadius);
+
+		// If the robot is a point-robot then just check for point
+		// intersections.
+		if (robotRadius == 0) {
+			// Get the robot path.
+			Line2D robotPath = new Line2D.Double(currentPoint.getX(),
+					currentPoint.getY(), nextPoint.getX(), nextPoint.getY());
+
+			return MathExtended.strictLineIntersectsPath(robotPath,
+					croppedUnchangedTC);
+		}
 
 		// Check if the robot intersects the tether at the current point.
 		if (MathExtended.strictCircleIntersectsPath(currentPoint, robotRadius,
@@ -580,7 +601,7 @@ public class TetheredAStarPathfinding {
 		// Fail if the destination is undefined.
 		if (d == null) {
 			Log.error("Destination is undefined.");
-			
+
 			return null;
 		}
 
@@ -668,7 +689,7 @@ public class TetheredAStarPathfinding {
 
 			return result;
 		}
-		
+
 		boolean doNotUnwrap = lastWrapPoint != null && lastWrapPoint.equals(q);
 
 		// Get the point at which unwrapping would occur along the line pd.
@@ -677,8 +698,8 @@ public class TetheredAStarPathfinding {
 		// It is not sufficient to simply compare angles of qp, rq and qd.
 		// This point should still be defined if r, q and p are collinear.
 		// We should not unwrap if we just wrapped around q.
-		Point2D u = (r != null && !doNotUnwrap) ? getUnwrapPoint(r,
-				q, rq, p, pd) : null;
+		Point2D u = (r != null && !doNotUnwrap) ? getUnwrapPoint(r, q, rq, p,
+				pd) : null;
 
 		// Create a triangle qpu (if u exists) or qpd (if u does not exist).
 		// If an obstacle point lies within this triangle then the tether will
@@ -704,8 +725,15 @@ public class TetheredAStarPathfinding {
 		// Check all obstacle vertices for this first wrap point.
 		for (Obstacle o : obstacles) {
 			for (Point2D v : o.points) {
-				// Skip this point if it was previously unwrapped.
-				if (lastUnwrapPoint == null || !v.equals(lastUnwrapPoint)) {
+				// Check if the obstacle vertex is where we are currently at in
+				// case of 'fatal' floating point inaccuracies.
+				boolean isCurrentPoint = MathExtended.approxEqual(p, v,
+						0.000001, 0.000001);
+
+				// Skip this point if it was previously unwrapped or if it is at
+				// the robot's current location.
+				if ((lastUnwrapPoint == null || !v.equals(lastUnwrapPoint))
+						&& !isCurrentPoint) {
 					// Check if the neighbouring points of v do not prevent the
 					// wrapping of the tether.
 					// This is used to take care of cases where q, p and v are

@@ -3,6 +3,7 @@ package uk.ac.cam.oda22.core.tethers;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import uk.ac.cam.oda22.core.ListFunctions;
 import uk.ac.cam.oda22.core.MathExtended;
 import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.pathplanning.Path;
@@ -41,9 +42,15 @@ public class TetherConfiguration extends Path {
 	public boolean moveLastPoint(Point2D newPoint) {
 		// Get the tether configuration which is all but the last segment.
 		boolean removedPoint = this.removeLastPoint();
+		
+		// Get the last point.
+		Point2D lastPoint = ListFunctions.getLast(this.points);
 
-		// Add the new final segment.
-		this.addPoint(newPoint);
+		// If the last point is different to the point being moved to then add the new point.
+		if (!lastPoint.equals(newPoint)) {
+			// Add the new final segment.
+			this.addPoint(newPoint);
+		}
 
 		return removedPoint;
 	}

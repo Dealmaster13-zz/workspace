@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.cam.oda22.core.MathExtended;
+import uk.ac.cam.oda22.core.logging.Log;
 
 /**
  * @author Oliver
@@ -45,7 +46,8 @@ public abstract class Tether {
 	}
 
 	/**
-	 * Gets the tether configuration which does not include the segment from the anchor point.
+	 * Gets the tether configuration which does not include the segment from the
+	 * anchor point.
 	 * 
 	 * @return tether configuration
 	 */
@@ -63,12 +65,26 @@ public abstract class Tether {
 		List<Point2D> ps = new ArrayList<Point2D>();
 		ps.add(this.anchor);
 		ps.addAll(this.configuration.points);
-		
+
 		return new TetherConfiguration(ps);
 	}
 
 	public void setConfiguration(TetherConfiguration configuration) {
 		this.configuration = configuration;
+	}
+
+	public void setFullConfiguration(TetherConfiguration configuration) {
+		if (configuration != null && configuration.points.size() > 0) {
+			this.anchor = configuration.points.get(0);
+
+			this.configuration = new TetherConfiguration();
+
+			for (int i = 1; i < configuration.points.size(); i++) {
+				this.configuration.addPoint(configuration.points.get(i));
+			}
+		} else {
+			Log.error("Invalid tether configuration.");
+		}
 	}
 
 	public abstract double getUsedLength();

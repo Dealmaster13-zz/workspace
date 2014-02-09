@@ -49,15 +49,15 @@
 <fullyQualifiedTypeName name="java.awt.geom.Rectangle2D"/>
 <fullyQualifiedTypeName name="javax.microedition.location.Orientation"/>
 <fullyQualifiedTypeName name="java.util.Collection"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ListFunctions"/>
 <fullyQualifiedTypeName name="java.awt.Stroke"/>
-<fullyQualifiedTypeName name="java.awt.BasicStroke"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarPathfinding"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.shapes.DisplayShape"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.logging.Log"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.Vector2D"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.MathExtended"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.TetherConfiguration"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.NextTetherConfigurationResult"/>
+<fullyQualifiedTypeName name="java.awt.BasicStroke"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ListFunctions"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.MathExtended"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarPathfinding"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.TetherConfiguration"/>
 </qualifiedTypeNameHistroy>
