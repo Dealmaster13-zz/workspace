@@ -1,9 +1,4 @@
-/**
- * 
- */
 package uk.ac.cam.oda22.coverage;
-
-import uk.ac.cam.oda22.pathplanning.TetheredPath;
 
 /**
  * @author Oliver
@@ -11,10 +6,10 @@ import uk.ac.cam.oda22.pathplanning.TetheredPath;
  */
 public class ShortestPathGrid {
 	
-	public final TetheredPath[][] shortestPaths;
+	public final ShortestPathGridCell[][] cells;
 	
-	public ShortestPathGrid(TetheredPath[][] shortestPaths) {
-		this.shortestPaths = shortestPaths;
+	public ShortestPathGrid(ShortestPathGridCell[][] cells) {
+		this.cells = cells;
 	}
 
 }

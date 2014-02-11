@@ -96,7 +96,7 @@ public class TetheredAStarPathfinding {
 			if (current.g + current.h > destination.g) {
 				optimalPathFound = true;
 			} else {
-				// For each undiscovered neighbour of the current edge, try to
+				// For each neighbour of the current edge, try to
 				// relax their edge.
 				for (AStarEdge edge : current.edges) {
 					AStarNode neighbour = (current == edge.p) ? edge.q : edge.p;
@@ -249,7 +249,7 @@ public class TetheredAStarPathfinding {
 			TetherConfiguration tc = destination.subPaths.get(i).tc;
 
 			// Reassemble the forward path.
-			for (int j = predecessorList.size() - 1; j >= 0; j--) {
+			for (int j = 0; j < predecessorList.size(); j++) {
 				path.addPoint(predecessorList.get(j).p);
 			}
 
@@ -546,6 +546,8 @@ public class TetheredAStarPathfinding {
 	 * the orientation of its two associated obstacle edges. This only checks
 	 * angular values, and does not consider whether or not the tether is long
 	 * enough. This does not consider the tether rotating more than 180 degrees.
+	 * If allowSamePoint is set to true, then we allow the fact that p or q may
+	 * be equal to v.
 	 * 
 	 * @param q
 	 * @param p
@@ -553,10 +555,12 @@ public class TetheredAStarPathfinding {
 	 * @param qd
 	 * @param v
 	 * @param o
+	 * @param allowSamePoint
 	 * @return true if the tether can wrap, false otherwise
 	 */
 	private static boolean isWrappingPossible(Point2D q, Point2D p,
-			Vector2D qp, Vector2D qd, Point2D v, Obstacle o) {
+			Vector2D qp, Vector2D qd, Point2D v, Obstacle o,
+			boolean allowSamePoint) {
 		// Fail if the obstacle and/or its vertex is invalid.
 		if (v == null || o.points.size() == 0) {
 			Log.error("Invalid obstacle.");
@@ -564,16 +568,16 @@ public class TetheredAStarPathfinding {
 			return false;
 		}
 
+		// If q and v or p and v are the same point then the tether cannot wrap
+		// point v.
+		if (!allowSamePoint && (q.equals(v) || p.equals(v))) {
+			return false;
+		}
+
 		// If point v is the only point in the obstacle then the tether can wrap
 		// around it.
 		if (o.points.size() == 1) {
 			return true;
-		}
-
-		// If q and v or p and v are the same point then the tether cannot wrap
-		// point v.
-		if (q.equals(v) || p.equals(v)) {
-			return false;
 		}
 
 		// Get the direction in which the tether will rotate.
@@ -636,6 +640,49 @@ public class TetheredAStarPathfinding {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Returns whether or not a tether segment qp can wrap around vertex v given
+	 * the orientation of its two associated obstacle edges. This only checks
+	 * angular values, and does not consider whether or not the tether is long
+	 * enough. This does not consider the tether rotating more than 180 degrees.
+	 * 
+	 * @param q
+	 * @param p
+	 * @param qp
+	 * @param qd
+	 * @param v
+	 * @param o
+	 * @return true if the tether can wrap, false otherwise
+	 */
+	private static boolean willWrapAtObstacleVertex(Point2D q, Point2D p,
+			Vector2D qp, Vector2D qd, List<Obstacle> os) {
+		Point2D v = null;
+		Obstacle o = null;
+
+		// Find the obstacle vertex to which p corresponds, if one exists.
+		for (Obstacle obstacle : os) {
+			for (Point2D vertex : obstacle.points) {
+				if (p.equals(vertex)) {
+					if (v != null) {
+						// TODO: Run extra checks for if multiple obstacle
+						// vertices coincide. They can either block a path or
+						// still allow it.
+					}
+
+					v = vertex;
+					o = obstacle;
+				}
+			}
+		}
+
+		// Stop if p is not at an obstacle vertex.
+		if (v == null) {
+			return false;
+		}
+
+		return isWrappingPossible(q, p, qp, qd, v, o, true);
 	}
 
 	/**
@@ -799,7 +846,8 @@ public class TetheredAStarPathfinding {
 					// This is used to take care of cases where q, p and v are
 					// collinear, or q is collinear with v and one of its
 					// neighbouring vertices.
-					boolean canWrap = isWrappingPossible(q, p, qp, qd, v, o);
+					boolean canWrap = isWrappingPossible(q, p, qp, qd, v, o,
+							false);
 
 					// Check if the vertex lies within the wrap zone.
 					boolean inWrapZone = wrapZone.containsPoint(v) != PointInTriangleResult.NONE;
@@ -852,11 +900,18 @@ public class TetheredAStarPathfinding {
 			}
 
 			/*
-			 * Remove the last point on the tether (p), and add new vertices,
-			 * minVertex and newP.
+			 * Remove the last point on the tether (p) if it is not at an
+			 * obstacle vertex, and add new vertices, minVertex and newP. Note
+			 * that if p is at an obstacle vertex (as could be the case for a
+			 * point robot) then we know that we need to keep the point since we
+			 * are wrapping around it.
 			 */
 
-			newTC.removeLastPoint();
+			boolean pWrap = willWrapAtObstacleVertex(q, p, qp, qd, obstacles);
+
+			if (!pWrap) {
+				newTC.removeLastPoint();
+			}
 
 			// Add v if it is distinct from newP.
 			if (!MathExtended.approxEqual(minVertex, newP, 0.00001, 0.00001)) {
@@ -898,10 +953,23 @@ public class TetheredAStarPathfinding {
 			return result;
 		}
 
-		// Since we cannot wrap nor unwrap, move straight to d, and alter the
-		// tether configuration accordingly.
-		// Change the last point on the tether (from p) to d.
-		newTC.moveLastPoint(d);
+		/*
+		 * Since we cannot wrap nor unwrap, move straight to d, and alter the
+		 * tether configuration accordingly. Remove the last point on the tether
+		 * (p) if it is not at an obstacle vertex, and add new vertices,
+		 * minVertex and newP. Note that if p is at an obstacle vertex (as could
+		 * be the case for a point robot) then we know that we need to keep the
+		 * point since we are wrapping around it.
+		 */
+
+		boolean pWrap = willWrapAtObstacleVertex(q, p, qp, qd, obstacles);
+
+		if (!pWrap) {
+			newTC.moveLastPoint(d);
+		}
+		else {
+			newTC.addPoint(d);
+		}
 
 		// Assert that the tether configuration is valid.
 		if (!tc.assertConfigurationValid()) {

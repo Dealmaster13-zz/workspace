@@ -1,8 +1,6 @@
 package uk.ac.cam.oda22.simulation;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -22,6 +20,8 @@ import uk.ac.cam.oda22.core.robots.Robot;
 import uk.ac.cam.oda22.core.tethers.SimpleTether;
 import uk.ac.cam.oda22.core.tethers.Tether;
 import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
+import uk.ac.cam.oda22.coverage.Coverage;
+import uk.ac.cam.oda22.coverage.CoverageResult;
 import uk.ac.cam.oda22.graphics.GraphicsFunctions;
 import uk.ac.cam.oda22.graphics.IVisualiser;
 import uk.ac.cam.oda22.graphics.VisualiserUsingJFrame;
@@ -77,18 +77,19 @@ public class Simulator {
 
 		Point2D goal = new Point2D.Double(40, 5);
 
-		PathPlanningResult result = testPathPlanning(room, robot, goal);
+		// PathPlanningResult result = testPathPlanning(room, robot, goal);
+		CoverageResult result = testCoverage(room, robot);
 
 		// Sleep for one second so that the visualiser has time to initialise.
 		Thread.sleep(1000);
 
 		// Draw the graphics.
-		drawRoom(room, robot.radius, true, false, false);
-		drawRobot(robot);
-		drawGoal(goal);
-		drawTether(robot.tether, Color.cyan, true);
-		drawAnchor(robot.tether.getAnchor());
-		if (result != null) drawPath(result.tetheredPath.path);
+		drawRoom(room, robot.radius, false, false, false);
+		// drawRobot(robot);
+		// drawGoal(goal);
+		// drawTether(robot.tether, Color.cyan, true);
+		// drawAnchor(robot.tether.getAnchor());
+		// if (result != null) drawPath(result.tetheredPath.path);
 	}
 
 	private static Room createRoom1() {
@@ -288,9 +289,10 @@ public class Simulator {
 	 * @return
 	 * @throws Exception
 	 */
-	private static Robot createRobot1_2(Tether tether, double radius) throws Exception {
+	private static Robot createRobot1_2(Tether tether, double radius)
+			throws Exception {
 		double sideLength = radius * Math.sqrt(2);
-		
+
 		return new RectangularRobot(tether.getLastPoint(), 0, Math.PI / 180,
 				tether, sideLength, sideLength);
 	}
@@ -441,6 +443,18 @@ public class Simulator {
 			Point2D goal) {
 		PathPlanningResult result = PathPlanner.performPathPlanning(room,
 				robot, goal, tetherSegments);
+
+		if (result != null) {
+			for (int i = 0; i < result.actions.size(); i++) {
+				System.out.println(result.actions.get(i));
+			}
+		}
+
+		return result;
+	}
+
+	private static CoverageResult testCoverage(Room room, Robot robot) {
+		CoverageResult result = Coverage.performCoverage(room, robot);
 
 		if (result != null) {
 			for (int i = 0; i < result.actions.size(); i++) {
