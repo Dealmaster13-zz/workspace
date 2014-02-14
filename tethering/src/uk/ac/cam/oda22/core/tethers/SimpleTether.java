@@ -95,7 +95,7 @@ public class SimpleTether extends Tether {
 
 	@Override
 	public Point2D getLastPoint() {
-		if (configuration.length() > 0) {
+		if (configuration.points.size() > 0) {
 			return ListFunctions.getLast(this.configuration.points);
 		}
 

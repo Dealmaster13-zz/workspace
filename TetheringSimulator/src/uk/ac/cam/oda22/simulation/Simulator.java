@@ -22,6 +22,8 @@ import uk.ac.cam.oda22.core.tethers.Tether;
 import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
 import uk.ac.cam.oda22.coverage.Coverage;
 import uk.ac.cam.oda22.coverage.CoverageResult;
+import uk.ac.cam.oda22.coverage.ShortestPathGrid;
+import uk.ac.cam.oda22.coverage.ShortestPathGridCell;
 import uk.ac.cam.oda22.graphics.GraphicsFunctions;
 import uk.ac.cam.oda22.graphics.IVisualiser;
 import uk.ac.cam.oda22.graphics.VisualiserUsingJFrame;
@@ -63,8 +65,9 @@ public class Simulator {
 		Robot robot;
 
 		try {
-			Tether tether = createTether3_3(300);
-			robot = createRobot1_2(tether, 4);
+			double robotRadius = 4;
+			Tether tether = createTether3_4(80, robotRadius);
+			robot = createRobot1_2(tether, robotRadius);
 		} catch (Exception e) {
 			Log.error("Could not create robot with tether.");
 
@@ -79,16 +82,19 @@ public class Simulator {
 
 		// PathPlanningResult result = testPathPlanning(room, robot, goal);
 		CoverageResult result = testCoverage(room, robot);
+		
+		ShortestPathGrid shortestPathGrid = Coverage.computeShortestPaths(room, robot);
 
 		// Sleep for one second so that the visualiser has time to initialise.
 		Thread.sleep(1000);
 
 		// Draw the graphics.
 		drawRoom(room, robot.radius, false, false, false);
-		// drawRobot(robot);
+		drawRobot(robot);
 		// drawGoal(goal);
-		// drawTether(robot.tether, Color.cyan, true);
-		// drawAnchor(robot.tether.getAnchor());
+		drawTether(robot.tether, Color.cyan, true);
+		drawAnchor(robot.tether.getAnchor());
+		drawShortestPathGrid(shortestPathGrid);
 		// if (result != null) drawPath(result.tetheredPath.path);
 	}
 
@@ -274,6 +280,22 @@ public class Simulator {
 	}
 
 	/**
+	 * Tether for room 3 configuration type 4. This configuration is for coverage.
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	private static Tether createTether3_4(double maxTetherLength, double robotRadius)
+			throws Exception {
+		Point2D anchor = new Point2D.Double(50, 0);
+
+		TetherConfiguration X = new TetherConfiguration();
+		X.addPoint(new Point2D.Double(50, robotRadius));
+
+		return new SimpleTether(anchor, maxTetherLength, X);
+	}
+
+	/**
 	 * Tether for room 1 configuration type 1. This is a point robot.
 	 * 
 	 * @return
@@ -419,6 +441,23 @@ public class Simulator {
 			visualiser.drawShape(line);
 
 			previousPoint = path.points.get(i);
+		}
+	}
+
+	private static void drawShortestPathGrid(ShortestPathGrid g) {
+		for (ShortestPathGridCell[] cs : g.cells) {
+			for (ShortestPathGridCell c : cs) {
+				Point2D p = new Point2D.Double(c.x, c.y);
+
+				// Compute the colour which should be used for the grid cell.
+				double f = c.potentialValue / 140;
+				int rValue = (int) Math.min(f * 255, 255);
+				Color colour = new Color(rValue, 255 - rValue, 0);
+
+				Circle circle = new Circle(p, 0.2, colour, 2);
+
+				visualiser.drawShape(circle);
+			}
 		}
 	}
 

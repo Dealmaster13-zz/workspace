@@ -24,7 +24,6 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.AStarSubPath"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.Path"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarResult"/>
-<fullyQualifiedTypeName name="java.awt.geom.Point2D.Double"/>
 <fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.SimpleTetherSegment"/>
 <fullyQualifiedTypeName name="java.awt.geom.Line2D"/>
@@ -57,7 +56,8 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarShortestPathResult"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarSinglePathResult"/>
 <fullyQualifiedTypeName name="lejos.robotics.pathfinding.ShortestPathFinder"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.ShortestPathGrid"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.TetheredPath"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.ShortestPathGrid"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.ShortestPathGridCell"/>
+<fullyQualifiedTypeName name="java.awt.geom.Point2D.Double"/>
 </qualifiedTypeNameHistroy>

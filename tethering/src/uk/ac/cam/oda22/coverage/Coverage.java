@@ -3,7 +3,6 @@ package uk.ac.cam.oda22.coverage;
 import java.awt.geom.Point2D;
 import java.util.Stack;
 
-import uk.ac.cam.oda22.core.environment.Obstacle;
 import uk.ac.cam.oda22.core.environment.Room;
 import uk.ac.cam.oda22.core.environment.VisibilityGraph;
 import uk.ac.cam.oda22.core.logging.Log;
@@ -70,7 +69,7 @@ public final class Coverage {
 	 * @param room
 	 * @return saddle line
 	 */
-	private static ShortestPathGrid computeShortestPaths(Room room, Robot robot) {
+	public static ShortestPathGrid computeShortestPaths(Room room, Robot robot) {
 		Point2D anchorPoint = robot.tether.getAnchor();
 
 		double gridSeparation = robot.radius * 2;
