@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.StraightSweepSegment"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.CurvedSweepSegment"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.Sweep"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.CoverageResult"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.SaddleLineSegment"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.ISweepSegment"/>
 <fullyQualifiedTypeName name="java.util.Stack"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.CorridorProgress"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.LineIntersectionResult"/>
 <fullyQualifiedTypeName name="java.lang.Exception"/>
 <fullyQualifiedTypeName name="java.util.LinkedList"/>
@@ -22,7 +20,6 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.Triangle2D"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.PointInTriangleResult"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.AStarSubPath"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.Path"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarResult"/>
 <fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.SimpleTetherSegment"/>
@@ -38,11 +35,7 @@
 <fullyQualifiedTypeName name="java.awt.Stroke"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.graphics.shapes.DisplayShape"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.Vector2D"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.NextTetherConfigurationResult"/>
 <fullyQualifiedTypeName name="java.awt.BasicStroke"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ListFunctions"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.MathExtended"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.logging.Log"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.Obstacle"/>
 <fullyQualifiedTypeName name="lejos.robotics.pathfinding.ShortestPathFinder.Node"/>
@@ -51,13 +44,20 @@
 <fullyQualifiedTypeName name="lejos.geom.Rectangle"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarPathfinding"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.VisibilityGraph"/>
-<fullyQualifiedTypeName name="java.awt.geom.Point2D"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.TetherConfiguration"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarShortestPathResult"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarSinglePathResult"/>
 <fullyQualifiedTypeName name="lejos.robotics.pathfinding.ShortestPathFinder"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.TetheredPath"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.ShortestPathGrid"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.ShortestPathGridCell"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.Path"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.CorridorProgress"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.TetherConfiguration"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ListFunctions"/>
+<fullyQualifiedTypeName name="java.awt.geom.Point2D"/>
 <fullyQualifiedTypeName name="java.awt.geom.Point2D.Double"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.Vector2D"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.MathExtended"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.NextTetherConfigurationResult"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.NextTetherConfigurationRotationResult"/>
 </qualifiedTypeNameHistroy>

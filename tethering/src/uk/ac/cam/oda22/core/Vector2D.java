@@ -27,6 +27,10 @@ public class Vector2D {
 		this.x = l.getX2() - l.getX1();
 		this.y = l.getY2() - l.getY1();
 	}
+	
+	public Point2D getPoint() {
+		return new Point2D.Double(this.x, this.y);
+	}
 
 	public static Vector2D getTangentVector(double x, double y, boolean leftSide) {
 		double mag = getLength(x, y);

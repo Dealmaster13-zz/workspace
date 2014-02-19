@@ -50,11 +50,20 @@ public final class MathExtended {
 
 		return false;
 	}
+	
+	/**
+	 * Checks if two numbers have the same sign or not.
+	 * 
+	 * @return true if the numbers have the same sign, false otherwise
+	 */
+	public static boolean sameSign(double m, double n) {
+		return (m >= 0 && n >= 0) || (m <= 0 && n <= 0);
+	}
 
 	public static double length(double w, double h) {
 		return Math.sqrt((w * w) + (h * h));
 	}
-	
+
 	public static double length(Line2D l) {
 		return length(l.getX2() - l.getX1(), l.getY2() - l.getY1());
 	}
@@ -285,10 +294,10 @@ public final class MathExtended {
 
 		// Get the vector from p1 to p2.
 		Vector2D v12 = new Vector2D(p1, p2);
-		
+
 		// Get the vector from p2 to p3.
 		Vector2D v23 = new Vector2D(p2, p3);
-		
+
 		// Check if the angles of the vectors are equal.
 		return v12.getAngle() == v23.getAngle();
 	}
@@ -508,13 +517,13 @@ public final class MathExtended {
 
 		return null;
 	}
-	
+
 	public static Point2D getIntersectionPoint(Line2D l1, Line2D l2) {
 		Point2D p1 = l1.getP1();
 		Vector2D v1 = new Vector2D(l1);
 		Point2D p2 = l2.getP1();
 		Vector2D v2 = new Vector2D(l2);
-		
+
 		return getIntersectionPoint(p1, v1, p2, v2);
 	}
 
@@ -531,7 +540,7 @@ public final class MathExtended {
 	}
 
 	/**
-	 * Translates point p by position vector t, returning a new point.
+	 * Returns a new point equivalent to p+t.
 	 * 
 	 * @param p
 	 * @param t
@@ -541,6 +550,24 @@ public final class MathExtended {
 		return new Point2D.Double(p.getX() + t.getX(), p.getY() + t.getY());
 	}
 
+	/**
+	 * Translates point p by position vector t, returning a new point.
+	 * 
+	 * @param p
+	 * @param t
+	 * @return translated point
+	 */
+	public static Point2D translate(Point2D p, Vector2D t) {
+		return new Point2D.Double(p.getX() + t.x, p.getY() + t.y);
+	}
+
+	/**
+	 * Rotates point p about the origin.
+	 * 
+	 * @param p
+	 * @param rads
+	 * @return rotated point
+	 */
 	public static Point2D rotate(Point2D p, double rads) {
 		double x = (p.getX() * Math.cos(rads)) - (p.getY() * Math.sin(rads));
 		double y = (p.getX() * Math.sin(rads)) + (p.getY() * Math.cos(rads));
@@ -548,6 +575,46 @@ public final class MathExtended {
 		return new Point2D.Double(x, y);
 	}
 
+	/**
+	 * Rotates vector v about the origin.
+	 * 
+	 * @param p
+	 * @param rads
+	 * @return rotated point
+	 */
+	public static Vector2D rotate(Vector2D v, double rads) {
+		double x = (v.x * Math.cos(rads)) - (v.y * Math.sin(rads));
+		double y = (v.x * Math.sin(rads)) + (v.y * Math.cos(rads));
+
+		return new Vector2D(x, y);
+	}
+
+	/**
+	 * Rotates point p about pivotPoint.
+	 * 
+	 * @param p
+	 * @param pivotPoint
+	 * @param rads
+	 * @return rotated point
+	 */
+	public static Point2D rotate(Point2D p, Point2D pivotPoint, double rads) {
+		// Get the vector formed between pivotPoint and p.
+		Vector2D v = new Vector2D(pivotPoint, p);
+		
+		// Rotate the vector.
+		Vector2D rotatedVector = rotate(v, rads);
+
+		// Add the pivot point to the vector.
+		return rotatedVector.addPoint(pivotPoint);
+	}
+
+	/**
+	 * Rotates a line about the origin by rotating its two endpoints separately.
+	 * 
+	 * @param l
+	 * @param rads
+	 * @return
+	 */
 	public static Line2D rotate(Line2D l, double rads) {
 		Point2D p1 = rotate(l.getP1(), rads);
 		Point2D p2 = rotate(l.getP2(), rads);
@@ -643,10 +710,10 @@ public final class MathExtended {
 
 		return l;
 	}
-	
+
 	/**
-	 * Gets the fraction along the line l at which point p lies.
-	 * p should lie on the line l.
+	 * Gets the fraction along the line l at which point p lies. p should lie on
+	 * the line l.
 	 * 
 	 * @param p
 	 * @param l
@@ -658,14 +725,14 @@ public final class MathExtended {
 		double rads = v.getAngle();
 		Point2D pR = rotate(p, -rads);
 		Line2D lR = rotate(l, -rads);
-		
+
 		// The point should lie on the (extended) line.
 		if (!approxEqual(pR.getY(), lR.getY1(), 0.00001, 0.00001)) {
 			Log.warning("Point does not lie on the line.");
 		}
 
 		double distanceToP1 = pR.distance(lR.getP1());
-		
+
 		return distanceToP1 / (length(l));
 	}
 

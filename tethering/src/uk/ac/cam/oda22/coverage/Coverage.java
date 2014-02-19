@@ -20,11 +20,11 @@ import uk.ac.cam.oda22.pathplanning.TetheredPath;
 public final class Coverage {
 
 	public static CoverageResult performCoverage(Room room, Robot robot) {
-		/**
+		/*
 		 * TODO: Perform input sanitisation.
 		 */
 
-		// CHeck that the robot is not a point robot (otherwise coverage is not
+		// Check that the robot is not a point robot (otherwise coverage is not
 		// possible).
 		if (robot.radius <= 0) {
 			Log.error("Robot must have a positive area to perform coverage.");
@@ -32,7 +32,7 @@ public final class Coverage {
 			return null;
 		}
 
-		/**
+		/*
 		 * TODO: Compute the shortest path from the anchor point to every point
 		 * in the room, thus providing a discrete notion of 'saddle lines'.
 		 */
@@ -43,19 +43,24 @@ public final class Coverage {
 		Stack<Point2D> splitPoints = new Stack<Point2D>();
 
 		// Initialise corridor progress.
-		CorridorProgress corridorProgress = new CorridorProgress(0);
+		// Note that we initially search rightwards.
+		CorridorProgress corridorProgress = new CorridorProgress(0, true);
 
-		/**
-		 * TODO: Sweep around the anchor point until an obstacle is hit which
-		 * splits the potential in two directions along the obstacle. Call this
-		 * the primary split point and add it to S.
+		/*
+		 * TODO: Step 1: Move to the closest uncovered area, in a given
+		 * direction (determined by whether we are in a left or right corridor),
+		 * along the obstacle edge or saddle line. Note that we should be
+		 * touching an obstacle edge or saddle line.
 		 */
 
-		/**
-		 * TODO: Explore the right-hand corridor. Move sufficiently far along
-		 * the obstacle edge such that the robot is at the edge of the covered
-		 * area. Note that this new position should be the appropriate position
-		 * for the current potential level.
+		/*
+		 * TODO: Step 2: Explore the current corridor.
+		 */
+
+		/*
+		 * TODO: Step 3: Return to the last split point for which a corridor is
+		 * unexplored, and then go to step 2. If no such split point exists then
+		 * we are finished.
 		 */
 
 		return null;
@@ -114,6 +119,37 @@ public final class Coverage {
 		}
 
 		return new ShortestPathGrid(cells);
+	}
+
+	private static ISweepSegment exploreCorridor(Point2D position,
+			CorridorProgress corridorProgress) {
+		/*
+		 * TODO: Step 2a: Check when the robot will first hit a saddle line via
+		 * sweeping at its current radius, if one exists.
+		 */
+
+		/*
+		 * TODO: Step 2b: Check when the robot will first hit an obstacle (before
+		 * hitting any saddle lines) via sweeping at its current radius, if one
+		 * exists, and check if it would introduce a split point. If a split
+		 * point is introduced then add it to the stack, and create the
+		 * appropriate corridors.
+		 */
+
+		/*
+		 * TODO: Step 2c: Perform a sweep until the next saddle line or obstacle.
+		 */
+
+		return null;
+	}
+
+	private static ISweepSegment performSweep(Point2D position, double rads,
+			CorridorProgress corridorProgress) {
+		/*
+		 * TODO: Step 2c: Perform a sweep of given rotation.
+		 */
+
+		return null;
 	}
 
 	/**
