@@ -10,20 +10,21 @@ import javax.swing.SwingUtilities;
 
 import uk.ac.cam.oda22.core.ShapeFunctions;
 import uk.ac.cam.oda22.core.environment.Obstacle;
-import uk.ac.cam.oda22.core.environment.Room;
+import uk.ac.cam.oda22.core.environment.PolygonRoom;
 import uk.ac.cam.oda22.core.environment.VisibilityGraph;
 import uk.ac.cam.oda22.core.environment.VisibilityGraphEdge;
 import uk.ac.cam.oda22.core.logging.Log;
+import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarPathfinding;
 import uk.ac.cam.oda22.core.robots.PointRobot;
 import uk.ac.cam.oda22.core.robots.RectangularRobot;
 import uk.ac.cam.oda22.core.robots.Robot;
 import uk.ac.cam.oda22.core.tethers.SimpleTether;
 import uk.ac.cam.oda22.core.tethers.Tether;
 import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
-import uk.ac.cam.oda22.coverage.Coverage;
 import uk.ac.cam.oda22.coverage.CoverageResult;
 import uk.ac.cam.oda22.coverage.ShortestPathGrid;
 import uk.ac.cam.oda22.coverage.ShortestPathGridCell;
+import uk.ac.cam.oda22.coverage.simple.SimpleCoverage;
 import uk.ac.cam.oda22.graphics.GraphicsFunctions;
 import uk.ac.cam.oda22.graphics.IVisualiser;
 import uk.ac.cam.oda22.graphics.VisualiserUsingJFrame;
@@ -60,13 +61,14 @@ public class Simulator {
 		// Create the visualiser.
 		createVisualiser();
 
-		Room room = createRoom3();
+		PolygonRoom room = createRoom1();
 
 		Robot robot;
+		Tether tether;
 
 		try {
 			double robotRadius = 4;
-			Tether tether = createTether3_4(80, robotRadius);
+			tether = createTether1_1(120);
 			robot = createRobot1_2(tether, robotRadius);
 		} catch (Exception e) {
 			Log.error("Could not create robot with tether.");
@@ -78,27 +80,38 @@ public class Simulator {
 
 		tetherSegments = 1000;
 
-		Point2D goal = new Point2D.Double(40, 5);
+		Point2D goal = new Point2D.Double(5, 25);
 
-		// PathPlanningResult result = testPathPlanning(room, robot, goal);
-		CoverageResult result = testCoverage(room, robot);
+		PathPlanningResult result = testPathPlanning(room, robot, goal);
+		// CoverageResult result = testCoverage(room, robot);
+
+		boolean pathFound = result != null && result.actions != null;
+
+		// ShortestPathGrid shortestPathGrid =
+		// Coverage.computeShortestPaths(room, robot);
+
+		// Sleep for 100ms so that the visualiser has time to initialise.
+		Thread.sleep(100);
+
+		drawTether(tether, Color.darkGray, false);
 		
-		ShortestPathGrid shortestPathGrid = Coverage.computeShortestPaths(room, robot);
-
-		// Sleep for one second so that the visualiser has time to initialise.
-		Thread.sleep(1000);
-
 		// Draw the graphics.
-		drawRoom(room, robot.radius, false, false, false);
+		drawRoom(room, robot.radius, true, false, false);
 		drawRobot(robot);
-		// drawGoal(goal);
+		drawGoal(goal, pathFound);
 		drawTether(robot.tether, Color.cyan, true);
 		drawAnchor(robot.tether.getAnchor());
-		drawShortestPathGrid(shortestPathGrid);
-		// if (result != null) drawPath(result.tetheredPath.path);
+		// drawShortestPathGrid(shortestPathGrid);
+		if (pathFound)
+			drawPath(result.tetheredPath.path);
+		if (pathFound)
+			drawTetherConfiguration(result.tetheredPath.tc, Color.magenta);
+
+		if (pathFound)
+			verifyTCFromPath(tether, room.obstacles, robot.radius, result);
 	}
 
-	private static Room createRoom1() {
+	private static PolygonRoom createRoom1() {
 		List<Obstacle> l = new ArrayList<Obstacle>();
 
 		List<Point2D> points = new ArrayList<Point2D>();
@@ -111,7 +124,7 @@ public class Simulator {
 
 		l.add(o);
 
-		return new Room(100, 100, l);
+		return new PolygonRoom(100, 100, l);
 	}
 
 	/**
@@ -119,7 +132,7 @@ public class Simulator {
 	 * 
 	 * @return
 	 */
-	private static Room createRoom2() {
+	private static PolygonRoom createRoom2() {
 		List<Obstacle> l = new ArrayList<Obstacle>();
 
 		List<Point2D> points = new ArrayList<Point2D>();
@@ -132,7 +145,7 @@ public class Simulator {
 
 		l.add(o);
 
-		return new Room(100, 100, l);
+		return new PolygonRoom(100, 100, l);
 	}
 
 	/**
@@ -140,7 +153,7 @@ public class Simulator {
 	 * 
 	 * @return
 	 */
-	private static Room createRoom3() {
+	private static PolygonRoom createRoom3() {
 		List<Obstacle> l = new ArrayList<Obstacle>();
 
 		List<Point2D> points1 = new ArrayList<Point2D>();
@@ -158,7 +171,78 @@ public class Simulator {
 
 		l.add(new Obstacle(points2));
 
-		return new Room(100, 100, l);
+		return new PolygonRoom(100, 100, l);
+	}
+
+	/**
+	 * This room has two convex obstacles, roughly horizontally aligned.
+	 * 
+	 * @return
+	 */
+	private static PolygonRoom createRoom4() {
+		List<Obstacle> l = new ArrayList<Obstacle>();
+
+		List<Point2D> points1 = new ArrayList<Point2D>();
+		points1.add(new Point2D.Double(20, 15));
+		points1.add(new Point2D.Double(45, 20));
+		points1.add(new Point2D.Double(40, 40));
+		points1.add(new Point2D.Double(20, 35));
+
+		l.add(new Obstacle(points1));
+
+		List<Point2D> points2 = new ArrayList<Point2D>();
+		points2.add(new Point2D.Double(60, 10));
+		points2.add(new Point2D.Double(80, 10));
+		points2.add(new Point2D.Double(80, 50));
+		points2.add(new Point2D.Double(60, 40));
+
+		l.add(new Obstacle(points2));
+
+		return new PolygonRoom(100, 100, l);
+	}
+
+	/**
+	 * This room has two rectangular obstacles, horizontally aligned.
+	 * 
+	 * @return
+	 */
+	private static PolygonRoom createRoom5() {
+		List<Obstacle> l = new ArrayList<Obstacle>();
+
+		List<Point2D> points1 = new ArrayList<Point2D>();
+		points1.add(new Point2D.Double(10, 20));
+		points1.add(new Point2D.Double(45, 20));
+		points1.add(new Point2D.Double(45, 40));
+		points1.add(new Point2D.Double(10, 40));
+
+		l.add(new Obstacle(points1));
+
+		List<Point2D> points2 = new ArrayList<Point2D>();
+		points2.add(new Point2D.Double(55, 20));
+		points2.add(new Point2D.Double(90, 20));
+		points2.add(new Point2D.Double(90, 40));
+		points2.add(new Point2D.Double(55, 40));
+
+		l.add(new Obstacle(points2));
+
+		return new PolygonRoom(100, 100, l);
+	}
+
+	/**
+	 * Tether configuration type 1 for any room. This configuration is for
+	 * coverage.
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	private static Tether createTether0_1(double maxTetherLength,
+			double robotRadius) throws Exception {
+		Point2D anchor = new Point2D.Double(50, 0);
+
+		TetherConfiguration X = new TetherConfiguration();
+		X.addPoint(new Point2D.Double(50, robotRadius));
+
+		return new SimpleTether(anchor, maxTetherLength, X);
 	}
 
 	/**
@@ -280,22 +364,6 @@ public class Simulator {
 	}
 
 	/**
-	 * Tether for room 3 configuration type 4. This configuration is for coverage.
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	private static Tether createTether3_4(double maxTetherLength, double robotRadius)
-			throws Exception {
-		Point2D anchor = new Point2D.Double(50, 0);
-
-		TetherConfiguration X = new TetherConfiguration();
-		X.addPoint(new Point2D.Double(50, robotRadius));
-
-		return new SimpleTether(anchor, maxTetherLength, X);
-	}
-
-	/**
 	 * Tether for room 1 configuration type 1. This is a point robot.
 	 * 
 	 * @return
@@ -331,7 +399,7 @@ public class Simulator {
 		});
 	}
 
-	private static void drawRoom(Room room, double robotRadius,
+	private static void drawRoom(PolygonRoom room, double robotRadius,
 			boolean drawExpandedObstacles, boolean drawVisibilityGraph,
 			boolean drawExpandedVisibilityGraph) {
 		for (Obstacle o : room.obstacles) {
@@ -376,9 +444,11 @@ public class Simulator {
 		}
 	}
 
-	private static void drawGoal(Point2D goal) {
+	private static void drawGoal(Point2D goal, boolean pathFound) {
+		Color colour = pathFound ? Color.green : Color.red;
+
 		Line2D[] l = ShapeFunctions.getCross(goal, 2);
-		Line[] cross = GraphicsFunctions.colourLines(l, Color.green, 3);
+		Line[] cross = GraphicsFunctions.colourLines(l, colour, 3);
 
 		visualiser.drawShapes(cross);
 	}
@@ -478,10 +548,24 @@ public class Simulator {
 		}
 	}
 
-	private static PathPlanningResult testPathPlanning(Room room, Robot robot,
+	private static PathPlanningResult testPathPlanning(PolygonRoom room, Robot robot,
 			Point2D goal) {
 		PathPlanningResult result = PathPlanner.performPathPlanning(room,
 				robot, goal, tetherSegments);
+
+		if (result != null && result.actions != null) {
+			for (int i = 0; i < result.actions.size(); i++) {
+				System.out.println(result.actions.get(i));
+			}
+		}
+
+		return result;
+	}
+
+	private static CoverageResult testCoverage(PolygonRoom room, Robot robot) {
+		SimpleCoverage coverage = new SimpleCoverage();
+		
+		CoverageResult result = coverage.performCoverage(room, robot);
 
 		if (result != null) {
 			for (int i = 0; i < result.actions.size(); i++) {
@@ -492,16 +576,30 @@ public class Simulator {
 		return result;
 	}
 
-	private static CoverageResult testCoverage(Room room, Robot robot) {
-		CoverageResult result = Coverage.performCoverage(room, robot);
+	private static void verifyTCFromPath(Tether initialTether,
+			List<Obstacle> obstacles, double robotRadius,
+			PathPlanningResult result) {
+		TetherConfiguration tc = new TetherConfiguration(
+				initialTether.getFullConfiguration());
 
-		if (result != null) {
-			for (int i = 0; i < result.actions.size(); i++) {
-				System.out.println(result.actions.get(i));
+		List<Point2D> ps = result.tetheredPath.path.points;
+
+		// Starting at the second point in the path, move along the path,
+		// updating the tether configuration sequentially.
+		for (int i = 1; i < ps.size(); i++) {
+			tc = TetheredAStarPathfinding.computeTetherChange(tc,
+					initialTether.length, ps.get(i), obstacles, robotRadius);
+
+			if (tc == null) {
+				Log.error("Tether is malformed.");
+
+				return;
 			}
 		}
 
-		return result;
+		if (!result.tetheredPath.tc.equals(tc)) {
+			Log.error("Tether configuration mismatch.");
+		}
 	}
 
 }

@@ -1,0 +1,36 @@
+package uk.ac.cam.oda22.coverage.simple;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Oliver
+ * 
+ */
+public class SimpleCoverageRouteNode {
+	
+	/**
+	 * The room cell index of the node.
+	 */
+	public final RoomCellIndex index;
+
+	/**
+	 * The list of nodes which follow from this node.
+	 */
+	public final List<SimpleCoverageRouteNode> nextNodes;
+
+	/**
+	 * The list of re-coverage counts which correspond to the next node list.
+	 */
+	public final List<Integer> recoverageCounts;
+
+	public SimpleCoverageRouteNode(RoomCellIndex index) {
+		this.index = index;
+		
+		this.nextNodes = new ArrayList<SimpleCoverageRouteNode>();
+		this.recoverageCounts = new ArrayList<Integer>();
+	}
+	
+	
+
+}

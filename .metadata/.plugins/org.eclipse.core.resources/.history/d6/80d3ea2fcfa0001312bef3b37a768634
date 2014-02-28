@@ -1,0 +1,20 @@
+package uk.ac.cam.oda22.coverage.simple;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Oliver
+ *
+ */
+public class SimpleCoverageRouteNode {
+
+	public final List<SimpleCoverageRouteNode> nextNodes;
+	
+	public final List<Integer> recoverageCounts;
+	
+	public SimpleCoverageRouteNode() {
+		this.recoverageCounts = new ArrayList<Integer>();
+	}
+	
+}

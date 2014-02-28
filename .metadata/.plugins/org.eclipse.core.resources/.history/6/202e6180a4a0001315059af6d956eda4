@@ -1,0 +1,14 @@
+package uk.ac.cam.oda22.coverage;
+
+import uk.ac.cam.oda22.core.environment.Room;
+import uk.ac.cam.oda22.core.robots.Robot;
+
+/**
+ * @author Oliver
+ * 
+ */
+public abstract class Coverage {
+
+	public abstract CoverageResult performCoverage(Room room, Robot robot);
+
+}

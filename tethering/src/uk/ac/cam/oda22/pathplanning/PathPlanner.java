@@ -8,7 +8,7 @@ import java.util.List;
 import uk.ac.cam.oda22.core.ListFunctions;
 import uk.ac.cam.oda22.core.MathExtended;
 import uk.ac.cam.oda22.core.environment.Obstacle;
-import uk.ac.cam.oda22.core.environment.Room;
+import uk.ac.cam.oda22.core.environment.PolygonRoom;
 import uk.ac.cam.oda22.core.environment.VisibilityGraph;
 import uk.ac.cam.oda22.core.environment.VisibilityGraphNode;
 import uk.ac.cam.oda22.core.logging.Log;
@@ -31,7 +31,7 @@ import uk.ac.cam.oda22.core.tethers.TetherPoint;
  */
 public final class PathPlanner {
 
-	public static PathPlanningResult performPathPlanning(Room room,
+	public static PathPlanningResult performPathPlanning(PolygonRoom room,
 			Robot robot, Point2D goal, int tetherSegments) {
 		/*
 		 * Note that Step 1 (triangulate the environment) is carried out by
@@ -106,7 +106,7 @@ public final class PathPlanner {
 		 */
 		List<VisibilityChangeList> vList = calculateVisibilitySetChanges(visibility);
 		TetheredPath optimalPath = computeOptimalPath(vList, robot.tether,
-				expandedObstacles, visibilityGraph, goal, robot.radius);
+				obstacles, visibilityGraph, goal, robot.radius);
 
 		// Generate the robot actions which are required to be executed given
 		// the optimal path.
@@ -173,7 +173,7 @@ public final class PathPlanner {
 	 * @return tether point visibility sets
 	 */
 	private static List<TetherPointVisibility> getTetherPointVisibilitySets(
-			Tether t, int tetherSegments, Room room,
+			Tether t, int tetherSegments, PolygonRoom room,
 			VisibilityGraph visibilityGraph) {
 		List<TetherPointVisibility> tetherPointVisibilitySets = new LinkedList<TetherPointVisibility>();
 
@@ -299,7 +299,8 @@ public final class PathPlanner {
 			for (int j = 0; j < currentVertices.size(); j++) {
 				Point2D vertex = currentVertices.get(j);
 
-				if (!ListFunctions.isPointInList(vertex, previousVertices)) {
+				if (!ListFunctions.contains(vertex, previousVertices, 0.00001,
+						0.00001)) {
 					changes.add(vertex);
 				}
 			}
@@ -319,16 +320,15 @@ public final class PathPlanner {
 	 * 
 	 * @param v
 	 * @param t
-	 * @param room
+	 * @param obstacles
 	 * @param visibilityGraph
 	 * @param goal
 	 * @param robotRadius
 	 * @return optimal tethered path
 	 */
 	private static TetheredPath computeOptimalPath(
-			List<VisibilityChangeList> v, Tether t,
-			List<Obstacle> expandedObstacles, VisibilityGraph visibilityGraph,
-			Point2D goal, double robotRadius) {
+			List<VisibilityChangeList> v, Tether t, List<Obstacle> obstacles,
+			VisibilityGraph visibilityGraph, Point2D goal, double robotRadius) {
 		Path optimalPath = null;
 		Path currentPath;
 
@@ -370,7 +370,7 @@ public final class PathPlanner {
 					// vertex.
 					tetherConfiguration = TetheredAStarPathfinding
 							.computeTetherChange(tetherConfiguration, t.length,
-									vertex, expandedObstacles, robotRadius);
+									vertex, obstacles, robotRadius);
 				} else {
 					tetherConfiguration = null;
 				}
@@ -381,13 +381,12 @@ public final class PathPlanner {
 
 				// Compute the shortest paths from vertex to the goal, if the
 				// tether length has not already been exceeded.
-
 				TetheredAStarShortestPathResult shortestPaths = !tetherLengthExceeded ? TetheredAStarPathfinding
 						.getShortestPaths(vertex, goal, visibilityGraph,
-								tetherConfiguration, t.length, robotRadius)
-						: null;
+								obstacles, tetherConfiguration, t.length,
+								robotRadius) : null;
 
-				// Skip if no shortest path was found.
+				// Check if a shortest path was found.
 				if (shortestPaths != null
 						&& shortestPaths.shortestPathResults.size() > 0) {
 					// Take an arbitrary shortest path and tether configuration
@@ -410,6 +409,14 @@ public final class PathPlanner {
 					// Fail if the path does not contain vertex.
 					if (!vToG.contains(vertex)) {
 						Log.error("The shortest path from v to the goal does not contain v.");
+
+						return null;
+					}
+
+					// Fail if the tether configuration does not end with the
+					// goal point.
+					if (!ListFunctions.getLast(newTC.points).equals(goal)) {
+						Log.error("The final tether configuration does not contain the goal point.");
 
 						return null;
 					}
@@ -456,7 +463,7 @@ public final class PathPlanner {
 						if (optimalPath == null
 								|| currentPath.length() < optimalPath.length()) {
 							optimalPath = currentPath;
-							optimalTC = tetherConfiguration;
+							optimalTC = newTC;
 						}
 					}
 				}
@@ -501,6 +508,11 @@ public final class PathPlanner {
 	private static List<IRobotAction> generateActionsFromPath(Path path,
 			double initialRotation, double rotationalSensitivity) {
 		List<IRobotAction> actions = new LinkedList<IRobotAction>();
+
+		// Return null if the path is null.
+		if (path == null) {
+			return null;
+		}
 
 		// If there is no path to traverse then return an empty actions list.
 		if (path.points.size() <= 1) {

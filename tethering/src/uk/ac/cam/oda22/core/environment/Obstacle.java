@@ -39,7 +39,7 @@ public class Obstacle {
 
 			// Fail if this line intersects with any of the existing edges.
 			for (Line2D l : this.edges) {
-				if (MathExtended.strictIntersectsLine(line, l)) {
+				if (MathExtended.strictLineIntersectsLine(line, l)) {
 					Log.error("Obstacle is malformed as two or more of its edges intersect one another.");
 
 					return;
@@ -48,6 +48,32 @@ public class Obstacle {
 
 			this.edges.add(line);
 		}
+	}
+
+	/**
+	 * Gets the perimeter of the obstacle (polygon) as a path.
+	 * 
+	 * @return path
+	 */
+	public Path getPerimeter() {
+		Path p = new Path();
+
+		// Stop if there are no points.
+		if (this.points.size() == 0) {
+			return p;
+		}
+
+		for (int i = 0; i < points.size(); i++) {
+			p.addPoint(this.points.get(i));
+		}
+
+		// Add the first point again if there are more than two points (i.e. the
+		// path needs to be closed).
+		if (this.points.size() > 2) {
+			p.addPoint(this.points.get(0));
+		}
+
+		return p;
 	}
 
 	public Rectangle2D getBounds() {
@@ -176,7 +202,7 @@ public class Obstacle {
 
 		// Check if any obstacle edges intersect with the line.
 		for (Line2D edge : this.edges) {
-			if (MathExtended.strictIntersectsLine(l, edge)) {
+			if (MathExtended.strictLineIntersectsLine(l, edge)) {
 				return ObstacleLineIntersectionResult.CROSSED;
 			}
 		}
@@ -333,8 +359,7 @@ public class Obstacle {
 				Vector2D v2 = new Vector2D(p, next);
 
 				// Get the angular change between the edges.
-				double angularChange = MathExtended.getAngularChange(
-						v1.getAngle(), v2.getAngle());
+				double angularChange = MathExtended.getAngularChange(v1, v2);
 
 				// Skip the vertex if there is no angular change.
 				if (angularChange != 0) {
@@ -443,7 +468,7 @@ public class Obstacle {
 			Vector2D v1 = new Vector2D(prev, p);
 			Vector2D v2 = new Vector2D(p, next);
 
-			n += MathExtended.getAngularChange(v1.getAngle(), v2.getAngle());
+			n += MathExtended.getAngularChange(v1, v2);
 		}
 
 		if (!MathExtended.approxEqual(Math.abs(n), Math.PI * 2, 0.00001,

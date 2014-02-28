@@ -1,0 +1,26 @@
+package uk.ac.cam.oda22.core.environment;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Oliver
+ *
+ */
+public class SimpleRoom extends Room {
+
+	public final boolean[][] obstacleCells;
+	
+	public SimpleRoom(double width, double height, boolean[][] obstacleCells) {
+		super(width, height, new ArrayList<Obstacle>());
+		
+		this.obstacleCells = obstacleCells;
+	}
+	
+	private static void generateObstacles(boolean[][] obstacleCells) {
+		List<Obstacle> os = new ArrayList<Obstacle>();
+		
+		
+	}
+	
+}

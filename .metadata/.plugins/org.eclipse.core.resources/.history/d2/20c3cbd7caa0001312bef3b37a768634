@@ -1,0 +1,22 @@
+package uk.ac.cam.oda22.coverage.simple;
+
+/**
+ * @author Oliver
+ *
+ */
+public class CellIndex {
+
+	public int i;
+
+	public int j;
+
+	/**
+	 * @param i
+	 * @param j
+	 */
+	public CellIndex(int i, int j) {
+		this.i = i;
+		this.j = j;
+	}
+	
+}

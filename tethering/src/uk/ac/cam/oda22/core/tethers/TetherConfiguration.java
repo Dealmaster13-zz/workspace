@@ -42,11 +42,12 @@ public class TetherConfiguration extends Path {
 	public boolean moveLastPoint(Point2D newPoint) {
 		// Get the tether configuration which is all but the last segment.
 		boolean removedPoint = this.removeLastPoint();
-		
+
 		// Get the last point.
 		Point2D lastPoint = ListFunctions.getLast(this.points);
 
-		// If the last point is different to the point being moved to then add the new point.
+		// If the last point is different to the point being moved to then add
+		// the new point.
 		if (!lastPoint.equals(newPoint)) {
 			// Add the new final segment.
 			this.addPoint(newPoint);
@@ -57,8 +58,8 @@ public class TetherConfiguration extends Path {
 
 	/**
 	 * Returns a cropped tether which does not overlap with the robot near its
-	 * attachment point. This should work for all attachment points.
-	 * Note that this will not ensure that the tether is connected to the robot.
+	 * attachment point. This should work for all attachment points. Note that
+	 * this will not ensure that the tether is connected to the robot.
 	 * 
 	 * @param robotPosition
 	 * @param radius
@@ -69,7 +70,7 @@ public class TetherConfiguration extends Path {
 		TetherConfiguration newTC = new TetherConfiguration(this);
 
 		int s = this.points.size();
-		
+
 		int index = s - 1;
 
 		boolean crossPointFound = false;
@@ -91,37 +92,48 @@ public class TetherConfiguration extends Path {
 		for (int i = s - 1; i > index; i--) {
 			newTC.removeLastPoint();
 		}
-		
+
 		return newTC;
 	}
-	
+
 	/**
 	 * Checks if the tether has a valid configuration.
 	 * 
 	 * @return true if the configuration is valid, false otherwise
 	 */
 	public boolean assertConfigurationValid() {
+		return this.assertConfigurationValid(0, 0);
+	}
+
+	/**
+	 * Checks if the tether has a valid configuration.
+	 * 
+	 * @return true if the configuration is valid, false otherwise
+	 */
+	public boolean assertConfigurationValid(double fractionalError,
+			double absoluteError) {
 		int s = this.points.size();
-		
+
 		if (s == 0) {
 			Log.error("Tether configuration is empty.");
-			
+
 			return false;
 		}
-		
+
 		if (s == 1) {
 			return true;
 		}
-		
+
 		for (int i = 0; i < s - 1; i++) {
 			Point2D currentPoint = this.points.get(i);
 			Point2D nextPoint = this.points.get(i + 1);
-			
-			if (MathExtended.approxEqual(currentPoint, nextPoint, 0.00001, 0.00001)) {
+
+			if (MathExtended.approxEqual(currentPoint, nextPoint,
+					fractionalError, absoluteError)) {
 				Log.warning("Two adjacent points are roughly equal.");
 			}
 		}
-		
+
 		return true;
 	}
 }

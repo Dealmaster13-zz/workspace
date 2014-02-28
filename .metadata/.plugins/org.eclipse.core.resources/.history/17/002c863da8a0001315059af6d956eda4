@@ -1,0 +1,50 @@
+package uk.ac.cam.oda22.core.environment;
+
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Oliver
+ * 
+ */
+public class SimpleRoom extends Room {
+
+	public final boolean[][] obstacleCells;
+
+	public final double cellSize;
+
+	public SimpleRoom(int horizontalCount, int verticalCount, boolean[][] obstacleCells,
+			double cellSize) {
+		super(horizontalCount * cellSize, verticalCount * cellSize, new ArrayList<Obstacle>());
+
+		this.obstacleCells = obstacleCells;
+		this.cellSize = cellSize;
+
+		this.generateObstacles(obstacleCells, cellSize);
+	}
+
+	/**
+	 * Creates cell-sized obstacles and adds them to the obstacle list.
+	 * 
+	 * @param obstacleCells
+	 */
+	private void generateObstacles(boolean[][] obstacleCells, double cellSize) {
+		for (int i = 0; i < obstacleCells.length; i++) {
+			for (int j = 0; j < obstacleCells[i].length; j++) {
+				List<Point2D> points = new ArrayList<Point2D>();
+
+				// Create an obstacle spanning from index (j, i) to index (j+1,
+				// i+1).
+				points.add(new Point2D.Double(j * cellSize, i * cellSize));
+				points.add(new Point2D.Double(j * cellSize, (i + 1) * cellSize));
+				points.add(new Point2D.Double((j + 1) * cellSize, i * cellSize));
+				points.add(new Point2D.Double((j + 1) * cellSize, (i + 1)
+						* cellSize));
+
+				this.obstacles.add(new Obstacle(points));
+			}
+		}
+	}
+
+}

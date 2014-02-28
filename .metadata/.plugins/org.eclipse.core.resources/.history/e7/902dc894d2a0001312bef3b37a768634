@@ -1,0 +1,56 @@
+package uk.ac.cam.oda22.coverage.simple;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Oliver
+ * 
+ */
+public class SimpleCoverageRouteNode {
+
+	/**
+	 * The room cell index of the node.
+	 */
+	public final RoomCellIndex index;
+
+	/**
+	 * The node which comes before this node.
+	 */
+	public final SimpleCoverageRouteNode previousNode;
+
+	/**
+	 * The re-coverage count which corresponds to the previous node list.
+	 */
+	public final int recoverageCount;
+
+	/**
+	 * The status of whether or not the robot is recovering tiles at this stage.
+	 */
+	public final boolean recovering;
+
+	public SimpleCoverageRouteNode(RoomCellIndex index, SimpleCoverageRouteNode previousNode) {
+		this.index = index;
+		this.previousNode = previousNode;
+		
+		this.recoverageCount = previousNode != null ? previousNode.recoverageCount : 0;
+		
+		if (isRevisited(this.index, this.previousNode)) {
+			
+		}
+	}
+
+	private static boolean isRevisited(RoomCellIndex index,
+			SimpleCoverageRouteNode previousNode) {
+		SimpleCoverageRouteNode n = previousNode;
+
+		while (n != null) {
+			if (n.index.equals(index)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+}

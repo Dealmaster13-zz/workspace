@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename method &apos;uk.ac.cam.oda22.simulation.Simulator.createTether3_4(...)&apos; to &apos;createTether0_1&apos;&#x0D;&#x0A;- Original project: &apos;TetheringSimulator&apos;&#x0D;&#x0A;- Original element: &apos;uk.ac.cam.oda22.simulation.Simulator.createTether3_4(...)&apos;&#x0D;&#x0A;- Renamed element: &apos;uk.ac.cam.oda22.simulation.Simulator.createTether0_1(...)&apos;&#x0D;&#x0A;- Update references to refactored element" delegate="false" deprecate="false" description="Rename method &apos;createTether3_4&apos;" flags="589826" id="org.eclipse.jdt.ui.rename.method" input="/src&lt;uk.ac.cam.oda22.simulation{Simulator.java[Simulator~createTether3_4~D~D" name="createTether0_1" references="true" stamp="1392820253356" version="1.0"/>
+</session>

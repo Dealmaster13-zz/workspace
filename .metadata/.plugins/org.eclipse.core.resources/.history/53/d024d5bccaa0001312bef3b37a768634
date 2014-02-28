@@ -1,0 +1,12 @@
+/**
+ * 
+ */
+package uk.ac.cam.oda22.coverage.simple;
+
+/**
+ * @author Oliver
+ *
+ */
+public class CellIndex {
+
+}

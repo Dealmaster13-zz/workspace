@@ -87,7 +87,8 @@ public class TestAStar {
 		double maxTetherLength = 100;
 
 		this.pathFound = TetheredAStarPathfinding.getShortestPath(g,
-				sourceNode, this.destinationNode, tc, maxTetherLength, 0);
+				sourceNode, this.destinationNode, obstacles, tc,
+				maxTetherLength, 0);
 	}
 
 	@Test

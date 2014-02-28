@@ -1,0 +1,23 @@
+1393206147977	Rename local variable 'maxValue'
+1393361079365	Rename local variable 'expandedObstacles'
+1393604238988	Rename type 'Room'
+1393605107944	Rename local variable 'room'
+1393605111489	Rename local variable 'rs'
+1393606875004	Rename local variable 'obstacles'
+1393607629239	Delete element
+1393611310060	Rename type 'ICoverage'
+1393611925470	Move compilation unit
+1393611951028	Move compilation units
+1393611960811	Move compilation units
+1393611968987	Move compilation unit
+1393613019865	Rename local variable 'verticalCount'
+1393613024375	Rename local variable 'horizontalCount'
+1393627891920	Rename type 'CellIndex'
+1393628017212	Rename field 'i'
+1393628022974	Rename field 'j'
+1393628027472	Rename local variable 'i'
+1393628031976	Rename local variable 'j'
+1393629530640	Rename type 'SimpleCoverageRoute'
+1393629736871	Rename field 'previousNodes'
+1393630234157	Rename field 'nextNodes'
+1393631541451	Rename local variable 'baseRecoverageCount'

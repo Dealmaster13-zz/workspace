@@ -9,7 +9,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import uk.ac.cam.oda22.core.environment.Obstacle;
-import uk.ac.cam.oda22.core.environment.Room;
+import uk.ac.cam.oda22.core.environment.PolygonRoom;
 import uk.ac.cam.oda22.core.robots.PointRobot;
 import uk.ac.cam.oda22.core.robots.Robot;
 import uk.ac.cam.oda22.core.tethers.SimpleTether;
@@ -40,7 +40,7 @@ public class TestPathPlanning {
 
 		l.add(o);
 
-		Room room = new Room(100, 100, l);
+		PolygonRoom room = new PolygonRoom(100, 100, l);
 
 		Point2D u = new Point2D.Double(80, 60);
 

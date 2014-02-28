@@ -35,13 +35,14 @@ public class TetheredAStarPathfinding {
 	 * @param g
 	 * @param source
 	 * @param destination
+	 * @param obstacles
 	 * @param initialTetherConfiguration
 	 * @param maxTetherLength
 	 * @param robotRadius
 	 * @return shortest valid path
 	 */
 	public static boolean getShortestPath(AStarGraph g, AStarNode source,
-			AStarNode destination,
+			AStarNode destination, List<Obstacle> obstacles,
 			TetherConfiguration initialTetherConfiguration,
 			double maxTetherLength, double robotRadius) {
 		Point2D lastTetherPoint = ListFunctions
@@ -112,7 +113,7 @@ public class TetheredAStarPathfinding {
 
 							TetherConfiguration newTC = computeTetherChange(
 									subPath.tc, maxTetherLength, neighbour.p,
-									g.obstacles, robotRadius);
+									obstacles, robotRadius);
 
 							// Create a new shortest path if the tether
 							// configuration is valid.
@@ -155,6 +156,7 @@ public class TetheredAStarPathfinding {
 	 * @param source
 	 * @param destination
 	 * @param visibilityGraph
+	 * @param obstacles
 	 * @param tetherConfiguration
 	 * @param maxTetherLength
 	 * @param robotRadius
@@ -162,7 +164,7 @@ public class TetheredAStarPathfinding {
 	 */
 	public static TetheredAStarShortestPathResult getShortestPaths(
 			Point2D source, Point2D destination,
-			VisibilityGraph visibilityGraph,
+			VisibilityGraph visibilityGraph, List<Obstacle> obstacles,
 			TetherConfiguration tetherConfiguration, double maxTetherLength,
 			double robotRadius) {
 		// If the points are equal then return the path with a single node.
@@ -195,8 +197,8 @@ public class TetheredAStarPathfinding {
 		AStarNode aStarDestination = aStarGraph.getNode(destinationNode);
 
 		boolean pathFound = TetheredAStarPathfinding.getShortestPath(
-				aStarGraph, aStarSource, aStarDestination, tetherConfiguration,
-				maxTetherLength, robotRadius);
+				aStarGraph, aStarSource, aStarDestination, obstacles,
+				tetherConfiguration, maxTetherLength, robotRadius);
 
 		// Return null if no path was found.
 		if (!pathFound) {
@@ -682,8 +684,7 @@ public class TetheredAStarPathfinding {
 	private static Double getUnwrapRotation(Vector2D qp, Vector2D rq,
 			double rads) {
 		// Get the angular change between line qp and line rq.
-		double angularChange = MathExtended.getAngularChange(qp.getAngle(),
-				rq.getAngle());
+		double angularChange = MathExtended.getAngularChange(qp, rq);
 
 		// Stop if the rotation is in the opposite direction.
 		if (!MathExtended.sameSign(angularChange, rads)) {
@@ -1174,7 +1175,7 @@ public class TetheredAStarPathfinding {
 
 		TetherConfiguration newTC = new TetherConfiguration(tc);
 
-		// Stop if the robot will no move.
+		// Stop if the robot will not move.
 		if (rads == 0) {
 			Log.warning("Robot will not move.");
 
@@ -1282,8 +1283,7 @@ public class TetheredAStarPathfinding {
 					Vector2D qv = new Vector2D(q, v);
 
 					// Get the angular change from qp to qv.
-					double aPQV = MathExtended.getAngularChange(qp.getAngle(),
-							qv.getAngle());
+					double aPQV = MathExtended.getAngularChange(qp, qv);
 
 					// Check if wrapping around v occurs before unwrapping.
 					boolean wrapBeforeUnwrap = uRot == null
@@ -1304,9 +1304,8 @@ public class TetheredAStarPathfinding {
 					if (canWrap && inWrapZone) {
 						// Use the magnitude of the angle, since v could be on
 						// either side of qp.
-						double angleToQP = Math
-								.abs(MathExtended.getAngularChange(
-										qv.getAngle(), qp.getAngle()));
+						double angleToQP = Math.abs(MathExtended
+								.getAngularChange(qv, qp));
 
 						// Choose the point with lesser angle to qp. If the
 						// angular changes are equal, then the point closer to p
@@ -1420,7 +1419,7 @@ public class TetheredAStarPathfinding {
 	}
 
 	private static boolean isTetherMovementClockwise(Vector2D qp, Vector2D qd) {
-		return MathExtended.getAngularChange(qp.getAngle(), qd.getAngle()) < 0;
+		return MathExtended.getAngularChange(qp, qd) < 0;
 	}
 
 	/**

@@ -1,0 +1,18 @@
+package uk.ac.cam.oda22.coverage;
+
+import uk.ac.cam.oda22.core.environment.Room;
+import uk.ac.cam.oda22.core.robots.Robot;
+
+/**
+ * @author Oliver
+ *
+ */
+public class SimpleCoverage implements ICoverage {
+
+	@Override
+	public CoverageResult performCoverage(Room room, Robot robot) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

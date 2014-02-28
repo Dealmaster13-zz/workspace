@@ -50,7 +50,27 @@ public final class MathExtended {
 
 		return false;
 	}
-	
+
+	public static double max(double d1, double d2, double... ds) {
+		double maxValue = Math.max(d1, d2);
+
+		for (double d : ds) {
+			maxValue = Math.max(maxValue, d);
+		}
+
+		return maxValue;
+	}
+
+	public static double min(double d1, double d2, double... ds) {
+		double minValue = Math.min(d1, d2);
+
+		for (double d : ds) {
+			minValue = Math.min(minValue, d);
+		}
+
+		return minValue;
+	}
+
 	/**
 	 * Checks if two numbers have the same sign or not.
 	 * 
@@ -96,14 +116,68 @@ public final class MathExtended {
 	 */
 	public static double getAngularChange(Vector2D vectorFrom, Vector2D vectorTo) {
 		if (!vectorFrom.isZeroVector() && !vectorTo.isZeroVector()) {
-			return normaliseAngle(vectorTo.getAngle() - vectorFrom.getAngle());
+			return getAngularChange(vectorFrom.getAngle(), vectorTo.getAngle());
 		} else {
 			return Double.NaN;
 		}
 	}
 
 	/**
-	 * Normalises an angle to take a value between -pi and +pi.
+	 * Gets the shortest angular change from one angle to another, rotating in a
+	 * particular direction. This returns a value in the range [0, 2*pi)
+	 * 
+	 * @param radsFrom
+	 * @param radsTo
+	 * @param clockwise
+	 * @return angular change
+	 */
+	public static double getAngularChange(double radsFrom, double radsTo,
+			boolean clockwise) {
+		if (radsFrom != Double.NaN && radsTo != Double.NaN) {
+			double angle = normaliseAngle(radsTo - radsFrom);
+
+			// Check if the angle is for rotating counter-clockwise, but we
+			// require clockwise rotation. Note that this would be an angle in
+			// the range [pi, 2*pi).
+			if (clockwise && angle > 0) {
+				return (2 * Math.PI) - angle;
+			}
+
+			// Check if the angle is for rotating clockwise, but we require
+			// counter-clockwise rotation. Note that this would be an angle in
+			// the range [pi, 2*pi).
+			if (!clockwise && angle < 0) {
+				return angle + (2 * Math.PI);
+			}
+
+			// Return the absolute value of the angle, to cover for the case of
+			// clockwise rotation.
+			return Math.abs(angle);
+		} else {
+			return Double.NaN;
+		}
+	}
+
+	/**
+	 * Gets the shortest angular change from one vector to another, rotating in
+	 * a particular direction. This returns a value in the range [0, 2*pi)
+	 * 
+	 * @param vectorFrom
+	 * @param vectorTo
+	 * @return angular change
+	 */
+	public static double getAngularChange(Vector2D vectorFrom,
+			Vector2D vectorTo, boolean clockwise) {
+		if (!vectorFrom.isZeroVector() && !vectorTo.isZeroVector()) {
+			return getAngularChange(vectorFrom.getAngle(), vectorTo.getAngle(),
+					clockwise);
+		} else {
+			return Double.NaN;
+		}
+	}
+
+	/**
+	 * Normalises an angle to give a value in the range (-pi, +pi].
 	 * 
 	 * @param rads
 	 * @return normalised angle
@@ -302,7 +376,7 @@ public final class MathExtended {
 		return v12.getAngle() == v23.getAngle();
 	}
 
-	public static LineIntersectionResult intersectsLine(Line2D l1, Line2D l2) {
+	public static LineIntersectionResult lineIntersectsLine(Line2D l1, Line2D l2) {
 		// Check if the lines do not intersect.
 		// TODO: Check the functionality of this function and possibly replace
 		// it.
@@ -336,8 +410,8 @@ public final class MathExtended {
 		return LineIntersectionResult.CROSS;
 	}
 
-	public static boolean strictIntersectsLine(Line2D l1, Line2D l2) {
-		return intersectsLine(l1, l2) == LineIntersectionResult.CROSS;
+	public static boolean strictLineIntersectsLine(Line2D l1, Line2D l2) {
+		return lineIntersectsLine(l1, l2) == LineIntersectionResult.CROSS;
 	}
 
 	public static boolean strictLineIntersectsPath(Line2D l, Path p) {
@@ -348,7 +422,7 @@ public final class MathExtended {
 			Line2D edge = pathEdges.get(i);
 
 			// Check if the line intersects with the path edge.
-			if (strictIntersectsLine(edge, l)) {
+			if (strictLineIntersectsLine(edge, l)) {
 				return true;
 			}
 
@@ -399,15 +473,109 @@ public final class MathExtended {
 		return false;
 	}
 
-	public static boolean strictCircleIntersectsPath(Point2D centre,
-			double radius, Path p) {
-		List<Line2D> pathEdges = p.getEdges();
+	/**
+	 * Computes the intersection points between a circle and a line.
+	 * 
+	 * @param centre
+	 * @param radius
+	 * @param l
+	 * @param allowEndPoints
+	 * @return intersection points
+	 */
+	public static List<Point2D> strictGetCircleLineIntersectionPoints(
+			Point2D centre, double radius, Line2D l, boolean allowEndPoints) {
+		List<Point2D> intersectionPoints = new ArrayList<Point2D>();
+
+		// Get the vector form of the line.
+		Vector2D lineVector = new Vector2D(l);
+
+		// Get the angle of the vector.
+		double angle = lineVector.getAngle();
+
+		// Rotate the centre of the circle and the line by -angle such that the
+		// line vector points in the direction of the positive x-axis.
+		Point2D p = rotate(centre, -angle);
+		Line2D l2 = rotate(l, -angle);
+
+		/*
+		 * After algebraic manipulation, we get the x-coordinates of the
+		 * intersection points as: x = p.x +/- sqrt(radius^2 - (l2.y - p.y)^2).
+		 */
+
+		// Store [l2.y - p.y] as a. Note that l2.y1 = l2.y2.
+		double a = l2.getY1() - p.getY();
+
+		// Store [radius^2 - a^2] as b.
+		double b = (radius * radius) - (a * a);
+
+		// Stop if b <= 0, which means that the circle does not intersect the
+		// infinite line defined by l. If b = 0 then the circle touches the
+		// line.
+		if (b <= 0) {
+			return intersectionPoints;
+		}
+
+		// Store [p.x +/- sqrt(b)] as x1 and x2.
+		double x1 = p.getX() + Math.sqrt(b);
+		double x2 = p.getX() - Math.sqrt(b);
+
+		// Add the intersection point given by x1 if x1 lies inside the range
+		// given by l2. We use a strict inequality if we disallow end-points.
+		if (inRange(x1, l2.getX1(), l2.getX2(), !allowEndPoints)) {
+			Point2D p1 = new Point2D.Double(x1, l2.getY1());
+
+			// Rotate back to the original orientation.
+			intersectionPoints.add(rotate(p1, angle));
+		}
+
+		// Add the intersection point given by x2.
+		if (inRange(x2, l2.getX1(), l2.getX2(), !allowEndPoints)) {
+			Point2D p2 = new Point2D.Double(x2, l2.getY1());
+
+			// Rotate back to the original orientation.
+			intersectionPoints.add(rotate(p2, angle));
+		}
+
+		return intersectionPoints;
+	}
+
+	public static List<Point2D> strictGetCirclePathIntersectionPoints(
+			Point2D centre, double radius, Path path) {
+		List<Point2D> intersectionPoints = new ArrayList<Point2D>();
+
+		List<Line2D> pathEdges = path.getEdges();
 
 		// For each path segment, check if it intersects with the line.
 		for (int i = 0; i < pathEdges.size(); i++) {
 			Line2D edge = pathEdges.get(i);
 
-			// Check if the circle intersects with the path edge.
+			// Get the intersection points between the circle and the edge. Note
+			// that we need to allow end points so that intersections through
+			// corners of the obstacle are included.
+			List<Point2D> points = strictGetCircleLineIntersectionPoints(
+					centre, radius, edge, true);
+
+			// Add all new intersection points.
+			for (Point2D point : points) {
+				if (!ListFunctions.contains(point, points, 0.00001, 0.00001)) {
+					intersectionPoints.add(point);
+				}
+			}
+		}
+
+		return intersectionPoints;
+	}
+
+	public static boolean strictCircleIntersectsPath(Point2D centre,
+			double radius, Path path) {
+		List<Line2D> pathEdges = path.getEdges();
+
+		// For each path segment, check if it intersects with the line.
+		for (int i = 0; i < pathEdges.size(); i++) {
+			Line2D edge = pathEdges.get(i);
+
+			// Check if the circle intersects with the path edge. Note that we
+			// do not count touching the edge.
 			if (getShortestDistanceFromPointToLine(centre, edge) < radius) {
 				return true;
 			}
@@ -600,7 +768,7 @@ public final class MathExtended {
 	public static Point2D rotate(Point2D p, Point2D pivotPoint, double rads) {
 		// Get the vector formed between pivotPoint and p.
 		Vector2D v = new Vector2D(pivotPoint, p);
-		
+
 		// Rotate the vector.
 		Vector2D rotatedVector = rotate(v, rads);
 
