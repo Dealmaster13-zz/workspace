@@ -1,5 +1,6 @@
 package uk.ac.cam.oda22.coverage.simple;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,11 @@ public class RoomCellIndex {
 	public RoomCellIndex(int x, int y) {
 		this.x = x;
 		this.y = y;
+	}
+	
+	public RoomCellIndex(Point2D p, double cellSize) {
+		this.x = (int) Math.round(p.getX() / cellSize);
+		this.y = (int) Math.round(p.getY() / cellSize);
 	}
 
 	public RoomCellIndex(RoomCellIndex c) {

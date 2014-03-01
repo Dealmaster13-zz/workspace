@@ -1,12 +1,15 @@
 package uk.ac.cam.oda22.coverage.simple;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.cam.oda22.core.environment.Room;
 import uk.ac.cam.oda22.core.environment.SimpleRoom;
 import uk.ac.cam.oda22.core.logging.Log;
+import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarPathfinding;
 import uk.ac.cam.oda22.core.robots.Robot;
+import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
 import uk.ac.cam.oda22.coverage.Coverage;
 import uk.ac.cam.oda22.coverage.CoverageResult;
 import uk.ac.cam.oda22.coverage.ShortestPathGrid;
@@ -30,9 +33,8 @@ public class SimpleCoverage extends Coverage {
 		// Get the robot coordinates and corresponding cell positions.
 		double robotX = robot.getPosition().getX();
 		double robotY = robot.getPosition().getY();
-		int robotCellX = (int) Math.round(robotX / sRoom.cellSize);
-		int robotCellY = (int) Math.round(robotY / sRoom.cellSize);
-		RoomCellIndex robotCell = new RoomCellIndex(robotCellX, robotCellY);
+		RoomCellIndex robotCell = new RoomCellIndex(robot.getPosition(),
+				sRoom.cellSize);
 
 		// Check if the robot is at the centre of a cell.
 		if (robotX != robotCell.x * sRoom.cellSize
@@ -46,6 +48,14 @@ public class SimpleCoverage extends Coverage {
 			Log.error("Robot is outside of the room boundaries.");
 
 			return null;
+		}
+
+		RoomCellIndex anchorCell = new RoomCellIndex(robot.tether.getAnchor(),
+				sRoom.cellSize);
+
+		// Assert that the anchor point is in the same cell as the robot.
+		if (!anchorCell.equals(robotCell)) {
+			Log.error("Robot is not in the same cell as its anchor.");
 		}
 
 		// Fail if the robot is on an obstacle.
@@ -63,24 +73,36 @@ public class SimpleCoverage extends Coverage {
 		ShortestPathGrid shortestPathGrid = computeShortestPaths(sRoom, robot,
 				sRoom.cellSize);
 
+		/*
+		 * Step 2: Perform breadth first search to find the optimal coverage
+		 * solution which re-covers the minimum number of cells possible.
+		 */
+		SimpleCoverageRouteNode node = findOptimalCoverageBFS(robotCell, sRoom,
+				robot, shortestPathGrid, false);
+
 		return null;
 	}
 
-	private SimpleCoverageRouteNode findOptimalCoverageBFS(
-			RoomCellIndex initialRobotCell, SimpleRoom room,
-			ShortestPathGrid shortestPathGrid) {
+	private static SimpleCoverageRouteNode findOptimalCoverageBFS(
+			RoomCellIndex initialRobotCell, SimpleRoom room, Robot robot,
+			ShortestPathGrid shortestPathGrid, boolean returnToInitialCell) {
 		RoomCellIndex currentRobotCell = new RoomCellIndex(initialRobotCell);
 
 		// This stores the list of nodes which are due to be explored.
 		List<SimpleCoverageRouteNode> openList = new ArrayList<SimpleCoverageRouteNode>();
 
+		TetherConfiguration initialTC = new TetherConfiguration(
+				robot.tether.getAnchor());
+		initialTC.addPoint(robot.getPosition());
+
 		// Add the robot's current cell to the open list.
 		SimpleCoverageRouteNode startNode = new SimpleCoverageRouteNode(
-				currentRobotCell, null);
+				currentRobotCell, null, initialTC);
 		openList.add(startNode);
 
 		// Get the number of cells which need to be covered.
-		int totalCellCount = room.getOpenCellCount();
+		int totalCellCount = getNumberOfCoverableCells(room, shortestPathGrid,
+				robot.tether.length);
 
 		while (openList.size() > 0) {
 			// Get the next node in the open list with minimal re-covered cells.
@@ -88,11 +110,13 @@ public class SimpleCoverage extends Coverage {
 			// one.
 			SimpleCoverageRouteNode n = extractMinNode(openList);
 
-			// Stop if all cells have been covered and the node is at the start
-			// point.
-			if (n.getCoveredCellCount() == totalCellCount
-					&& n.index.equals(initialRobotCell)) {
-				return n;
+			// Check if all cells have been covered.
+			if (n.getCoveredCellCount() == totalCellCount) {
+				// Check if the robot has returned to the initial cell if
+				// necessary.
+				if (!returnToInitialCell || n.index.equals(initialRobotCell)) {
+					return n;
+				}
 			}
 
 			// Get the valid cells adjacent to n.
@@ -104,21 +128,37 @@ public class SimpleCoverage extends Coverage {
 			// state can equally be achieved by the associated shorter path.
 			for (RoomCellIndex cell : cells) {
 				if (!n.isCellInRecoveringState(cell)) {
-					// TODO: Check if a saddle line has been crossed.
+					// Get the coordinates of the cell.
+					Point2D d = new Point2D.Double(cell.x * room.cellSize,
+							cell.y * room.cellSize);
 
-					SimpleCoverageRouteNode newNode = new SimpleCoverageRouteNode(
-							cell, n);
+					// Get the resultant tether configuration.
+					TetherConfiguration nextTC = TetheredAStarPathfinding
+							.computeTetherChange(n.tc, robot.tether.length, d,
+									room.obstacles, robot.radius);
 
-					openList.add(newNode);
+					/*
+					 * Note that no checks are made for crossing saddle lines
+					 * due to there already being a check for tether crossing.
+					 */
+
+					// Add the node if the tether was not crossed and its length
+					// was not exceeded.
+					if (nextTC != null) {
+						SimpleCoverageRouteNode newNode = new SimpleCoverageRouteNode(
+								cell, n, nextTC);
+
+						openList.add(newNode);
+					}
 				}
 			}
 		}
-		
+
 		// A solution was not found.
 		return null;
 	}
 
-	public static List<RoomCellIndex> getAdjacentCellChoices(RoomCellIndex c,
+	private static List<RoomCellIndex> getAdjacentCellChoices(RoomCellIndex c,
 			SimpleRoom room) {
 		List<RoomCellIndex> l = new ArrayList<RoomCellIndex>();
 
@@ -138,7 +178,27 @@ public class SimpleCoverage extends Coverage {
 		return l;
 	}
 
-	public static SimpleCoverageRouteNode extractMinNode(
+	private static int getNumberOfCoverableCells(SimpleRoom room,
+			ShortestPathGrid shortestPathGrid, double maximumTetherLength) {
+		int count = 0;
+
+		for (int y = 0; y < room.verticalCellCount; y++) {
+			for (int x = 0; x < room.horizontalCellCount; x++) {
+				// Check if the cell is covered by an obstacle.
+				if (!room.obstacleCells[y][x]) {
+					// Check if the cell cannot be reached given the tether
+					// length restrictions.
+					if (shortestPathGrid.cells[y][x].potentialValue <= maximumTetherLength) {
+						count++;
+					}
+				}
+			}
+		}
+
+		return count;
+	}
+
+	private static SimpleCoverageRouteNode extractMinNode(
 			List<SimpleCoverageRouteNode> openList) {
 		SimpleCoverageRouteNode min = null;
 
@@ -152,4 +212,5 @@ public class SimpleCoverage extends Coverage {
 
 		return min;
 	}
+
 }

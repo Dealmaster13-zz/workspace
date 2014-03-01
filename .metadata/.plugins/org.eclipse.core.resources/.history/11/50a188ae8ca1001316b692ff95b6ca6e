@@ -1,0 +1,50 @@
+package uk.ac.cam.oda22.coverage.simple;
+
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
+
+import uk.ac.cam.oda22.coverage.CoverageResult;
+import uk.ac.cam.oda22.pathplanning.Path;
+
+/**
+ * @author Oliver
+ *
+ */
+public class SimpleCoverageResult extends CoverageResult {
+
+	List<RoomCellIndex> cellList;
+	
+	public SimpleCoverageResult(SimpleCoverageRouteNode finalNode) {
+		List<RoomCellIndex> reverseCellList = new ArrayList<RoomCellIndex>();
+		
+		SimpleCoverageRouteNode currentNode = finalNode;
+		
+		while (currentNode != null) {
+			reverseCellList.add(currentNode.index);
+			
+			currentNode = currentNode.previousNode;
+		}
+		
+		this.cellList = new ArrayList<RoomCellIndex>();
+		
+		for (int i = reverseCellList.size() - 1; i >= 0; i++) {
+			this.cellList.add(reverseCellList.get(i));
+		}
+	}
+	
+	private static Path getPath(List<RoomCellIndex> cellList, double cellSize) {
+		Path path = new Path();
+		
+		for (int i = 0; i < cellList.size(); i++) {
+			RoomCellIndex cell = cellList.get(i);
+			
+			Point2D point = new Point2D.Double(cell.x * cellSize, cell.y * cellSize);
+			
+			path.addPoint(point);
+		}
+		
+		return path;
+	}
+	
+}

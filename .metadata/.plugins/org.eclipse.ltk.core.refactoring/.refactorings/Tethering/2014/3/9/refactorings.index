@@ -4,3 +4,5 @@
 1393683381599	Delete element
 1393683447842	Rename field 'elements'
 1393684825787	Rename local variable 'e'
+1393709170223	Rename local variable 'i'
+1393709174694	Rename local variable 'j'

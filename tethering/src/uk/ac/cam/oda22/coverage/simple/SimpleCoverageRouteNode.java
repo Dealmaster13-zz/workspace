@@ -1,5 +1,7 @@
 package uk.ac.cam.oda22.coverage.simple;
 
+import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
+
 /**
  * @author Oliver
  * 
@@ -34,11 +36,14 @@ public class SimpleCoverageRouteNode implements
 	 * stage.
 	 */
 	public final boolean recovering;
+	
+	public final TetherConfiguration tc;
 
 	public SimpleCoverageRouteNode(RoomCellIndex index,
-			SimpleCoverageRouteNode previousNode) {
+			SimpleCoverageRouteNode previousNode, TetherConfiguration tc) {
 		this.index = index;
 		this.previousNode = previousNode;
+		this.tc = tc;
 
 		this.pathLength = previousNode != null ? previousNode.pathLength : 0;
 
