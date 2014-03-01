@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.robots.RectangularRobot"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.astar.AStarNode"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.graphs.Node"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.astar.AStarGraph"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.PointOnLineResult"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.Triangle2D"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.PointInTriangleResult"/>
@@ -38,14 +34,12 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.NextTetherConfigurationRotationResult"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.pathplanning.Path"/>
 <fullyQualifiedTypeName name="java.awt.geom.Point2D.Double"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.Vector2D"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.SweepToObstacleResult"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.MathExtended"/>
 <fullyQualifiedTypeName name="java.awt.Color"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.TetherConfiguration"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarPathfinding"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.tethers.Tether"/>
-<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ListFunctions"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.ICoverage"/>
 <fullyQualifiedTypeName name="java.lang.Override"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.PolygonRoom"/>
@@ -56,8 +50,14 @@
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.core.logging.Log"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="java.util.HashSet"/>
+<fullyQualifiedTypeName name="java.util.Queue"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.sorting.PriorityQueue"/>
+<fullyQualifiedTypeName name="java.lang.Comparable"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.ListFunctions"/>
 <fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.Vector2D"/>
+<fullyQualifiedTypeName name="uk.ac.cam.oda22.core.environment.Room"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.simple.RoomCellIndex"/>
 <fullyQualifiedTypeName name="uk.ac.cam.oda22.coverage.simple.SimpleCoverageRouteNode"/>
 </qualifiedTypeNameHistroy>

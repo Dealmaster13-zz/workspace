@@ -4,7 +4,8 @@ package uk.ac.cam.oda22.coverage.simple;
  * @author Oliver
  * 
  */
-public class SimpleCoverageRouteNode {
+public class SimpleCoverageRouteNode implements
+		Comparable<SimpleCoverageRouteNode> {
 
 	/**
 	 * The room cell index of the node.
@@ -17,7 +18,14 @@ public class SimpleCoverageRouteNode {
 	public final SimpleCoverageRouteNode previousNode;
 
 	/**
-	 * The re-coverage count which corresponds to the previous node list.
+	 * The length of the path.
+	 */
+	public final int pathLength;
+
+	/**
+	 * The re-coverage count which corresponds to the previous node list. This
+	 * is the total number of times any cell has been re-covered, rather than
+	 * the number of unique cells which have been re-covered.
 	 */
 	public final int recoverageCount;
 
@@ -32,6 +40,8 @@ public class SimpleCoverageRouteNode {
 		this.index = index;
 		this.previousNode = previousNode;
 
+		this.pathLength = previousNode != null ? previousNode.pathLength : 0;
+
 		// Get the re-coverage count of the previous node.
 		int previousRecoverageCount = previousNode != null ? previousNode.recoverageCount
 				: 0;
@@ -44,6 +54,45 @@ public class SimpleCoverageRouteNode {
 				+ (this.recovering ? 1 : 0);
 	}
 
+	/**
+	 * Gets the number of unique cells which have been covered.
+	 * 
+	 * @return covered cell count
+	 */
+	public int getCoveredCellCount() {
+		// Note that path length starts at 0 for the initial node.
+		return pathLength + 1 - recoverageCount;
+	}
+
+	/**
+	 * Checks whether or not a room cell is in one of the nodes which has
+	 * recently been re-covered (i.e. during the period of being in the
+	 * 're-covering' state).
+	 * 
+	 * @param c
+	 * @return
+	 */
+	public boolean isCellInRecoveringState(RoomCellIndex c) {
+		// Stop if this node is not in the recovering state.
+		if (this.recovering == false) {
+			return false;
+		}
+
+		if (this.index.equals(c)) {
+			return true;
+		}
+
+		// Check if any previous 're-covering' nodes are at cell c.
+		return previousNode.isCellInRecoveringState(c);
+	}
+
+	/**
+	 * Checks whether or not a room cell has been revisited.
+	 * 
+	 * @param index
+	 * @param previousNode
+	 * @return true if the cell has been revisited, false otherwise
+	 */
 	private static boolean isRevisited(RoomCellIndex index,
 			SimpleCoverageRouteNode previousNode) {
 		SimpleCoverageRouteNode n = previousNode;
@@ -57,4 +106,23 @@ public class SimpleCoverageRouteNode {
 		return false;
 	}
 
+	@Override
+	public int compareTo(SimpleCoverageRouteNode n) {
+		// This node has higher value if it has a higher re-coverage count. Note
+		// that lower is better in terms of prioritising which node to search
+		// next.
+		if (this.recoverageCount > n.recoverageCount) {
+			return 1;
+		} else if (this.recoverageCount < n.recoverageCount) {
+			return -1;
+		}
+
+		// When the re-coverage counts are equal, compare against the total
+		// number of cells covered. Note that higher is better, and the number
+		// of unique cells covered is just the total number of cells minus the
+		// re-coverage count.
+		Integer pl1 = this.pathLength;
+		Integer pl2 = n.pathLength;
+		return pl2.compareTo(pl1);
+	}
 }

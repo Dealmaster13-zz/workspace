@@ -1,0 +1,18 @@
+package uk.ac.cam.oda22.coverage.simple;
+
+/**
+ * @author Oliver
+ *
+ */
+public class PriorityQueue {
+	
+	private int size;
+
+	private Object[] elements;
+	
+	public PriorityQueue() {
+		this.size = 10;
+		this.elements = new Object[10];
+	}
+	
+}

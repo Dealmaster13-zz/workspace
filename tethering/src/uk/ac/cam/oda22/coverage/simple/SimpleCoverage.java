@@ -44,14 +44,14 @@ public class SimpleCoverage extends Coverage {
 		if (robotCell.x < 0 || robotCell.x >= sRoom.horizontalCellCount
 				|| robotCell.y < 0 || robotCell.y >= sRoom.verticalCellCount) {
 			Log.error("Robot is outside of the room boundaries.");
-			
+
 			return null;
 		}
 
 		// Fail if the robot is on an obstacle.
 		if (sRoom.obstacleCells[robotCell.y][robotCell.x]) {
 			Log.error("Robot is on an obstacle.");
-			
+
 			return null;
 		}
 
@@ -66,11 +66,90 @@ public class SimpleCoverage extends Coverage {
 		return null;
 	}
 
-	private void findOptimalCoverageBFS(RoomCellIndex initialRobotCell, ShortestPathGrid shortestPathGrid) {
+	private SimpleCoverageRouteNode findOptimalCoverageBFS(
+			RoomCellIndex initialRobotCell, SimpleRoom room,
+			ShortestPathGrid shortestPathGrid) {
 		RoomCellIndex currentRobotCell = new RoomCellIndex(initialRobotCell);
+
+		// This stores the list of nodes which are due to be explored.
+		List<SimpleCoverageRouteNode> openList = new ArrayList<SimpleCoverageRouteNode>();
+
+		// Add the robot's current cell to the open list.
+		SimpleCoverageRouteNode startNode = new SimpleCoverageRouteNode(
+				currentRobotCell, null);
+		openList.add(startNode);
+
+		// Get the number of cells which need to be covered.
+		int totalCellCount = room.getOpenCellCount();
+
+		while (openList.size() > 0) {
+			// Get the next node in the open list with minimal re-covered cells.
+			// This ensures that the first solution found will be the optimal
+			// one.
+			SimpleCoverageRouteNode n = extractMinNode(openList);
+
+			// Stop if all cells have been covered and the node is at the start
+			// point.
+			if (n.getCoveredCellCount() == totalCellCount
+					&& n.index.equals(initialRobotCell)) {
+				return n;
+			}
+
+			// Get the valid cells adjacent to n.
+			List<RoomCellIndex> cells = getAdjacentCellChoices(n.index, room);
+
+			// For each valid adjacent cell, add a new node to the open list,
+			// only if it doesn't re-cover a tile visited in the 're-covering'
+			// phase. This prevents (useless) spurious solutions, since this
+			// state can equally be achieved by the associated shorter path.
+			for (RoomCellIndex cell : cells) {
+				if (!n.isCellInRecoveringState(cell)) {
+					// TODO: Check if a saddle line has been crossed.
+
+					SimpleCoverageRouteNode newNode = new SimpleCoverageRouteNode(
+							cell, n);
+
+					openList.add(newNode);
+				}
+			}
+		}
 		
-		// This stores the list of cells 
-		List<RoomCellIndex> openList = new ArrayList<RoomCellIndex>();
+		// A solution was not found.
+		return null;
 	}
 
+	public static List<RoomCellIndex> getAdjacentCellChoices(RoomCellIndex c,
+			SimpleRoom room) {
+		List<RoomCellIndex> l = new ArrayList<RoomCellIndex>();
+
+		List<RoomCellIndex> adjacentCells = c.getAdjacentCells();
+
+		// For each cell adjacent to c, check if it is a valid cell in open
+		// space (not coincident with an obstacle).
+		for (RoomCellIndex cell : adjacentCells) {
+			if (cell.x >= 0 && cell.x < room.horizontalCellCount && cell.y >= 0
+					&& cell.y < room.verticalCellCount) {
+				if (!room.obstacleCells[c.y][c.x]) {
+					l.add(cell);
+				}
+			}
+		}
+
+		return l;
+	}
+
+	public static SimpleCoverageRouteNode extractMinNode(
+			List<SimpleCoverageRouteNode> openList) {
+		SimpleCoverageRouteNode min = null;
+
+		for (SimpleCoverageRouteNode n : openList) {
+			if (min == null || n.compareTo(min) < 0) {
+				min = n;
+			}
+		}
+
+		openList.remove(min);
+
+		return min;
+	}
 }

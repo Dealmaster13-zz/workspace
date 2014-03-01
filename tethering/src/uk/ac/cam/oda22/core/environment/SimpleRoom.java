@@ -40,6 +40,35 @@ public class SimpleRoom extends Room {
 	}
 
 	/**
+	 * Gets the number of cells not covered by an obstacle.
+	 * 
+	 * @return open cell count
+	 */
+	public int getOpenCellCount() {
+		return (horizontalCellCount * verticalCellCount)
+				- this.getObstacleCellCount();
+	}
+
+	/**
+	 * Gets the number of cells covered by an obstacle.
+	 * 
+	 * @return obstacle cell count
+	 */
+	public int getObstacleCellCount() {
+		int count = 0;
+
+		for (int i = 0; i < obstacleCells.length; i++) {
+			for (int j = 0; j < obstacleCells[i].length; j++) {
+				if (obstacleCells[i][j]) {
+					count++;
+				}
+			}
+		}
+
+		return count;
+	}
+
+	/**
 	 * Creates cell-sized obstacles and adds them to the obstacle list.
 	 * 
 	 * @param obstacleCells

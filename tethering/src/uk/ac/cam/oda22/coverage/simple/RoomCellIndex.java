@@ -1,5 +1,8 @@
 package uk.ac.cam.oda22.coverage.simple;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Oliver
  * 
@@ -22,6 +25,15 @@ public class RoomCellIndex {
 	public RoomCellIndex(RoomCellIndex c) {
 		this.x = c.x;
 		this.y = c.y;
+	}
+	
+	public List<RoomCellIndex> getAdjacentCells() {
+		List<RoomCellIndex> l = new ArrayList<RoomCellIndex>();
+		l.add(new RoomCellIndex(this.x - 1, this.y));
+		l.add(new RoomCellIndex(this.x, this.y + 1));
+		l.add(new RoomCellIndex(this.x + 1, this.y));
+		l.add(new RoomCellIndex(this.x, this.y - 1));
+		return l;
 	}
 	
 	@Override
