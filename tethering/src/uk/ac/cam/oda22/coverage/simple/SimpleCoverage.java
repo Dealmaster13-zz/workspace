@@ -9,10 +9,14 @@ import uk.ac.cam.oda22.core.environment.SimpleRoom;
 import uk.ac.cam.oda22.core.logging.Log;
 import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarPathfinding;
 import uk.ac.cam.oda22.core.robots.Robot;
+import uk.ac.cam.oda22.core.robots.actions.IRobotAction;
+import uk.ac.cam.oda22.core.robots.actions.simple.SimpleMoveAction;
+import uk.ac.cam.oda22.core.robots.actions.simple.SimpleMoveDirection;
 import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
 import uk.ac.cam.oda22.coverage.Coverage;
 import uk.ac.cam.oda22.coverage.CoverageResult;
 import uk.ac.cam.oda22.coverage.ShortestPathGrid;
+import uk.ac.cam.oda22.pathplanning.Path;
 
 /**
  * @author Oliver
@@ -31,14 +35,11 @@ public class SimpleCoverage extends Coverage {
 		SimpleRoom sRoom = (SimpleRoom) room;
 
 		// Get the robot coordinates and corresponding cell positions.
-		double robotX = robot.getPosition().getX();
-		double robotY = robot.getPosition().getY();
 		RoomCellIndex robotCell = new RoomCellIndex(robot.getPosition(),
 				sRoom.cellSize);
 
 		// Check if the robot is at the centre of a cell.
-		if (robotX != robotCell.x * sRoom.cellSize
-				|| robotY != robotCell.y * sRoom.cellSize) {
+		if (!robot.getPosition().equals(robotCell.getPosition(sRoom.cellSize))) {
 			Log.warning("Robot is not at the centre of a cell, so it will be repositioned.");
 		}
 
@@ -77,10 +78,17 @@ public class SimpleCoverage extends Coverage {
 		 * Step 2: Perform breadth first search to find the optimal coverage
 		 * solution which re-covers the minimum number of cells possible.
 		 */
-		SimpleCoverageRouteNode node = findOptimalCoverageBFS(robotCell, sRoom,
-				robot, shortestPathGrid, false);
+		SimpleCoverageRouteNode finalNode = findOptimalCoverageBFS(robotCell,
+				sRoom, robot, shortestPathGrid, false);
 
-		return null;
+		List<RoomCellIndex> cellList = SimpleCoverageResult
+				.getCellList(finalNode);
+
+		Path path = SimpleCoverageResult.getPath(cellList, sRoom.cellSize);
+
+		List<IRobotAction> actions = generateActionsFromCellList(cellList);
+
+		return new SimpleCoverageResult(actions, path);
 	}
 
 	private static SimpleCoverageRouteNode findOptimalCoverageBFS(
@@ -211,6 +219,23 @@ public class SimpleCoverage extends Coverage {
 		openList.remove(min);
 
 		return min;
+	}
+
+	private static List<IRobotAction> generateActionsFromCellList(
+			List<RoomCellIndex> cellList) {
+		List<IRobotAction> actions = new ArrayList<IRobotAction>();
+
+		for (int i = 0; i < cellList.size() - 1; i++) {
+			RoomCellIndex cell = cellList.get(i);
+			RoomCellIndex nextCell = cellList.get(i + 1);
+
+			SimpleMoveDirection direction = cell
+					.getDirectionToAdjacentCell(nextCell);
+			SimpleMoveAction action = new SimpleMoveAction(direction);
+			action.addAction(actions);
+		}
+
+		return actions;
 	}
 
 }

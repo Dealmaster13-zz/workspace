@@ -3,14 +3,18 @@ package uk.ac.cam.oda22.simulation;
 import java.awt.Color;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.SwingUtilities;
 
+import uk.ac.cam.oda22.core.Result;
 import uk.ac.cam.oda22.core.ShapeFunctions;
 import uk.ac.cam.oda22.core.environment.Obstacle;
 import uk.ac.cam.oda22.core.environment.PolygonRoom;
+import uk.ac.cam.oda22.core.environment.Room;
+import uk.ac.cam.oda22.core.environment.SimpleRoom;
 import uk.ac.cam.oda22.core.environment.VisibilityGraph;
 import uk.ac.cam.oda22.core.environment.VisibilityGraphEdge;
 import uk.ac.cam.oda22.core.logging.Log;
@@ -21,10 +25,12 @@ import uk.ac.cam.oda22.core.robots.Robot;
 import uk.ac.cam.oda22.core.tethers.SimpleTether;
 import uk.ac.cam.oda22.core.tethers.Tether;
 import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
+import uk.ac.cam.oda22.coverage.Coverage;
 import uk.ac.cam.oda22.coverage.CoverageResult;
 import uk.ac.cam.oda22.coverage.ShortestPathGrid;
 import uk.ac.cam.oda22.coverage.ShortestPathGridCell;
 import uk.ac.cam.oda22.coverage.simple.SimpleCoverage;
+import uk.ac.cam.oda22.coverage.sweeping.SweepingCoverage;
 import uk.ac.cam.oda22.graphics.GraphicsFunctions;
 import uk.ac.cam.oda22.graphics.IVisualiser;
 import uk.ac.cam.oda22.graphics.VisualiserUsingJFrame;
@@ -94,7 +100,7 @@ public class Simulator {
 		Thread.sleep(100);
 
 		drawTether(tether, Color.darkGray, false);
-		
+
 		// Draw the graphics.
 		drawRoom(room, robot.radius, true, false, false);
 		drawRobot(robot);
@@ -229,6 +235,36 @@ public class Simulator {
 	}
 
 	/**
+	 * This room is a 3x3 room with no obstacles.
+	 * 
+	 * @return room
+	 */
+	private static SimpleRoom createSimpleRoom1(double cellSize) {
+		return new SimpleRoom(3, 3, new boolean[0][0], cellSize);
+	}
+
+	/**
+	 * Tether configuration type 1 for any room. This configuration is for
+	 * coverage. This gets the point closest to the anchor point on a room edge
+	 * for the position of the robot.
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	private static Tether createTether0_1(double maxTetherLength,
+			double robotRadius, Point2D anchorPoint, Room room)
+			throws Exception {
+		double robotX = anchorPoint.getX() < robotRadius ? robotRadius : Math
+				.min(anchorPoint.getX(), room.width - robotRadius);
+		double robotY = anchorPoint.getY() < robotRadius ? robotRadius : Math
+				.min(anchorPoint.getY(), room.height - robotRadius);
+
+		Point2D robotPosition = new Point2D.Double(robotX, robotY);
+
+		return createTether0_1(maxTetherLength, anchorPoint, robotPosition);
+	}
+
+	/**
 	 * Tether configuration type 1 for any room. This configuration is for
 	 * coverage.
 	 * 
@@ -236,13 +272,12 @@ public class Simulator {
 	 * @throws Exception
 	 */
 	private static Tether createTether0_1(double maxTetherLength,
-			double robotRadius) throws Exception {
-		Point2D anchor = new Point2D.Double(50, 0);
-
+			Point2D anchorPoint, Point2D robotPosition) throws Exception {
 		TetherConfiguration X = new TetherConfiguration();
-		X.addPoint(new Point2D.Double(50, robotRadius));
+		X.addPoint(new Point2D.Double(robotPosition.getX(), robotPosition
+				.getY()));
 
-		return new SimpleTether(anchor, maxTetherLength, X);
+		return new SimpleTether(anchorPoint, maxTetherLength, X);
 	}
 
 	/**
@@ -548,32 +583,66 @@ public class Simulator {
 		}
 	}
 
-	private static PathPlanningResult testPathPlanning(PolygonRoom room, Robot robot,
-			Point2D goal) {
+	private static PathPlanningResult testPathPlanning(PolygonRoom room,
+			Robot robot, Point2D goal) {
 		PathPlanningResult result = PathPlanner.performPathPlanning(room,
 				robot, goal, tetherSegments);
 
-		if (result != null && result.actions != null) {
-			for (int i = 0; i < result.actions.size(); i++) {
-				System.out.println(result.actions.get(i));
-			}
-		}
+		printResult(result);
 
 		return result;
 	}
 
-	private static CoverageResult testCoverage(PolygonRoom room, Robot robot) {
-		SimpleCoverage coverage = new SimpleCoverage();
-		
+	private static CoverageResult testCoverage(Room room, Robot robot) {
+		Coverage coverage;
+
+		if (room instanceof SimpleRoom) {
+			coverage = new SimpleCoverage();
+		} else if (room instanceof PolygonRoom) {
+			coverage = new SweepingCoverage();
+		} else {
+			Log.error("No implementation exists for the given room type.");
+
+			return null;
+		}
+
 		CoverageResult result = coverage.performCoverage(room, robot);
 
+		printResult(result);
+
+		return result;
+	}
+
+	private static void testCoverage1() {
+		Room room = createSimpleRoom1(1);
+		
+		Point2D anchorPoint = new Point2D.Double(1.5, 0);
+		
+		Point2D robotPosition = new Point2D.Double(1.5, 0.5);
+		
+		Robot robot;
+		
+		try {
+			Tether tether = createTether0_1(3, anchorPoint, robotPosition);
+			
+			robot = createRobot1_2(tether, 0.5);
+		} catch (Exception e) {
+			Log.error("Could not create robot with tether.");
+
+			e.printStackTrace();
+			
+			return;
+		}
+		
+		CoverageResult result = testCoverage(room, robot);
+	}
+
+	private static void printResult(Result result) {
 		if (result != null) {
 			for (int i = 0; i < result.actions.size(); i++) {
 				System.out.println(result.actions.get(i));
 			}
 		}
-
-		return result;
 	}
 
 	private static void verifyTCFromPath(Tether initialTether,
