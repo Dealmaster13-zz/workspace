@@ -31,7 +31,7 @@ public class SimpleCoverageResult extends CoverageResult {
 
 		List<RoomCellIndex> cellList = new ArrayList<RoomCellIndex>();
 
-		for (int i = reverseCellList.size() - 1; i >= 0; i++) {
+		for (int i = reverseCellList.size() - 1; i >= 0; i--) {
 			cellList.add(reverseCellList.get(i));
 		}
 		
@@ -44,8 +44,7 @@ public class SimpleCoverageResult extends CoverageResult {
 		for (int i = 0; i < cellList.size(); i++) {
 			RoomCellIndex cell = cellList.get(i);
 
-			Point2D point = new Point2D.Double(cell.x * cellSize, cell.y
-					* cellSize);
+			Point2D point = cell.getPosition(cellSize);
 
 			path.addPoint(point);
 		}

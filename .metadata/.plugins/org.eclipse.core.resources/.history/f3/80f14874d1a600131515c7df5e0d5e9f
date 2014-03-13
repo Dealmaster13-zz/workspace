@@ -1,0 +1,97 @@
+package uk.ac.cam.oda22.graphics;
+
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
+import uk.ac.cam.oda22.graphics.shapes.DisplayShape;
+
+/**
+ * @author Oliver
+ * 
+ */
+public class VisualiserJPanel extends JPanel implements IVisualiser {
+
+	private static final long serialVersionUID = 4146428062464803588L;
+
+	private static final Object drawLock = new Object();
+
+	private List<DisplayShape> shapes;
+
+	private Point2D offset;
+
+	private double xScale;
+
+	private double yScale;
+
+	public VisualiserJPanel(Point2D offset, double xScale, double yScale) {
+		this.shapes = new ArrayList<DisplayShape>();
+
+		this.offset = offset;
+		this.xScale = xScale;
+		this.yScale = yScale;
+	}
+
+	@Override
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+
+		draw(g);
+	}
+
+	@Override
+	public void drawShape(DisplayShape s) {
+		synchronized (drawLock) {
+			this.shapes.add(s);
+			updateGraphics();
+		}
+	}
+
+	@Override
+	public void drawShapes(DisplayShape[] ss) {
+		for (DisplayShape s : ss) {
+			this.drawShape(s);
+		}
+	}
+
+	private void draw(Graphics g) {
+		synchronized (drawLock) {
+			Graphics2D graphics = (Graphics2D) g;
+
+			// Draw all shapes.
+			for (DisplayShape s : this.shapes) {
+				graphics.setColor(s.colour);
+				graphics.setStroke(s.stroke);
+
+				DisplayShape newS = this.transformShape(s);
+
+				Shape[] shapes = newS.getShapes();
+
+				for (Shape shape : shapes) {
+					graphics.draw(shape);
+				}
+			}
+		}
+	}
+
+	private void updateGraphics() {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				validate();
+				repaint();
+			}
+		});
+	}
+
+	private DisplayShape transformShape(DisplayShape s) {
+		return s.stretch(this.xScale, this.yScale)
+				.translate(this.offset.getX(), this.offset.getY());
+	}
+
+}

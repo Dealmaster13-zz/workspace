@@ -45,7 +45,7 @@ public class SimpleCoverageRouteNode implements
 		this.previousNode = previousNode;
 		this.tc = tc;
 
-		this.pathLength = previousNode != null ? previousNode.pathLength : 0;
+		this.pathLength = previousNode != null ? previousNode.pathLength + 1 : 0;
 
 		// Get the re-coverage count of the previous node.
 		int previousRecoverageCount = previousNode != null ? previousNode.recoverageCount
@@ -106,6 +106,8 @@ public class SimpleCoverageRouteNode implements
 			if (n.index.equals(index)) {
 				return true;
 			}
+			
+			n = n.previousNode;
 		}
 
 		return false;

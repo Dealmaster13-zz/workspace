@@ -76,17 +76,21 @@ public class SimpleRoom extends Room {
 	private void generateObstacles(boolean[][] obstacleCells, double cellSize) {
 		for (int i = 0; i < obstacleCells.length; i++) {
 			for (int j = 0; j < obstacleCells[i].length; j++) {
-				List<Point2D> points = new ArrayList<Point2D>();
+				if (obstacleCells[i][j]) {
+					List<Point2D> points = new ArrayList<Point2D>();
 
-				// Create an obstacle spanning from index (j, i) to index (j+1,
-				// i+1).
-				points.add(new Point2D.Double(j * cellSize, i * cellSize));
-				points.add(new Point2D.Double(j * cellSize, (i + 1) * cellSize));
-				points.add(new Point2D.Double((j + 1) * cellSize, i * cellSize));
-				points.add(new Point2D.Double((j + 1) * cellSize, (i + 1)
-						* cellSize));
+					// Create an obstacle spanning from index (j, i) to index
+					// (j+1, i+1).
+					points.add(new Point2D.Double(j * cellSize, i * cellSize));
+					points.add(new Point2D.Double(j * cellSize, (i + 1)
+							* cellSize));
+					points.add(new Point2D.Double((j + 1) * cellSize, (i + 1)
+							* cellSize));
+					points.add(new Point2D.Double((j + 1) * cellSize, i
+							* cellSize));
 
-				this.obstacles.add(new Obstacle(points));
+					this.obstacles.add(new Obstacle(points));
+				}
 			}
 		}
 	}

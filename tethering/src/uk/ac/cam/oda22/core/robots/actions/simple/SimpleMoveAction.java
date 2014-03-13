@@ -21,4 +21,9 @@ public class SimpleMoveAction implements IRobotAction {
 		l.add(this);
 	}
 	
+	@Override
+	public String toString() {
+		return "Move action: " + this.direction.toString();
+	}
+	
 }

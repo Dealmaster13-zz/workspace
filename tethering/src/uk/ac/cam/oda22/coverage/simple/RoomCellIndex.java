@@ -27,8 +27,8 @@ public class RoomCellIndex {
 	}
 
 	public RoomCellIndex(Point2D p, double cellSize) {
-		this.x = (int) Math.round(p.getX() / cellSize);
-		this.y = (int) Math.round(p.getY() / cellSize);
+		this.x = (int) Math.max(0, Math.round(p.getX() / cellSize) - 1);
+		this.y = (int) Math.max(0, Math.round(p.getY() / cellSize) - 1);
 	}
 
 	public RoomCellIndex(RoomCellIndex c) {

@@ -11,7 +11,7 @@ import uk.ac.cam.oda22.core.tethers.Tether;
 
 /**
  * @author Oliver
- *
+ * 
  */
 public class RectangularRobot extends Robot {
 
@@ -21,10 +21,13 @@ public class RectangularRobot extends Robot {
 
 	/**
 	 * @param args
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	public RectangularRobot(Point2D position, double rotation, double rotationalSensitivity, Tether tether, double width, double height) throws Exception {
-		super(position, MathExtended.getRadius(width, height), rotation, rotationalSensitivity, tether);
+	public RectangularRobot(Point2D position, double rotation,
+			double rotationalSensitivity, Tether tether, double width,
+			double height) throws Exception {
+		super(position, MathExtended.getRadius(width, height), rotation,
+				rotationalSensitivity, tether);
 
 		this.width = width;
 		this.height = height;
@@ -33,18 +36,22 @@ public class RectangularRobot extends Robot {
 
 		this.setOutline(outline);
 	}
-	
+
 	private Line2D[] createOutline() {
-		Line2D[] arrow = ShapeFunctions.getArrow(new Point2D.Double(0, 0), this.getRotation(), 20, 5);
-		Line2D[] rectangle = ShapeFunctions.getRectangle(new Point2D.Double(0, 0), this.width, this.height, this.getRotation());
+		double arrowLength = 2 * MathExtended.length(this.width, this.height);
 		
+		Line2D[] arrow = ShapeFunctions.getArrow(new Point2D.Double(0, 0),
+				this.getRotation(), arrowLength, arrowLength / 4);
+		Line2D[] rectangle = ShapeFunctions.getRectangle(new Point2D.Double(0,
+				0), this.width, this.height, this.getRotation());
+
 		List<Line2D> l = ListFunctions.addAll(arrow, rectangle);
 		Line2D[] array = new Line2D[l.size()];
-		
+
 		for (int i = 0; i < l.size(); i++) {
 			array[i] = l.get(i);
 		}
-		
+
 		return array;
 	}
 

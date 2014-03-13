@@ -46,11 +46,19 @@ public final class PathPlanner {
 		List<Obstacle> expandedObstacles = room
 				.getExpandedObstacles(robot.radius);
 
+		TetherConfiguration tc = robot.tether.getFullConfiguration();
+
+		// If the tether crosses any obstacles then the tether configuration is
+		// invalid.
+		if (tetherCrossesObstacles(tc, obstacles)) {
+			Log.error("Tether crosses obstacles.");
+
+			return null;
+		}
+
 		// Tighten the tether.
 		TetherConfiguration tightenedTC = TetheredAStarPathfinding
-				.getTautTetherConfiguration(
-						robot.tether.getFullConfiguration(), obstacles,
-						robot.radius);
+				.getTautTetherConfiguration(tc, obstacles, robot.radius);
 
 		// If the taut tether configuration is undefined then the original
 		// tether configuration is invalid.
@@ -120,6 +128,27 @@ public final class PathPlanner {
 		// TODO: Extension task: implement this method.
 
 		return null;
+	}
+
+	/**
+	 * Checks if a tether configuration crosses any obstacles, thus rendering
+	 * the configuration invalid.
+	 * 
+	 * @param tc
+	 * @param obstacles
+	 * @return true if the tether crosses an obstacle, false otherwise
+	 */
+	private static boolean tetherCrossesObstacles(TetherConfiguration tc,
+			List<Obstacle> obstacles) {
+		for (Obstacle o : obstacles) {
+			Path perimeter = o.getPerimeter();
+
+			if (MathExtended.strictPathIntersectsPath(perimeter, tc)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

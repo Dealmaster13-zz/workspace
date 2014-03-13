@@ -47,22 +47,6 @@ public class PolygonRoom extends Room {
 		return true;
 	}
 
-	/**
-	 * Expand all of the obstacles in the room by a given radius.
-	 * 
-	 * @param radius
-	 * @return expanded obstacles
-	 */
-	public List<Obstacle> getExpandedObstacles(double radius) {
-		List<Obstacle> l = new ArrayList<Obstacle>();
-
-		for (int i = 0; i < this.obstacles.size(); i++) {
-			l.add(this.obstacles.get(i).expandObstacle(radius));
-		}
-
-		return l;
-	}
-
 	public boolean isPointInEmptySpace(Point2D p) {
 		boolean inSpace = false;
 

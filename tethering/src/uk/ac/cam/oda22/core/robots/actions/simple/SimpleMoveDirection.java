@@ -2,16 +2,32 @@ package uk.ac.cam.oda22.core.robots.actions.simple;
 
 /**
  * @author Oliver
- *
+ * 
  */
 public enum SimpleMoveDirection {
 
 	UP,
-	
+
 	RIGHT,
-	
+
 	DOWN,
-	
-	LEFT
-	
+
+	LEFT;
+
+	@Override
+	public String toString() {
+		switch (this) {
+		case UP:
+			return "up";
+		case RIGHT:
+			return "right";
+		case DOWN:
+			return "down";
+		case LEFT:
+			return "left";
+		default:
+			throw new IllegalArgumentException();
+		}
+	}
+
 }

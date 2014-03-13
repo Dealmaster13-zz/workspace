@@ -25,7 +25,8 @@ import uk.ac.cam.oda22.pathplanning.Path;
 public class SimpleCoverage extends Coverage {
 
 	@Override
-	public CoverageResult performCoverage(Room room, Robot robot) {
+	public CoverageResult performCoverage(Room room, Robot robot,
+			boolean returnToInitialCell) {
 		if (!(room instanceof SimpleRoom)) {
 			Log.error("Coverage unimplemented for non-simple rooms");
 
@@ -79,7 +80,7 @@ public class SimpleCoverage extends Coverage {
 		 * solution which re-covers the minimum number of cells possible.
 		 */
 		SimpleCoverageRouteNode finalNode = findOptimalCoverageBFS(robotCell,
-				sRoom, robot, shortestPathGrid, false);
+				sRoom, robot, shortestPathGrid, returnToInitialCell);
 
 		List<RoomCellIndex> cellList = SimpleCoverageResult
 				.getCellList(finalNode);
@@ -118,8 +119,10 @@ public class SimpleCoverage extends Coverage {
 			// one.
 			SimpleCoverageRouteNode n = extractMinNode(openList);
 
+			int cellsCovered = n.getCoveredCellCount();
+
 			// Check if all cells have been covered.
-			if (n.getCoveredCellCount() == totalCellCount) {
+			if (cellsCovered == totalCellCount) {
 				// Check if the robot has returned to the initial cell if
 				// necessary.
 				if (!returnToInitialCell || n.index.equals(initialRobotCell)) {
@@ -137,8 +140,7 @@ public class SimpleCoverage extends Coverage {
 			for (RoomCellIndex cell : cells) {
 				if (!n.isCellInRecoveringState(cell)) {
 					// Get the coordinates of the cell.
-					Point2D d = new Point2D.Double(cell.x * room.cellSize,
-							cell.y * room.cellSize);
+					Point2D d = cell.getPosition(room.cellSize);
 
 					// Get the resultant tether configuration.
 					TetherConfiguration nextTC = TetheredAStarPathfinding
@@ -177,7 +179,7 @@ public class SimpleCoverage extends Coverage {
 		for (RoomCellIndex cell : adjacentCells) {
 			if (cell.x >= 0 && cell.x < room.horizontalCellCount && cell.y >= 0
 					&& cell.y < room.verticalCellCount) {
-				if (!room.obstacleCells[c.y][c.x]) {
+				if (!room.obstacleCells[cell.y][cell.x]) {
 					l.add(cell);
 				}
 			}
@@ -214,6 +216,12 @@ public class SimpleCoverage extends Coverage {
 			if (min == null || n.compareTo(min) < 0) {
 				min = n;
 			}
+		}
+
+		if (min == null) {
+			Log.warning("Open list is empty.");
+
+			return null;
 		}
 
 		openList.remove(min);

@@ -25,6 +25,22 @@ public abstract class Room {
 	}
 
 	/**
+	 * Expand all of the obstacles in the room by a given radius.
+	 * 
+	 * @param radius
+	 * @return expanded obstacles
+	 */
+	public List<Obstacle> getExpandedObstacles(double radius) {
+		List<Obstacle> l = new ArrayList<Obstacle>();
+
+		for (int i = 0; i < this.obstacles.size(); i++) {
+			l.add(this.obstacles.get(i).expandObstacle(radius));
+		}
+
+		return l;
+	}
+
+	/**
 	 * Adds the four room edges as four obstacles with no width.
 	 */
 	private void addRoomEdges(double width, double height) {

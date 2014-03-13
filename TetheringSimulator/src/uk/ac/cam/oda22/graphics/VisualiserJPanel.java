@@ -22,17 +22,24 @@ public class VisualiserJPanel extends JPanel implements IVisualiser {
 
 	private static final Object drawLock = new Object();
 
-	private List<DisplayShape> shapes;
+	private final List<DisplayShape> shapes;
 
-	private Point2D offset;
+	private final int canvasWidth;
 
-	private double xScale;
+	private final int canvasHeight;
 
-	private double yScale;
+	private final Point2D offset;
 
-	public VisualiserJPanel(Point2D offset, double xScale, double yScale) {
+	private final double xScale;
+
+	private final double yScale;
+
+	public VisualiserJPanel(int canvasWidth, int canvasHeight, Point2D offset,
+			double xScale, double yScale) {
 		this.shapes = new ArrayList<DisplayShape>();
-		
+
+		this.canvasWidth = canvasWidth;
+		this.canvasHeight = canvasHeight;
 		this.offset = offset;
 		this.xScale = xScale;
 		this.yScale = yScale;
@@ -90,8 +97,10 @@ public class VisualiserJPanel extends JPanel implements IVisualiser {
 	}
 
 	private DisplayShape transformShape(DisplayShape s) {
-		return s.flipY().translate(this.offset.getX(), this.offset.getY())
-				.stretch(this.xScale, this.yScale);
+		return s.flipY()
+				.stretch(this.xScale, this.yScale)
+				.translate(this.offset.getX(),
+						this.canvasHeight - this.offset.getY());
 	}
 
 }

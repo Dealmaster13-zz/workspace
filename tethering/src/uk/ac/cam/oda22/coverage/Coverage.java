@@ -17,7 +17,8 @@ import uk.ac.cam.oda22.pathplanning.TetheredPath;
  */
 public abstract class Coverage {
 
-	public abstract CoverageResult performCoverage(Room room, Robot robot);
+	public abstract CoverageResult performCoverage(Room room, Robot robot,
+			boolean returnToInitialCell);
 
 	/**
 	 * Computes the shortest path from the anchor point to every other point in

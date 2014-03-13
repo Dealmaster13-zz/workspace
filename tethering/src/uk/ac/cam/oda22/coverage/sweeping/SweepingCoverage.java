@@ -9,11 +9,7 @@ import uk.ac.cam.oda22.core.Vector2D;
 import uk.ac.cam.oda22.core.environment.Obstacle;
 import uk.ac.cam.oda22.core.environment.PolygonRoom;
 import uk.ac.cam.oda22.core.environment.Room;
-import uk.ac.cam.oda22.core.environment.VisibilityGraph;
 import uk.ac.cam.oda22.core.logging.Log;
-import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarPathfinding;
-import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarShortestPathResult;
-import uk.ac.cam.oda22.core.pathfinding.astar.TetheredAStarSinglePathResult;
 import uk.ac.cam.oda22.core.robots.Robot;
 import uk.ac.cam.oda22.core.tethers.TetherConfiguration;
 import uk.ac.cam.oda22.coverage.CorridorProgress;
@@ -21,7 +17,6 @@ import uk.ac.cam.oda22.coverage.Coverage;
 import uk.ac.cam.oda22.coverage.CoverageResult;
 import uk.ac.cam.oda22.coverage.ShortestPathGrid;
 import uk.ac.cam.oda22.pathplanning.Path;
-import uk.ac.cam.oda22.pathplanning.TetheredPath;
 
 /**
  * @author Oliver
@@ -30,7 +25,8 @@ import uk.ac.cam.oda22.pathplanning.TetheredPath;
 public class SweepingCoverage extends Coverage {
 
 	@Override
-	public CoverageResult performCoverage(Room room, Robot robot) {
+	public CoverageResult performCoverage(Room room, Robot robot,
+			boolean returnToInitialCell) {
 		if (!(room instanceof PolygonRoom)) {
 			Log.error("Coverage unimplemented for non-polygonal rooms");
 

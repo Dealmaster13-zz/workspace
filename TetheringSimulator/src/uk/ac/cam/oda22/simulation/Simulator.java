@@ -3,7 +3,6 @@ package uk.ac.cam.oda22.simulation;
 import java.awt.Color;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,60 +60,19 @@ public class Simulator {
 	/**
 	 * @param args
 	 * @throws InterruptedException
-	 * @throws Exception
 	 */
 	public static void main(String[] args) throws InterruptedException {
-		// Create the visualiser.
-		createVisualiser();
+		testPathPlanning1();
 
-		PolygonRoom room = createRoom1();
-
-		Robot robot;
-		Tether tether;
-
-		try {
-			double robotRadius = 4;
-			tether = createTether1_1(120);
-			robot = createRobot1_2(tether, robotRadius);
-		} catch (Exception e) {
-			Log.error("Could not create robot with tether.");
-
-			e.printStackTrace();
-
-			return;
-		}
-
-		tetherSegments = 1000;
-
-		Point2D goal = new Point2D.Double(5, 25);
-
-		PathPlanningResult result = testPathPlanning(room, robot, goal);
-		// CoverageResult result = testCoverage(room, robot);
-
-		boolean pathFound = result != null && result.actions != null;
-
-		// ShortestPathGrid shortestPathGrid =
-		// Coverage.computeShortestPaths(room, robot);
-
-		// Sleep for 100ms so that the visualiser has time to initialise.
-		Thread.sleep(100);
-
-		drawTether(tether, Color.darkGray, false);
-
-		// Draw the graphics.
-		drawRoom(room, robot.radius, true, false, false);
-		drawRobot(robot);
-		drawGoal(goal, pathFound);
-		drawTether(robot.tether, Color.cyan, true);
-		drawAnchor(robot.tether.getAnchor());
-		// drawShortestPathGrid(shortestPathGrid);
-		if (pathFound)
-			drawPath(result.tetheredPath.path);
-		if (pathFound)
-			drawTetherConfiguration(result.tetheredPath.tc, Color.magenta);
-
-		if (pathFound)
-			verifyTCFromPath(tether, room.obstacles, robot.radius, result);
+		// testCoverage1(false);
+		// testCoverage2(false, 3);
+		// testCoverage2(false, 4);
+		// testCoverage2(false, 5);
+		// testCoverage3(false, 5);
+		// testCoverage3(false, 4);
+		// testCoverage3(true, 4);
+		// testCoverage4(false, 10);
+		// testCoverage5(false, 10);
 	}
 
 	private static PolygonRoom createRoom1() {
@@ -235,12 +193,54 @@ public class Simulator {
 	}
 
 	/**
-	 * This room is a 3x3 room with no obstacles.
+	 * Creates a 3x3 room with no obstacles.
 	 * 
 	 * @return room
 	 */
 	private static SimpleRoom createSimpleRoom1(double cellSize) {
-		return new SimpleRoom(3, 3, new boolean[0][0], cellSize);
+		return new SimpleRoom(3, 3, new boolean[3][3], cellSize);
+	}
+
+	/**
+	 * Creates a 3x3 room with an obstacle at cell (1, 1).
+	 * 
+	 * @return room
+	 */
+	private static SimpleRoom createSimpleRoom2(double cellSize) {
+		boolean[][] obstacleCells = new boolean[3][3];
+		obstacleCells[1][1] = true;
+
+		return new SimpleRoom(3, 3, obstacleCells, cellSize);
+	}
+
+	/**
+	 * Creates a 4x4 room with no obstacles.
+	 * 
+	 * @return room
+	 */
+	private static SimpleRoom createSimpleRoom3(double cellSize) {
+		return new SimpleRoom(4, 4, new boolean[4][4], cellSize);
+	}
+
+	/**
+	 * Creates a 8x8 room with no obstacles.
+	 * 
+	 * @return room
+	 */
+	private static SimpleRoom createSimpleRoom4(double cellSize) {
+		return new SimpleRoom(8, 8, new boolean[8][8], cellSize);
+	}
+
+	/**
+	 * Creates a 8x8 room with an obstacle at cell (3, 3).
+	 * 
+	 * @return room
+	 */
+	private static SimpleRoom createSimpleRoom5(double cellSize) {
+		boolean[][] obstacleCells = new boolean[8][8];
+		obstacleCells[3][3] = true;
+
+		return new SimpleRoom(8, 8, obstacleCells, cellSize);
 	}
 
 	/**
@@ -422,19 +422,56 @@ public class Simulator {
 				tether, sideLength, sideLength);
 	}
 
-	private static void createVisualiser() {
+	private static void createVisualiser(double drawingWidth,
+			double drawingHeight, final int canvasWidth,
+			final int canvasHeight, double margin) {
+		final double scaleFactor = getScaleFactor(drawingWidth, drawingHeight,
+				canvasWidth, canvasHeight, margin);
+
+		final Point2D offset = getOffset(drawingWidth, drawingHeight,
+				canvasWidth, canvasHeight, scaleFactor);
+
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				Point2D offset = new Point2D.Double(50, 120);
-				double xScale = 4;
-				double yScale = 4;
-
-				visualiser = new VisualiserUsingJFrame(offset, xScale, yScale);
+				visualiser = new VisualiserUsingJFrame(canvasWidth,
+						canvasHeight, offset, scaleFactor, scaleFactor);
 			}
 		});
 	}
 
-	private static void drawRoom(PolygonRoom room, double robotRadius,
+	private static double getScaleFactor(double drawingWidth,
+			double drawingHeight, int canvasWidth, int canvasHeight,
+			double margin) {
+		double xScale = (canvasWidth - (margin * 2)) / drawingWidth;
+		double yScale = (canvasHeight - (margin * 2)) / drawingHeight;
+
+		return Math.min(xScale, yScale);
+	}
+
+	private static Point2D getOffset(double drawingWidth, double drawingHeight,
+			int canvasWidth, int canvasHeight, double scaleFactor) {
+		double x = (canvasWidth - (drawingWidth * scaleFactor)) / 2;
+		double y = (canvasHeight - (drawingHeight * scaleFactor)) / 2;
+
+		return new Point2D.Double(x, y);
+	}
+
+	/**
+	 * Gets the approximate dimensions of an object given its standard
+	 * dimensions where the room dimensions are comparable with the pixel
+	 * dimensions of the viewing canvas - roughly 800x600 including margins, so
+	 * a standard room dimension would be 500 pixels.
+	 * 
+	 * @param standardDimensions
+	 * @param roomDimensions
+	 * @return
+	 */
+	private static double getApproxDimensions(double standardDimensions,
+			double roomDimensions) {
+		return standardDimensions * roomDimensions / 500;
+	}
+
+	private static void drawRoom(Room room, double robotRadius,
 			boolean drawExpandedObstacles, boolean drawVisibilityGraph,
 			boolean drawExpandedVisibilityGraph) {
 		for (Obstacle o : room.obstacles) {
@@ -479,10 +516,13 @@ public class Simulator {
 		}
 	}
 
-	private static void drawGoal(Point2D goal, boolean pathFound) {
+	private static void drawGoal(Point2D goal, boolean pathFound,
+			double roomDimensions) {
 		Color colour = pathFound ? Color.green : Color.red;
 
-		Line2D[] l = ShapeFunctions.getCross(goal, 2);
+		double radius = getApproxDimensions(10, roomDimensions);
+
+		Line2D[] l = ShapeFunctions.getCross(goal, radius);
 		Line[] cross = GraphicsFunctions.colourLines(l, colour, 3);
 
 		visualiser.drawShapes(cross);
@@ -525,8 +565,10 @@ public class Simulator {
 		}
 	}
 
-	private static void drawAnchor(Point2D anchor) {
-		Circle circle = new Circle(anchor, 1, Color.darkGray, 3);
+	private static void drawAnchor(Point2D anchor, double roomDimensions) {
+		double radius = getApproxDimensions(5, roomDimensions);
+
+		Circle circle = new Circle(anchor, radius, Color.darkGray, 3);
 
 		visualiser.drawShape(circle);
 	}
@@ -549,17 +591,21 @@ public class Simulator {
 		}
 	}
 
-	private static void drawShortestPathGrid(ShortestPathGrid g) {
+	private static void drawShortestPathGrid(ShortestPathGrid g,
+			double cellSize, double roomDimensions, double maxTetherLength) {
+		double circleRadius = getApproxDimensions(2, roomDimensions);
+
 		for (ShortestPathGridCell[] cs : g.cells) {
 			for (ShortestPathGridCell c : cs) {
-				Point2D p = new Point2D.Double(c.x, c.y);
+				Point2D p = new Point2D.Double(c.x * cellSize, c.y * cellSize);
 
 				// Compute the colour which should be used for the grid cell.
-				double f = c.potentialValue / 140;
+				double f = c.potentialValue / maxTetherLength;
 				int rValue = (int) Math.min(f * 255, 255);
-				Color colour = new Color(rValue, 255 - rValue, 0);
+				Color colour = f <= 1 ? new Color(rValue, 255 - rValue, 0)
+						: new Color(0, 0, 0);
 
-				Circle circle = new Circle(p, 0.2, colour, 2);
+				Circle circle = new Circle(p, circleRadius, colour, 2);
 
 				visualiser.drawShape(circle);
 			}
@@ -584,57 +630,303 @@ public class Simulator {
 	}
 
 	private static PathPlanningResult testPathPlanning(PolygonRoom room,
-			Robot robot, Point2D goal) {
+			Tether initialTether, Robot robot, Point2D goal)
+			throws InterruptedException {
+		// Create the visualiser.
+		createVisualiser(room.width, room.height, 800, 600, 50);
+
 		PathPlanningResult result = PathPlanner.performPathPlanning(room,
 				robot, goal, tetherSegments);
 
 		printResult(result);
 
+		boolean pathFound = result != null && result.actions != null;
+
+		// Sleep for 100ms so that the visualiser has time to initialise.
+		Thread.sleep(100);
+
+		/*
+		 * Draw the graphics.
+		 */
+
+		double roomDimensions = Math.max(room.width, room.height);
+
+		drawTether(initialTether, Color.darkGray, false);
+		drawRoom(room, robot.radius, true, false, false);
+		drawRobot(robot);
+		drawGoal(goal, pathFound, roomDimensions);
+		drawTether(robot.tether, Color.cyan, true);
+		drawAnchor(robot.tether.getAnchor(), roomDimensions);
+
+		if (pathFound) {
+			drawPath(result.getPath());
+			drawTetherConfiguration(result.getFinalTC(), Color.magenta);
+
+			verifyTCFromPath(initialTether, room.obstacles, robot.radius,
+					(PathPlanningResult) result);
+		}
+
 		return result;
 	}
 
-	private static CoverageResult testCoverage(Room room, Robot robot) {
+	private static PathPlanningResult testPathPlanning1()
+			throws InterruptedException {
+		PolygonRoom room = createRoom1();
+
+		Robot robot;
+		Tether tether;
+
+		try {
+			double robotRadius = 4;
+			tether = createTether1_1(120);
+			robot = createRobot1_2(tether, robotRadius);
+		} catch (Exception e) {
+			Log.error("Could not create robot with tether.");
+
+			e.printStackTrace();
+
+			return null;
+		}
+
+		tetherSegments = 1000;
+
+		Point2D goal = new Point2D.Double(5, 25);
+
+		PathPlanningResult result = testPathPlanning(room, tether, robot, goal);
+
+		return result;
+	}
+
+	private static CoverageResult testCoverage(Room room, Tether initialTether,
+			Robot robot, boolean returnToInitialCell)
+			throws InterruptedException {
+		// Create the visualiser.
+		createVisualiser(room.width, room.height, 800, 600, 50);
+
 		Coverage coverage;
+
+		double cellSize;
 
 		if (room instanceof SimpleRoom) {
 			coverage = new SimpleCoverage();
+			cellSize = ((SimpleRoom) room).cellSize;
 		} else if (room instanceof PolygonRoom) {
 			coverage = new SweepingCoverage();
+			cellSize = robot.radius * 2;
 		} else {
 			Log.error("No implementation exists for the given room type.");
 
 			return null;
 		}
 
-		CoverageResult result = coverage.performCoverage(room, robot);
+		CoverageResult result = coverage.performCoverage(room, robot,
+				returnToInitialCell);
 
 		printResult(result);
+
+		// Sleep for 100ms so that the visualiser has time to initialise.
+		Thread.sleep(100);
+
+		/*
+		 * Draw the graphics.
+		 */
+
+		double roomDimensions = Math.max(room.width, room.height);
+
+		drawTether(initialTether, Color.darkGray, false);
+		drawRoom(room, robot.radius, false, false, false);
+		drawRobot(robot);
+		drawTether(robot.tether, Color.cyan, true);
+		drawAnchor(robot.tether.getAnchor(), roomDimensions);
+		drawShortestPathGrid(
+				Coverage.computeShortestPaths(room, robot, cellSize), cellSize,
+				roomDimensions, initialTether.length);
+
+		if (result != null && result.actions != null) {
+			drawPath(result.getPath());
+		}
 
 		return result;
 	}
 
-	private static void testCoverage1() {
+	/**
+	 * This tests cell-based coverage in a 3x3 empty room, starting in cell (1,
+	 * 0).
+	 * 
+	 * @return
+	 * @throws InterruptedException
+	 */
+	private static CoverageResult testCoverage1(boolean returnToInitialCell)
+			throws InterruptedException {
 		Room room = createSimpleRoom1(1);
-		
+
 		Point2D anchorPoint = new Point2D.Double(1.5, 0);
-		
+
 		Point2D robotPosition = new Point2D.Double(1.5, 0.5);
-		
+
 		Robot robot;
-		
+		Tether tether;
+
 		try {
-			Tether tether = createTether0_1(3, anchorPoint, robotPosition);
-			
+			tether = createTether0_1(3, anchorPoint, robotPosition);
+
 			robot = createRobot1_2(tether, 0.5);
 		} catch (Exception e) {
 			Log.error("Could not create robot with tether.");
 
 			e.printStackTrace();
-			
-			return;
+
+			return null;
 		}
-		
-		CoverageResult result = testCoverage(room, robot);
+
+		CoverageResult result = testCoverage(room, tether, robot,
+				returnToInitialCell);
+
+		return result;
+	}
+
+	/**
+	 * This tests cell-based coverage in a 3x3 room, starting in cell (1, 0),
+	 * with one obstacle at (1, 1).
+	 * 
+	 * @return
+	 * @throws InterruptedException
+	 */
+	private static CoverageResult testCoverage2(boolean returnToInitialCell,
+			double tetherLength) throws InterruptedException {
+		Room room = createSimpleRoom2(1);
+
+		Point2D anchorPoint = new Point2D.Double(1.5, 0);
+
+		Point2D robotPosition = new Point2D.Double(1.5, 0.5);
+
+		Robot robot;
+		Tether tether;
+
+		try {
+			tether = createTether0_1(tetherLength, anchorPoint, robotPosition);
+
+			robot = createRobot1_2(tether, 0.5);
+		} catch (Exception e) {
+			Log.error("Could not create robot with tether.");
+
+			e.printStackTrace();
+
+			return null;
+		}
+
+		CoverageResult result = testCoverage(room, tether, robot,
+				returnToInitialCell);
+
+		return result;
+	}
+
+	/**
+	 * This tests cell-based coverage in an empty 4x4 room, starting in cell (1,
+	 * 0).
+	 * 
+	 * @return
+	 * @throws InterruptedException
+	 */
+	private static CoverageResult testCoverage3(boolean returnToInitialCell,
+			double tetherLength) throws InterruptedException {
+		Room room = createSimpleRoom3(1);
+
+		Point2D anchorPoint = new Point2D.Double(1.5, 0);
+
+		Point2D robotPosition = new Point2D.Double(1.5, 0.5);
+
+		Robot robot;
+		Tether tether;
+
+		try {
+			tether = createTether0_1(tetherLength, anchorPoint, robotPosition);
+
+			robot = createRobot1_2(tether, 0.5);
+		} catch (Exception e) {
+			Log.error("Could not create robot with tether.");
+
+			e.printStackTrace();
+
+			return null;
+		}
+
+		CoverageResult result = testCoverage(room, tether, robot,
+				returnToInitialCell);
+
+		return result;
+	}
+
+	/**
+	 * This tests cell-based coverage in an empty 8x8 room, starting in cell (1,
+	 * 0).
+	 * 
+	 * @return
+	 * @throws InterruptedException
+	 */
+	private static CoverageResult testCoverage4(boolean returnToInitialCell,
+			double tetherLength) throws InterruptedException {
+		Room room = createSimpleRoom4(1);
+
+		Point2D anchorPoint = new Point2D.Double(1.5, 0);
+
+		Point2D robotPosition = new Point2D.Double(1.5, 0.5);
+
+		Robot robot;
+		Tether tether;
+
+		try {
+			tether = createTether0_1(tetherLength, anchorPoint, robotPosition);
+
+			robot = createRobot1_2(tether, 0.5);
+		} catch (Exception e) {
+			Log.error("Could not create robot with tether.");
+
+			e.printStackTrace();
+
+			return null;
+		}
+
+		CoverageResult result = testCoverage(room, tether, robot,
+				returnToInitialCell);
+
+		return result;
+	}
+
+	/**
+	 * This tests cell-based coverage in an empty 8x8 room, starting in cell (1,
+	 * 0).
+	 * 
+	 * @return
+	 * @throws InterruptedException
+	 */
+	private static CoverageResult testCoverage5(boolean returnToInitialCell,
+			double tetherLength) throws InterruptedException {
+		Room room = createSimpleRoom5(1);
+
+		Point2D anchorPoint = new Point2D.Double(1.5, 0);
+
+		Point2D robotPosition = new Point2D.Double(1.5, 0.5);
+
+		Robot robot;
+		Tether tether;
+
+		try {
+			tether = createTether0_1(tetherLength, anchorPoint, robotPosition);
+
+			robot = createRobot1_2(tether, 0.5);
+		} catch (Exception e) {
+			Log.error("Could not create robot with tether.");
+
+			e.printStackTrace();
+
+			return null;
+		}
+
+		CoverageResult result = testCoverage(room, tether, robot,
+				returnToInitialCell);
+
+		return result;
 	}
 
 	private static void printResult(Result result) {
